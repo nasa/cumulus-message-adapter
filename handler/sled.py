@@ -30,7 +30,7 @@ def sled_handler(event, context, handler_fn, handler_config):
     handler_response = handler_fn(event, context)
 
     # validate_json_document handler_response schemas.output
-    if (schemas.output)
+    if (schemas and schemas.output)
         validate_json_document(handler_response, schemas.output)
 
     # TODO: return message.create_next_event
