@@ -9,4 +9,16 @@
 
 ### Running Tests
 
-    $ nosetests -v -s
+Running tests requires [localstack](https://github.com/localstack/localstack).
+
+Tests only require localstack running S3, which can be initiated with the following command:
+
+```
+$ SERVICES=s3 localstack start
+```
+
+And then you can check tests pass with the following nosetests command:
+
+```
+$ ENV=testing nosetests -v -s
+```
