@@ -7,6 +7,7 @@ from datetime import datetime,timedelta
 import uuid
 import boto3
 from jsonpath_ng import jsonpath, parse
+import aws_sled
 
 class message:
   """
@@ -94,7 +95,7 @@ class message:
     * @returns {*} the full event data
     """
     if ('replace' in event):
-      s3 = boto3.resource('s3');
+      s3 = aws_sled.s3()
       data = s3.Object(event['replace']['Bucket'], event['replace']['Key']).get();
       if (data is not None):
         return json.loads(data['Body'].read().decode('utf-8'));
