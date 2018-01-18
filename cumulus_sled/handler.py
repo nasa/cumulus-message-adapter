@@ -7,7 +7,7 @@ from os import path
 import json
 from jsonschema import validate
 
-from cumulus_sled.message import message
+import message
 
 def sled_handler(event, context, handler_fn=None, handler_config=None):
     """

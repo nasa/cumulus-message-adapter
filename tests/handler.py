@@ -1,11 +1,11 @@
 import unittest
 
-from handler import sled_handler
+import handler
 
 class TestSledHandler(unittest.TestCase):
 
     def test_working(self):
-        self.assertTrue(sled_handler)
+        self.assertTrue(handler)
 
     # def test_isupper(self):
     #     self.assertTrue('FOO'.isupper())
