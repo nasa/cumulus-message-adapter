@@ -27,7 +27,6 @@ def handler(event, context, handler_fn=None, handler_config=None):
 
     # use handler_config or get config via read_json_file cumulus.json
     config = handler_config if handler_fn else read_json_file('cumulus.json')
-    print config
 
     # in the node.js handler task_root is attached to module.exports
     # for now i'm passing it in as config
@@ -38,7 +37,6 @@ def handler(event, context, handler_fn=None, handler_config=None):
         """
         get absolute path of file in task
         """
-        print path.join(task_root, relative_filepath)
         return path.join(task_root, relative_filepath)
 
     def read_json_file(relative_filepath):
@@ -63,15 +61,15 @@ def handler(event, context, handler_fn=None, handler_config=None):
 
     full_event = msg.loadRemoteEvent(event)
     nested_event = msg.loadNestedEvent(full_event, context)
-    message_config = nested_event.message_config
+    message_config = nested_event['messageConfig']
 
     # validate the input
-    if (schemas and schemas.input):
-        validate_json_document(event.input, schemas.input)
+    if (schemas and schemas['input']):
+        validate_json_document(nested_event['input'], schemas['input'])
 
     # validate the config
-    if (schemas and schemas.config):
-        validate_json_document(event.config, schemas.config)
+    if (schemas and schemas['config']):
+        validate_json_document(nested_event['config'], schemas['config'])
 
     # call the handler function
     # TODO: this doesn't handle calling a function dynamically yet
@@ -79,7 +77,7 @@ def handler(event, context, handler_fn=None, handler_config=None):
     handler_response = handler_fn(nested_event, context)
 
     # validate the output
-    if (schemas and schemas.output):
-        validate_json_document(handler_response, schemas.output)
+    if (schemas and schemas['output']):
+        validate_json_document(handler_response, schemas['output'])
 
     return msg.createNextEvent(handler_response, full_event, message_config)

@@ -1,3 +1,7 @@
 {
-  "foo": "bar"
+  "properties": {
+    "boolean_option": {
+      "type": "boolean"
+    }
+  }
 }
