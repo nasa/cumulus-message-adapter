@@ -7,9 +7,9 @@ from os import path
 import json
 from jsonschema import validate
 
-import message
+from message import message
 
-def sled_handler(event, context, handler_fn=None, handler_config=None):
+def handler(event, context, handler_fn=None, handler_config=None):
     """
     Interprets incoming messages, passes them to an inner handler, gets the response
     and transforms it into an outgoing message, returned by Lambda.
@@ -20,17 +20,19 @@ def sled_handler(event, context, handler_fn=None, handler_config=None):
         handler_fn -- the handler function for the task
         handler_config -- configuration for the handler function
     """
-
+    
     # instantiate message parser
     msg = message()
 
+
     # use handler_config or get config via read_json_file cumulus.json
     config = handler_config if handler_fn else read_json_file('cumulus.json')
+    print config
 
     # in the node.js handler task_root is attached to module.exports
     # for now i'm passing it in as config
-    task_root = config.task.root
-    schemas = config.task.schemas
+    task_root = config['task']['root']
+    schemas = config['task']['schemas']
 
     def task_path(relative_filepath):
         """
