@@ -13,6 +13,8 @@ class message:
   """
   transforms the cumulus message
   """
+  # Maximum message payload size that will NOT be stored in S3. Anything bigger will be.
+  MAX_NON_S3_PAYLOAD_SIZE = 10000;
 
   def __getSfnExecutionArnByName(self, stateMachineArn, executionName):
     """
@@ -273,7 +275,7 @@ class message:
   # Output message creation #
   #############################
 
-  def __assignOutputs(self, nestedResponse, event, messageConfig):
+  def assignOutputs(self, nestedResponse, event, messageConfig):
     """
     * Applies a task's return value to an output message as defined in config.cumulus_message
     *
@@ -303,25 +305,21 @@ class message:
   * @returns {*} A response message, possibly referencing an S3 object for its contents
   """
   def __storeRemoteResponse(self, event):
-    # Maximum message payload size that will NOT be stored in S3. Anything bigger will be.
-    MAX_NON_S3_PAYLOAD_SIZE = 10000;
     jsonData = json.dumps(event);
     roughDataSize = len(jsonData) if event is not None else 0;
 
-    if (roughDataSize < MAX_NON_S3_PAYLOAD_SIZE): return event;
+    if (roughDataSize < self.MAX_NON_S3_PAYLOAD_SIZE): return event;
 
-    s3 = boto3.client('s3');
-    s3Location = {
-      'Bucket': event['ingest_meta']['message_bucket'],
-      'Key': ('/').join(['events', str(uuid.uuid4())]),
-    };
-    s3Params = s3Location.copy();
-    s3Params.update({
+    s3 = aws_sled.s3();
+    s3Bucket = event['ingest_meta']['message_bucket']
+    s3Key = ('/').join(['events', str(uuid.uuid4())])
+    s3Params = {
       'Expires': datetime.utcnow() + timedelta(days=7), # Expire in a week
       'Body': jsonData if event is not None else '{}'
-    });
+    };
+    s3Location = {'Bucket': s3Bucket, 'Key': s3Key}
 
-    s3.put_object(**s3Params);
+    s3.Object(s3Bucket, s3Key).put(**s3Params)
 
     return {
         'cumulus_meta': event['cumulus_meta'],
@@ -337,9 +335,9 @@ class message:
   * @returns {*} the output message to be returned
   """
   def createNextEvent(self, nestedResponse, event, messageConfig):
-    result = self.__assignOutputs(nestedResponse, event, messageConfig);
+    result = self.assignOutputs(nestedResponse, event, messageConfig);
     result['exception'] = 'None';
-    if 'replace' in result:del result['replace'];
+    if 'replace' in result: del result['replace'];
     return self.__storeRemoteResponse(result);
 
 if __name__ == '__main__':
