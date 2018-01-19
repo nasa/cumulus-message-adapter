@@ -251,7 +251,7 @@ class message:
     if ('cumulus_message' in config and 'input' in config['cumulus_message']):
       inputPath = config['cumulus_message']['input'];
       return self.__resolvePathStr(event, inputPath);
-    return event.payload;
+    return event['payload'];
 
   """
   * Interprets an incoming event as a Cumulus workflow message
