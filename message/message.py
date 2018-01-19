@@ -177,19 +177,22 @@ class message:
     valueRegex = '^{{(.*)}}$';
     arrayRegex = '^{\[(.*)\]}$';
     templateRegex = '{([^}]+)}';
-    
+
     if (re.search(valueRegex, str)):
       matchData = parse(str[2:(len(str)-2)]).find(event);
-      if len(matchData)>0: return matchData[0].value;
+      return matchData[0].value if len(matchData)>0 else None;
     
-    if (re.search(arrayRegex, str)):
+    elif (re.search(arrayRegex, str)):
       matchData = parse(str[2:(len(str)-2)]).find(event);
-      if len(matchData)>0: return [item.value for item in matchData];
+      return [item.value for item in matchData] if len(matchData)>0 else [];
 
-    matches = re.search(templateRegex, str);
-    if matches:
-      matchData = parse(matches.group(0).lstrip('{').rstrip('}')).find(event);
-      if len(matchData)>0: return str.replace(matches.group(0), matchData[0].value);
+    elif (re.search(templateRegex, str)):
+      matches = re.search(templateRegex, str);
+      if matches:
+        matchData = parse(matches.group(0).lstrip('{').rstrip('}')).find(event);
+        if len(matchData)>0: return str.replace(matches.group(0), matchData[0].value);
+    else:
+      return str;
 
     raise LookupError('Could not resolve path ' + str);
     
