@@ -1,8 +1,8 @@
 # `cumulus-sled` Contract
 
-`cumulus-sled` is a command-line interface for preparing and outputting cumulus messages for Cumulus Tasks. This contract defines how libraries can call `cumulus-sled` to integrate a task into a Cumulus Workflow.
+`cumulus-sled` is a command-line interface for preparing and outputting Cumulus Messages for Cumulus Tasks. This contract defines how libraries should call `cumulus-sled` to integrate a task into a Cumulus Workflow.
 
-Every Cumulus Task includes a business function. `cumulus-sled` and a language-specific library for interacting with `cumulus-sled` are required to integrate a business function as a Cumulus Task in a Cumulus Workflow.
+Every Cumulus Task includes a business function. `cumulus-sled` and a language-specific library for interacting with `cumulus-sled` are required to integrate a business function as a Cumulus Task into a Cumulus Workflow.
 
 **NOTE: This should be updated to call `cumulus-sled.zip` once we have created that package.**
 
@@ -14,13 +14,13 @@ python ./message/message.py loadNestedEvent '<event_json>' '<context_json>'
 python ./message/message.py createNextEvent '<nested_event_json>' '<event_json>' '<message_config_json>'
 ```
 
-These functions should be run in the order outlined above, but the output of the `loadNestedEvent` should be fed to a "business function".
+These functions should be run in the order outlined above, but the output of the `loadNestedEvent` should be fed to a "business function" and the output should be the `<nested_event_json>` sent to `createNextEvent`.
 
 ## Cumulus Message schemas
 
-Cumulus Messages come in 2 flavors: The full **Cumulus Message** and the **Cumulus Remote Message**.
+Cumulus Messages come in 2 flavors: The full **Cumulus Message** and the **Cumulus Remote Message**. The Cumulus Remote Message points to a full Cumulus Message stored in S3 because of size limitations.
 
-#### Cumulus Message
+#### Cumulus Message example:
 
 ```json
 {
@@ -46,7 +46,7 @@ Cumulus Messages come in 2 flavors: The full **Cumulus Message** and the **Cumul
 }
 ```
 
-#### Cumulus Remote Message:
+#### Cumulus Remote Message example:
 
 ```json
 {
@@ -59,20 +59,20 @@ Cumulus Messages come in 2 flavors: The full **Cumulus Message** and the **Cumul
 ```
 
 
-## loadRemote input and output
+## `loadRemote` input and output
 
-### loadRemote input
+### `loadRemote` input
 
 * `<event_json>` to cumulus-sled `loadRemote` should be either a full Cumulus Message or a Cumulus Remote Message, as defined above
 
 
-### loadRemote output
+### `loadRemote` output
 
 loadRemote output is a full Cumulus Message as defined returned as a json blob.
 
-## loadNestedEvent
+## `loadNestedEvent`
 
-### loadNestedEvent input
+### `loadNestedEvent` input
 
 * `<event_json>` to cumulus-sled `loadNestedEvent` should be a full Cumulus Message as defined above.
 
@@ -81,18 +81,18 @@ loadRemote output is a full Cumulus Message as defined returned as a json blob.
 **Details:** `loadNestedEvent` requests metadata from the AWS Step Function API and uses that metadata to self-identify what is the running task - something like asking `Who am I?`. The task name found associated with the running task is used to look up the task-specific `workflow_config` configuration. This configuration is used to template variables for input and config keys which are meant for submission to the "business function".
 
 
-### loadNestedEvent output
+### `loadNestedEvent` output
 
 The output of `loadNestedEvent` is a json blob containing the keys `input`, `config` and `messageConfig`.
 
-## createNextEvent
+## `createNextEvent` input and output
 
-### createNextEvent input
+### `createNextEvent` input
 
 * `<nested_event_json>` is just some json, whatever the "business function" returns.
 * `<event_json>` is a full cumulus message and should be whatever is returned from `loadRemoteEvent`
 * `<message_config_json>` should be the value of the `messageConfig` key returned from `loadNestedEvent`
 
-### createNextEvent output
+### `createNextEvent` output
 
 A Cumulus Message or a Cumulus Remote Message.
