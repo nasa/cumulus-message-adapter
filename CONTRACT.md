@@ -89,9 +89,9 @@ The output of `loadNestedEvent` is a json blob containing the keys `input`, `con
 
 ### `createNextEvent` input
 
-* `<nested_event_json>` is just some json, whatever the "business function" returns.
-* `<event_json>` is a full cumulus message and should be whatever is returned from `loadRemoteEvent`
-* `<message_config_json>` should be the value of the `messageConfig` key returned from `loadNestedEvent`
+* `<nested_event_json>` is arbitrary json - whatever the "business function" returns.
+* `<event_json>` is a full Cumulus Message and should be whatever is returned from `loadRemoteEvent`.
+* `<message_config_json>` should be the value of the `messageConfig` key returned from `loadNestedEvent`.
 
 ### `createNextEvent` output
 
