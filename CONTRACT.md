@@ -4,6 +4,8 @@
 
 Every Cumulus Task includes a business function. `cumulus-sled` and a language-specific library for interacting with `cumulus-sled` are required to integrate a business function as a Cumulus Task in a Cumulus Workflow.
 
+**NOTE: This should be updated to call `cumulus-sled.zip` once we have created that package.**
+
 All `cumulus-sled` functions below are invoked via command line:
 
 ```
