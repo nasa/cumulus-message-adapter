@@ -1,7 +1,6 @@
 import json
 import os
 import re
-import sys
 from types import *
 from datetime import datetime,timedelta
 import uuid
@@ -363,33 +362,4 @@ class message:
     result['exception'] = 'None';
     if 'replace' in result: del result['replace'];
     return self.__storeRemoteResponse(result);
-
-if __name__ == '__main__':
-  (scriptName, functionName) = sys.argv[0:2];
-  transformer = message();
-  exitCode = 1;
-  try:
-    if (functionName == 'loadNestedEvent'):
-      event = json.loads(sys.argv[2]);
-      context = json.loads(sys.argv[3]);
-      result = transformer.loadNestedEvent(event, context);
-    elif (functionName == 'createNextEvent'):
-      nestedResponse = json.loads(sys.argv[2]);
-      event = json.loads(sys.argv[3]);
-      messageConfig = json.loads(sys.argv[4]);
-      result = transformer.createNextEvent(nestedResponse, event, messageConfig);
-    elif (functionName == 'loadRemoteEvent'):
-      event = json.loads(sys.argv[2]);
-      result = transformer.loadRemoteEvent(event);
-    
-    if (result is not None and len(result) > 0):
-      sys.stdout.write(json.dumps(result));
-      sys.stdout.flush();
-      exitCode = 0;
-  except LookupError as le:
-    sys.stderr.write(le);
-  except:
-    sys.stderr.write("Unexpected error:"+ str(sys.exc_info()[0])+ ". " + str(sys.exc_info()[1]));
-
-  sys.exit(exitCode);
   

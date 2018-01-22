@@ -4,14 +4,12 @@
 
 Every Cumulus Task includes a business function. `cumulus-sled` and a language-specific library for interacting with `cumulus-sled` are required to integrate a business function as a Cumulus Task into a Cumulus Workflow.
 
-**NOTE: This should be updated to call `cumulus-sled.zip` once we have created that package.**
-
-All `cumulus-sled` functions below are invoked via command line:
+All `cumulus-sled` functions below are invoked via the command line:
 
 ```
-python ./message/message.py loadRemoteEvent '<event_json>'
-python ./message/message.py loadNestedEvent '<event_json>' '<context_json>'
-python ./message/message.py createNextEvent '<nested_event_json>' '<event_json>' '<message_config_json>'
+./cumulus-sled loadRemoteEvent '<event_json>'
+./cumulus-sled loadNestedEvent '<event_json>' '<context_json>'
+./cumulus-sled createNextEvent '<nested_event_json>' '<event_json>' '<message_config_json>'
 ```
 
 These functions should be run in the order outlined above, but the output of the `loadNestedEvent` should be fed to a "business function" and the output should be the `<nested_event_json>` sent to `createNextEvent`.
