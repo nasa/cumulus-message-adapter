@@ -99,12 +99,12 @@ class Test(unittest.TestCase):
     assert result == event_without_replace
 
   # loadNestedEvent tests
-  def test_returns_loadNestedEvent(self):
+  def test_returns_loadNestedEvent_local(self):
     """
     Test returns 'config', 'input' and 'messageConfig' in expected format
     - 'input' in return value is from 'payload' in first argument object
-    - 'config' in return value is key/pairs of 'workflow_config' which are not 'cumulus_message'
-    - 'messageConfig' in return value is 'cumulus_message' value from 'workflow_config'
+    - 'config' in return value is the task ($.cumulus_meta.task) configuration with 'cumulus_message' excluded
+    - 'messageConfig' in return value is the cumulus_message.input of the task configuration
     """
     result = sled_message.loadNestedEvent(nested_event_local, {})
     assert result == nested_event_local_return;
@@ -112,26 +112,24 @@ class Test(unittest.TestCase):
   # assignOutputs tests
   def test_result_payload_without_config(self):
     """ Test nestedResponse is returned when no config argument is passed """
-    result = sled_message.assignOutputs(nestedResponse, {}, None)
+    result = sled_message._message__assignOutputs(nestedResponse, {}, None)
     assert result['payload'] == nestedResponse
 
   def test_result_payload_without_config_outputs(self):
     """ Test nestedResponse is returned when config has no outputs key/value """
-    result = sled_message.assignOutputs(nestedResponse, {}, message_config_without_outputs)
+    result = sled_message._message__assignOutputs(nestedResponse, {}, message_config_without_outputs)
     assert result['payload'] == nestedResponse
 
   def test_result_payload_with_simple_config_outputs(self):
     """ Test payload value is updated when messageConfig contains outputs templates """
-    result = sled_message.assignOutputs(nestedResponse, {}, message_config_with_simple_outputs)
+    result = sled_message._message__assignOutputs(nestedResponse, {}, message_config_with_simple_outputs)
     assert result['payload'] == 's3://source.jpg'
 
-  @unittest.skip("Update with nonexistent path not implemented in jsonpath_ng")
   def test_result_payload_with_nested_config_outputs(self):
     """
-    (Pending/Not Yet Implemented)
     Test nested payload value is updated when messageConfig contains outputs templates with child nodes
     """
-    result = sled_message.assignOutputs(nestedResponse, {}, message_config_with_nested_outputs)
+    result = sled_message._message__assignOutputs(nestedResponse, {}, message_config_with_nested_outputs)
     assert result['payload'] == {'dataLocation': 's3://source.jpg'}
 
   # createNextEvent tests
