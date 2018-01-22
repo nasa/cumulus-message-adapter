@@ -75,18 +75,21 @@ test_uuid = 'aad93279-95d4-4ada-8c43-aa5823f8bbbc'
 next_event_object_key_name = "events/{0}".format(test_uuid)
 
 
-def setup():
-  s3.Bucket(bucket_name).create()
-  s3.Object(bucket_name, key_name).put(Body=json.dumps(s3_object))
 
-def teardown():
-  delete_objects_object = {
-    'Objects': [{'Key': key_name}, {'Key': next_event_object_key_name}]
-  }
-  s3.Bucket(bucket_name).delete_objects(Delete=delete_objects_object)
-  s3.Bucket(bucket_name).delete()
 
 class Test(unittest.TestCase):
+      
+  def setUp(self):
+    s3.Bucket(bucket_name).create()
+    s3.Object(bucket_name, key_name).put(Body=json.dumps(s3_object))
+
+  def tearDown(self):
+    delete_objects_object = {
+      'Objects': [{'Key': key_name}, {'Key': next_event_object_key_name}]
+    }
+    s3.Bucket(bucket_name).delete_objects(Delete=delete_objects_object)
+    s3.Bucket(bucket_name).delete()
+
   # loadRemoteEvent tests
   def test_returns_remote_s3_object(self):
     """ Test remote s3 event is returned when 'replace' key is present """
