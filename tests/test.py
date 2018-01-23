@@ -1,6 +1,7 @@
 """
 Tests for cumulus-sled
 """
+import os
 import json
 import unittest
 from mock import patch
@@ -19,6 +20,7 @@ class Test(unittest.TestCase):
     next_event_object_key_name = "events/{0}".format(test_uuid)
     s3 = aws_sled.s3()
     sled_message = message.message()
+    test_folder = os.path.join(os.getcwd(), 'examples/messages')
 
     def setUp(self):
         self.nested_response = {
@@ -186,3 +188,75 @@ class Test(unittest.TestCase):
         }
         assert remote_event_object == expected_remote_event_object
         assert create_next_event_result == expected_create_next_event_result
+    
+    def test_basic(self):
+        """ test basic.input.json """
+        inp = open(os.path.join(self.test_folder, 'basic.input.json'))
+        out = open(os.path.join(self.test_folder, 'basic.output.json'))
+        in_msg = json.loads(inp.read())
+        out_msg = json.loads(out.read())
+
+        msg = self.sled_message.loadNestedEvent(in_msg, {})
+
+        result = self.sled_message.createNextEvent(msg, in_msg, None)
+        assert result == out_msg
+
+    def test_jsonpath(self):
+        """ test jsonpath.input.json """
+        inp = open(os.path.join(self.test_folder, 'jsonpath.input.json'))
+        out = open(os.path.join(self.test_folder, 'jsonpath.output.json'))
+        in_msg = json.loads(inp.read())
+        out_msg = json.loads(out.read())
+
+        msg = self.sled_message.loadNestedEvent(in_msg, {})
+
+        result = self.sled_message.createNextEvent(msg, in_msg, None)
+        assert result == out_msg
+    
+    def test_meta(self):
+        """ test meta.input.json """
+        inp = open(os.path.join(self.test_folder, 'meta.input.json'))
+        out = open(os.path.join(self.test_folder, 'meta.output.json'))
+        in_msg = json.loads(inp.read())
+        out_msg = json.loads(out.read())
+
+        msg = self.sled_message.loadNestedEvent(in_msg, {})
+
+        result = self.sled_message.createNextEvent(msg, in_msg, None)
+        assert result == out_msg
+     
+    def test_remote(self):
+        """ test remote.input.json """
+        inp = open(os.path.join(self.test_folder, 'remote.input.json'))
+        out = open(os.path.join(self.test_folder, 'remote.output.json'))
+        in_msg = json.loads(inp.read())
+        out_msg = json.loads(out.read())
+
+        msg = self.sled_message.loadNestedEvent(in_msg, {})
+
+        result = self.sled_message.createNextEvent(msg, in_msg, None)
+        assert result == out_msg 
+
+    def test_sfn(self):
+        """ test sfn.input.json """
+        inp = open(os.path.join(self.test_folder, 'sfn.input.json'))
+        out = open(os.path.join(self.test_folder, 'sfn.output.json'))
+        in_msg = json.loads(inp.read())
+        out_msg = json.loads(out.read())
+
+        msg = self.sled_message.loadNestedEvent(in_msg, {})
+
+        result = self.sled_message.createNextEvent(msg, in_msg, None)
+        assert result == out_msg 
+    
+    def test_templates(self):
+        """ test templates.input.json """
+        inp = open(os.path.join(self.test_folder, 'templates.input.json'))
+        out = open(os.path.join(self.test_folder, 'templates.output.json'))
+        in_msg = json.loads(inp.read())
+        out_msg = json.loads(out.read())
+
+        msg = self.sled_message.loadNestedEvent(in_msg, {})
+
+        result = self.sled_message.createNextEvent(msg, in_msg, None)
+        assert result == out_msg
