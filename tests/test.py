@@ -1,8 +1,9 @@
-import boto3
+"""
+Tests for cumulus-sled
+"""
 import json
-from mock import patch
 import unittest
-import uuid
+from mock import patch
 
 from message import aws_sled, message
 
@@ -37,8 +38,7 @@ nested_event_local = {
     },
     "cumulus_meta": {"task": "Example", "message_source": "local", "id": "id-1234"},
     "meta": {"foo": "bar"},
-    "payload": {"input": {"anykey": "anyvalue"}
-                }
+    "payload": {"input": {"anykey": "anyvalue"}}
 }
 nested_event_local_return = {
     'input': {'anykey': 'anyvalue'},
@@ -76,6 +76,7 @@ next_event_object_key_name = "events/{0}".format(test_uuid)
 
 
 class Test(unittest.TestCase):
+    """ Test class """
 
     def setUp(self):
         s3.Bucket(bucket_name).create()
@@ -104,7 +105,8 @@ class Test(unittest.TestCase):
         """
         Test returns 'config', 'input' and 'messageConfig' in expected format
         - 'input' in return value is from 'payload' in first argument object
-        - 'config' in return value is the task ($.cumulus_meta.task) configuration with 'cumulus_message' excluded
+        - 'config' in return value is the task ($.cumulus_meta.task) configuration
+           with 'cumulus_message' excluded
         - 'messageConfig' in return value is the cumulus_message.input of the task configuration
         """
         result = sled_message.loadNestedEvent(nested_event_local, {})
@@ -130,7 +132,8 @@ class Test(unittest.TestCase):
 
     def test_result_payload_with_nested_config_outputs(self):
         """
-        Test nested payload value is updated when messageConfig contains outputs templates with child nodes
+        Test nested payload value is updated when messageConfig contains
+        outputs templates with child nodes
         """
         result = sled_message._message__assignOutputs(
             nestedResponse, {}, message_config_with_nested_outputs)
@@ -162,12 +165,13 @@ class Test(unittest.TestCase):
     @patch('uuid.uuid4')
     def test_big_result_stored_remotely(self, uuid_mock):
         """
-        Test remote event is stored in S3 and return value points to remote location with 'replace' key/value
+        Test remote event is stored in S3 and return value points
+        to remote location with 'replace' key/value
         """
         uuid_mock.return_value = test_uuid
-        createNextEvent_result = sled_message.createNextEvent(
+        create_next_event_result = sled_message.createNextEvent(
             nestedResponse, event_with_ingest, None)
-        expected_createNextEvent_result = {
+        expected_create_next_event_result = {
             'cumulus_meta': {'workflow': 'testing'},
             'replace': {'Bucket': bucket_name, 'Key': next_event_object_key_name}
         }
@@ -181,4 +185,4 @@ class Test(unittest.TestCase):
             'payload': {'input': {'dataLocation': 's3://source.jpg'}}
         }
         assert remote_event_object == expected_remote_event_object
-        assert createNextEvent_result == expected_createNextEvent_result
+        assert create_next_event_result == expected_create_next_event_result
