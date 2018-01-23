@@ -4,9 +4,13 @@
 
 Every Cumulus Task includes a business function. `cumulus-sled` and a language-specific library for interacting with `cumulus-sled` are required to integrate a business function as a Cumulus Task into a Cumulus Workflow.
 
-All `cumulus-sled` functions below are invoked via the command line and read from stdin. The first input should be the function name. The second through fourth inputs should be json strings sent as stdin as detailed below.
+`cumulus-sled` functions are invoked via the command line and read from stdin. Calling `./cumulus-sled <function_name>` should be followed by 1 to 3 json strings sent as stdin as detailed below.
 
 ```bash
+# Cumulus Message or Cumulus Remote Message in:
+./cumulus-sled loadRemoteEvent
+'<event_json>'
+
 # Cumulus Message and Lambda Context in:
 ./cumulus-sled loadNestedEvent
 '<event_json>'
@@ -21,7 +25,7 @@ All `cumulus-sled` functions below are invoked via the command line and read fro
 '<message_config_json>'
 ```
 
-These functions should be run in the order outlined above, but the output of the `loadNestedEvent` should be fed to a "business function" and the output should be the `<handler_response_json>` sent to `createNextEvent`.
+These functions should be run in the order outlined above. The output of `loadRemoteEvent` should be sent as `<event_json>` to `createNextEvent`. The output of the `loadNestedEvent` should be fed to a "business function" and the output should be the `<handler_response_json>` sent to `createNextEvent`. More details on these values is provided in sections below.
 
 ## Cumulus Message schemas
 
@@ -66,14 +70,13 @@ Cumulus Messages come in 2 flavors: The full **Cumulus Message** and the **Cumul
 ```
 
 
-## `loadRemote` input and output
+## `loadRemoteEvent` input and output
 
-### `loadRemote` input
+### `loadRemoteEvent` input
 
-* `<event_json>` to cumulus-sled `loadRemote` should be either a full Cumulus Message or a Cumulus Remote Message, as defined above
+* `<event_json>` to cumulus-sled `loadRemoteEvent` should be either a full Cumulus Message or a Cumulus Remote Message, as defined above.
 
-
-### `loadRemote` output
+### `loadRemoteEvent` output
 
 loadRemote output is a full Cumulus Message as defined returned as a json blob.
 
@@ -85,12 +88,16 @@ loadRemote output is a full Cumulus Message as defined returned as a json blob.
 
 * `<context_json>` to cumulus-sled `loadNestedEvent` should be the context from the lambda.
 
-**Details:** `loadNestedEvent` requests metadata from the AWS Step Function API and uses that metadata to self-identify what is the running task - something like asking `Who am I?`. The task name found associated with the running task is used to look up the task-specific `workflow_config` configuration. This configuration is used to template variables for input and config keys which are meant for submission to the "business function".
+**`loadNestedEvent` Details:**
 
+`loadNestedEvent` requests metadata from the AWS Step Function API and uses that metadata to self-identify by determining which task in the workflow is "in-progress". This is roundabout way of the lambda asking `whoami` and will be removed once AWS makes some promised updates to the lambda context object.
+
+The task name found associated with the running task is used to look up the task-specific configuration. For example, if the current execution is associated with task named `'Task1'` then the `'config'` object sent to the business function is the value of `workflow_config['Task1']` and the `messageConfig` object sent to the business function is the value of `workflow_config['Task1']['cumulus_message']`. These configurations are used to dispatch values to other parts of the Cumulus Message which are required by the business function or `createNextEvent`
 
 ### `loadNestedEvent` output
 
 The output of `loadNestedEvent` is a json blob containing the keys `input`, `config` and `messageConfig`.
+
 
 ## `createNextEvent` input and output
 

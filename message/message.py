@@ -260,10 +260,9 @@ class message:
     * @param {*} event The input message sent to the Lambda
     * @returns {*} message that is ready to pass to an inner task
     """
-    fullEvent = self.loadRemoteEvent(event)
-    config = self.__loadConfig(fullEvent, context);
-    finalConfig = self.__resolveConfigTemplates(fullEvent, config);
-    finalPayload = self.__resolveInput(fullEvent, config);
+    config = self.__loadConfig(event, context);
+    finalConfig = self.__resolveConfigTemplates(event, config);
+    finalPayload = self.__resolveInput(event, config);
     return {
             'input': finalPayload,
             'config': finalConfig,
