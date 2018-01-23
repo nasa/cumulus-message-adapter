@@ -71,7 +71,6 @@ class message:
     * @param {string} arn An ARN to an Activity or Lambda to find. See "IMPORTANT!"
     * @returns {string} The name of the task being run
     """
-    region = os.getenv('AWS_DEFAULT_REGION', 'us-east-1')
     sfn = aws_sled.stepFn()
     executionArn = self.__getSfnExecutionArnByName(stateMachineArn, executionName);
     executionHistory = sfn.get_execution_history(
