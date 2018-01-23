@@ -22,3 +22,7 @@ And then you can check tests pass with the following nosetests command:
 ```
 $ ENV=testing nosetests -v -s
 ```
+
+### Linting
+
+     $ pylint message
