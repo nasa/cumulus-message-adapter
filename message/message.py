@@ -71,8 +71,8 @@ class message:
     * @param {string} arn An ARN to an Activity or Lambda to find. See "IMPORTANT!"
     * @returns {string} The name of the task being run
     """
-    region = os.getenv('AWS_DEFAULT_REGION', 'us-east-1');
-    sfn = boto3.client('stepfunctions', region_name=region);
+    region = os.getenv('AWS_DEFAULT_REGION', 'us-east-1')
+    sfn = aws_sled.stepFn()
     executionArn = self.__getSfnExecutionArnByName(stateMachineArn, executionName);
     executionHistory = sfn.get_execution_history(
       executionArn=executionArn,
@@ -260,9 +260,10 @@ class message:
     * @param {*} event The input message sent to the Lambda
     * @returns {*} message that is ready to pass to an inner task
     """
-    config = self.__loadConfig(event, context);
-    finalConfig = self.__resolveConfigTemplates(event, config);
-    finalPayload = self.__resolveInput(event, config);
+    fullEvent = self.loadRemoteEvent(event)
+    config = self.__loadConfig(fullEvent, context);
+    finalConfig = self.__resolveConfigTemplates(fullEvent, config);
+    finalPayload = self.__resolveInput(fullEvent, config);
     return {
             'input': finalPayload,
             'config': finalConfig,
@@ -298,11 +299,11 @@ class message:
       exec ("message" + dictPath + " = value");
     return message;
 
-  def __assignOutputs(self, nestedResponse, event, messageConfig):
+  def __assignOutputs(self, handlerResponse, event, messageConfig):
     """
     * Applies a task's return value to an output message as defined in config.cumulus_message
     *
-    * @param {*} nestedResponse The task's return value
+    * @param {*} handlerResponse The task's return value
     * @param {*} event The output message to apply the return value to
     * @param {*} messageConfig The cumulus_message configuration
     * @returns {*} The output message with the nested response applied
@@ -315,10 +316,10 @@ class message:
         sourcePath = output['source'];
         destPath = output['destination'];
         destJsonPath = destPath[2:(len(destPath)-2)];
-        value = self.__resolvePathStr(nestedResponse, sourcePath);
+        value = self.__resolvePathStr(handlerResponse, sourcePath);
         self.__assignJsonPathValue(result, destJsonPath, value);
     else:
-      result['payload'] = nestedResponse;
+      result['payload'] = handlerResponse;
 
     return result;
 
@@ -349,16 +350,16 @@ class message:
         'replace': s3Location
       };
 
-  def createNextEvent(self, nestedResponse, event, messageConfig):
+  def createNextEvent(self, handlerResponse, event, messageConfig):
     """
     * Creates the output message returned by a task
     *
-    * @param {*} nestedResponse The response returned by the inner task code
+    * @param {*} handlerResponse The response returned by the inner task code
     * @param {*} event The input message sent to the Lambda
     * @param {*} messageConfig The cumulus_message object configured for the task
     * @returns {*} the output message to be returned
     """
-    result = self.__assignOutputs(nestedResponse, event, messageConfig);
+    result = self.__assignOutputs(handlerResponse, event, messageConfig);
     result['exception'] = 'None';
     if 'replace' in result: del result['replace'];
     return self.__storeRemoteResponse(result);

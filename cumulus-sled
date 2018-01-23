@@ -4,23 +4,23 @@ import sys
 
 from message import message
 
+def readJsonStringFromStdIn():
+  return json.loads(sys.stdin.readline().replace('\n', ''))
+
 if __name__ == '__main__':
-  functionName = sys.stdin.readline().replace('\n', '')
+  functionName = sys.argv[1]
   transformer = message.message()
   exitCode = 1
   try:
     if (functionName == 'loadNestedEvent'):
-      event = json.loads(sys.stdin.readline().replace('\n', ''))
-      context = json.loads(sys.stdin.readline().replace('\n', ''))
-      result = transformer.loadNestedEvent(event, context);
+      event = readJsonStringFromStdIn()
+      context = readJsonStringFromStdIn()
+      result = transformer.loadNestedEvent(event, context)
     elif (functionName == 'createNextEvent'):
-      nestedResponse = json.loads(sys.stdin.readline().replace('\n', ''))
-      event = json.loads(sys.stdin.readline().replace('\n', ''))
-      messageConfig = json.loads(sys.stdin.readline().replace('\n', ''))
-      result = transformer.createNextEvent(nestedResponse, event, messageConfig);
-    elif (functionName == 'loadRemoteEvent'):
-      event = json.loads(sys.stdin.readline().replace('\n', ''))
-      result = transformer.loadRemoteEvent(event)
+      handlerResponse = readJsonStringFromStdIn()
+      event = readJsonStringFromStdIn()
+      messageConfig = readJsonStringFromStdIn()
+      result = transformer.createNextEvent(handlerResponse, event, messageConfig)
     if (result is not None and len(result) > 0):
       sys.stdout.write(json.dumps(result))
       sys.stdout.flush()

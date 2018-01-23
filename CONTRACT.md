@@ -4,15 +4,24 @@
 
 Every Cumulus Task includes a business function. `cumulus-sled` and a language-specific library for interacting with `cumulus-sled` are required to integrate a business function as a Cumulus Task into a Cumulus Workflow.
 
-All `cumulus-sled` functions below are invoked via the command line:
+All `cumulus-sled` functions below are invoked via the command line and read from stdin. The first input should be the function name. The second through fourth inputs should be json strings sent as stdin as detailed below.
 
-```
-./cumulus-sled loadRemoteEvent '<event_json>'
-./cumulus-sled loadNestedEvent '<event_json>' '<context_json>'
-./cumulus-sled createNextEvent '<nested_event_json>' '<event_json>' '<message_config_json>'
+```bash
+# Cumulus Message and Lambda Context in:
+./cumulus-sled loadNestedEvent
+'<event_json>'
+'<context_json>'
+
+# Call inner handler
+
+# Send result as <handler_response_json> to produce Cumulus Message out:
+./cumulus-sled createNextEvent
+'<handler_response_json>'
+'<event_json>'
+'<message_config_json>'
 ```
 
-These functions should be run in the order outlined above, but the output of the `loadNestedEvent` should be fed to a "business function" and the output should be the `<nested_event_json>` sent to `createNextEvent`.
+These functions should be run in the order outlined above, but the output of the `loadNestedEvent` should be fed to a "business function" and the output should be the `<handler_response_json>` sent to `createNextEvent`.
 
 ## Cumulus Message schemas
 
@@ -87,7 +96,7 @@ The output of `loadNestedEvent` is a json blob containing the keys `input`, `con
 
 ### `createNextEvent` input
 
-* `<nested_event_json>` is arbitrary json - whatever the "business function" returns.
+* `<handler_response_json>` is arbitrary json - whatever the "business function" returns.
 * `<event_json>` is a full Cumulus Message and should be whatever is returned from `loadRemoteEvent`.
 * `<message_config_json>` should be the value of the `messageConfig` key returned from `loadNestedEvent`.
 
