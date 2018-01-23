@@ -5,22 +5,21 @@ import sys
 from message import message
 
 if __name__ == '__main__':
-  args = map(lambda line: line.replace('\n', ''), sys.stdin.readlines())
-  functionName = args[0]
+  functionName = sys.stdin.readline().replace('\n', '')
   transformer = message.message()
   exitCode = 1
   try:
     if (functionName == 'loadNestedEvent'):
-      event = json.loads(args[1])
-      context = json.loads(args[2])
+      event = json.loads(sys.stdin.readline().replace('\n', ''))
+      context = json.loads(sys.stdin.readline().replace('\n', ''))
       result = transformer.loadNestedEvent(event, context);
     elif (functionName == 'createNextEvent'):
-      nestedResponse = json.loads(args[1])
-      event = json.loads(args[2])
-      messageConfig = json.loads(args[3])
+      nestedResponse = json.loads(sys.stdin.readline().replace('\n', ''))
+      event = json.loads(sys.stdin.readline().replace('\n', ''))
+      messageConfig = json.loads(sys.stdin.readline().replace('\n', ''))
       result = transformer.createNextEvent(nestedResponse, event, messageConfig);
     elif (functionName == 'loadRemoteEvent'):
-      event = json.loads(args[1])
+      event = json.loads(sys.stdin.readline().replace('\n', ''))
       result = transformer.loadRemoteEvent(event)
     if (result is not None and len(result) > 0):
       sys.stdout.write(json.dumps(result))
