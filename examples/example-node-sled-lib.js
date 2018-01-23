@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 const assert = require('assert');
 const cp = require('child_process');
 
