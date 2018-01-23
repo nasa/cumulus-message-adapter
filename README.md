@@ -1,5 +1,7 @@
 # Cumulus Sled Message Transformation
 
+[![CircleCI](https://circleci.com/gh/cumulus-nasa/cumulus-sled.svg?style=svg)](https://circleci.com/gh/cumulus-nasa/cumulus-sled)
+
 ## Development
 
 ### Dependency Installation
