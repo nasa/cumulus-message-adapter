@@ -3,9 +3,9 @@ const assert = require('assert');
 const cp = require('child_process');
 const fs = require('fs');
 
-// Set ENV=testing so we don't make real requests to AWS APIs
+// Set CUMULUS_ENV=testing so we don't make real requests to AWS APIs
 const env = Object.create(process.env);
-env.ENV = 'testing';
+env.CUMULUS_ENV = 'testing';
 
 function loadJsonFromFile(fileName) {
   return fs.readFileSync(fileName, 'utf8').replace(/(\s)/gm,"");

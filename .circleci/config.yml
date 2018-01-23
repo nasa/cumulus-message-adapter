@@ -42,6 +42,6 @@ jobs:
             LOCALSTACK_HOST: localstack
           command: |
             . venv/bin/activate
-            ENV=testing nosetests -v -s
+            CUMULUS_ENV=testing nosetests -v -s
 
           
