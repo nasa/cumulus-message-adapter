@@ -4,25 +4,31 @@
 
 Every Cumulus Task includes a business function. `cumulus-sled` and a language-specific library for interacting with `cumulus-sled` are required to integrate a business function as a Cumulus Task into a Cumulus Workflow.
 
-`cumulus-sled` functions are invoked via the command line and read from stdin. Calling `./cumulus-sled <function_name>` should be followed by 1 to 3 json strings sent as stdin as detailed below.
+`cumulus-sled` functions are invoked via the command line and read from stdin. Calling `./cumulus-sled <function_name>` should be followed by a json blob sent to stdin as detailed below.
 
 ```bash
 # Cumulus Message or Cumulus Remote Message in:
 ./cumulus-sled loadRemoteEvent
-'<event_json>'
+'{
+  "event": <event_json>
+}'
 
 # Cumulus Message and Lambda Context in:
 ./cumulus-sled loadNestedEvent
-'<event_json>'
-'<context_json>'
+'{
+  "event": <event_json>,
+  "context": <context_json>
+}'
 
 # Call inner handler
 
 # Send result as <handler_response_json> to produce Cumulus Message out:
 ./cumulus-sled createNextEvent
-'<handler_response_json>'
-'<event_json>'
-'<message_config_json>'
+'{
+  "event": <event_json>,
+  "handler_response": <handler_response_json>,
+  "message_config": <message_config_json>
+}'
 ```
 
 These functions should be run in the order outlined above. The output of `loadRemoteEvent` should be sent as `<event_json>` to `createNextEvent`. The output of the `loadNestedEvent` should be fed to a "business function" and the output should be the `<handler_response_json>` sent to `createNextEvent`. More details on these values is provided in sections below.

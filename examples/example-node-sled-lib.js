@@ -10,6 +10,33 @@ env.ENV = 'testing';
 function loadJsonFromFile(fileName) {
   return fs.readFileSync(fileName, 'utf8').replace(/(\s)/gm,"");
 }
+
+/**
+* WIP Integration Test for loadNestedEvent
+*/
+
+/**
+* This will fail with "Lookup error: 'events'". * At the moment localstack
+* doesn't support step functions so there is no way to do a complete integration
+* test :(.
+* TODO(aimee) Mock the response from AWS Step Functions API.
+*/
+var child = cp.spawn('./cumulus-sled', ['loadRemoteEvent'], { env: env });
+
+child.stderr.pipe(process.stderr);
+
+// example event object
+const eventObject = JSON.parse(loadJsonFromFile('examples/messages/sfn.input.json'));
+
+child.stdin.write(JSON.stringify({'event': eventObject}));
+child.stdin.end();
+
+child.stdout.on('data', (data) => {
+  const expectedResponse = eventObject;
+  assert.deepEqual(JSON.parse(data.toString()), expectedResponse);
+  console.log('loadRemoteEvent test passed');
+});
+
 /**
 * WIP Integration Test for loadNestedEvent
 */
@@ -24,13 +51,11 @@ var child = cp.spawn('./cumulus-sled', ['loadNestedEvent'], { env: env });
 
 child.stderr.pipe(process.stderr);
 
-// example event object
-const eventJsonContent = loadJsonFromFile('examples/messages/sfn.input.json');
-child.stdin.write(eventJsonContent + '\n');
-
 // example context object
-const contextJsonContent = loadJsonFromFile('examples/contexts/simple-context.json');
-child.stdin.write(contextJsonContent + '\n');
+const contextObject = JSON.parse(loadJsonFromFile('examples/contexts/simple-context.json'));
+
+const fullInput = JSON.stringify({'event': eventObject, 'context': contextObject});
+child.stdin.write(fullInput);
 child.stdin.end();
 
 /*
@@ -41,15 +66,19 @@ var child = cp.spawn('./cumulus-sled', ['createNextEvent']);
 child.stderr.pipe(process.stderr);
 
 // example handler response
-const exampleResponseJson = loadJsonFromFile('examples/responses/meta.response.json');
-child.stdin.write(exampleResponseJson + '\n');
+const exampleResponseObject = JSON.parse(loadJsonFromFile('examples/responses/meta.response.json'));
+
 // example event object
-const eventWithMetaJson = loadJsonFromFile('examples/messages/meta.input.json');
-child.stdin.write(eventWithMetaJson + '\n');
+const eventWithMetaObject = JSON.parse(loadJsonFromFile('examples/messages/meta.input.json'));
+
 // example messageConfigObject
-const eventWithMetaObject = JSON.parse(eventWithMetaJson);
 const messageConfig = eventWithMetaObject.workflow_config['Example'].cumulus_message;
-child.stdin.write(JSON.stringify(messageConfig) + '\n');
+
+child.stdin.write(JSON.stringify({
+  'handler_response': exampleResponseObject,
+  'event': eventWithMetaObject,
+  'message_config': messageConfig
+}));
 
 child.stdin.end();
 child.stdout.on('data', (data) => {
