@@ -78,7 +78,7 @@ Cumulus Messages come in 2 flavors: The full **Cumulus Message** and the **Cumul
 
 ### `loadRemoteEvent` output
 
-loadRemote output is a full Cumulus Message as defined returned as a json blob.
+loadRemote output is a full Cumulus Message as a json blob.
 
 ## `loadNestedEvent`
 
