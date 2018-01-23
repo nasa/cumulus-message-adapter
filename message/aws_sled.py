@@ -1,5 +1,4 @@
 """ Determines the correct AWS endpoint for AWS services """
-
 import os
 import boto3
 
