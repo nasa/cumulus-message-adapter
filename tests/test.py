@@ -257,5 +257,6 @@ class Test(unittest.TestCase):
         out_msg = json.loads(out.read())
 
         msg = self.sled_message.loadNestedEvent(in_msg, {})
+
         result = self.sled_message.createNextEvent(msg, in_msg, None)
         assert result == out_msg
