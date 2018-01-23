@@ -90,7 +90,7 @@ loadRemote output is a full Cumulus Message as a json blob.
 
 **`loadNestedEvent` Details:**
 
-`loadNestedEvent` requests metadata from the AWS Step Function API and uses that metadata to self-identify by determining which task in the workflow is "in-progress". This is roundabout way of the lambda asking `whoami` and will be removed once AWS makes some promised updates to the lambda context object.
+`loadNestedEvent` requests metadata from the AWS Step Function API and uses that metadata to self-identify by determining which task in the workflow is "in-progress". This is roundabout way of the lambda asking `whoami` and will be removed once AWS updates the lambda context object.
 
 The task name found associated with the running task is used to look up the task-specific configuration. For example, if the current execution is associated with task named `'Task1'` then the `'config'` object sent to the business function is the value of `workflow_config['Task1']` and the `messageConfig` object sent to the business function is the value of `workflow_config['Task1']['cumulus_message']`. These configurations are used to dispatch values to other parts of the Cumulus Message which are required by the business function or `createNextEvent`
 
