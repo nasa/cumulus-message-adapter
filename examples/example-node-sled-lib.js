@@ -12,14 +12,7 @@ function loadJsonFromFile(fileName) {
 }
 
 /**
-* WIP Integration Test for loadNestedEvent
-*/
-
-/**
-* This will fail with "Lookup error: 'events'". * At the moment localstack
-* doesn't support step functions so there is no way to do a complete integration
-* test :(.
-* TODO(aimee) Mock the response from AWS Step Functions API.
+* Integration Test for loadRemoteEvent
 */
 var child = cp.spawn('python', ['./cumulus-sled.zip', 'loadRemoteEvent'], { env: env });
 
