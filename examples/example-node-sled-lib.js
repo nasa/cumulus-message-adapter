@@ -47,7 +47,7 @@ child.stdout.on('data', (data) => {
 * test :(.
 * TODO(aimee) Mock the response from AWS Step Functions API.
 */
-var child = cp.spawn('python', ['./cumulus-sled', 'loadNestedEvent'], { env: env });
+var child = cp.spawn('python', ['./cumulus-sled.zip', 'loadNestedEvent'], { env: env });
 
 child.stderr.pipe(process.stderr);
 
