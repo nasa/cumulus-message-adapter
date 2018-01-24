@@ -34,3 +34,11 @@ Some example node.js code for handling the cumulus-sled can be found and execute
 ### Linting
 
      $ pylint message
+
+### Contributing
+
+If changes are made to the codebase, a new zip archive should be created to replace `cumulus-sled.zip` for libraries that require it:
+
+```bash
+$ zip -r cumulus-sled.zip .
+```
