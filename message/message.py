@@ -4,7 +4,6 @@ import re
 from types import *
 from datetime import datetime,timedelta
 import uuid
-import boto3
 from jsonpath_ng import jsonpath, parse
 import aws_sled
 
