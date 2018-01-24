@@ -12,16 +12,9 @@ function loadJsonFromFile(fileName) {
 }
 
 /**
-* WIP Integration Test for loadNestedEvent
+* Integration Test for loadRemoteEvent
 */
-
-/**
-* This will fail with "Lookup error: 'events'". * At the moment localstack
-* doesn't support step functions so there is no way to do a complete integration
-* test :(.
-* TODO(aimee) Mock the response from AWS Step Functions API.
-*/
-var child = cp.spawn('./cumulus-sled', ['loadRemoteEvent'], { env: env });
+var child = cp.spawn('python', ['./cumulus-sled.zip', 'loadRemoteEvent'], { env: env });
 
 child.stderr.pipe(process.stderr);
 
@@ -47,7 +40,7 @@ child.stdout.on('data', (data) => {
 * test :(.
 * TODO(aimee) Mock the response from AWS Step Functions API.
 */
-var child = cp.spawn('./cumulus-sled', ['loadNestedEvent'], { env: env });
+var child = cp.spawn('python', ['./cumulus-sled.zip', 'loadNestedEvent'], { env: env });
 
 child.stderr.pipe(process.stderr);
 
@@ -61,7 +54,7 @@ child.stdin.end();
 /*
 * Integration Test for createNextEvent 
 */
-var child = cp.spawn('./cumulus-sled', ['createNextEvent']);
+var child = cp.spawn('python', ['./cumulus-sled.zip', 'createNextEvent']);
 
 child.stderr.pipe(process.stderr);
 

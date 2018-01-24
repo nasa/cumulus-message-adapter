@@ -6,15 +6,17 @@ Every Cumulus Task includes a business function. `cumulus-sled` and a language-s
 
 `cumulus-sled` functions are invoked via the command line and read from stdin. Calling `./cumulus-sled <function_name>` should be followed by a json blob sent to stdin as detailed below.
 
+Note: The `python ./cumulus-sled.zip` is interchangeable with `__main__.py` if the `cumulus-sled.zip` is up-to-date with the code.
+
 ```bash
 # Cumulus Message or Cumulus Remote Message in:
-./cumulus-sled loadRemoteEvent
+python ./cumulus-sled.zip loadRemoteEvent
 '{
   "event": <event_json>
 }'
 
 # Cumulus Message and Lambda Context in:
-./cumulus-sled loadNestedEvent
+python ./cumulus-sled.zip loadNestedEvent
 '{
   "event": <event_json>,
   "context": <context_json>
@@ -23,7 +25,7 @@ Every Cumulus Task includes a business function. `cumulus-sled` and a language-s
 # Call inner handler
 
 # Send result as <handler_response_json> to produce Cumulus Message out:
-./cumulus-sled createNextEvent
+python ./cumulus-sled.zip createNextEvent
 '{
   "event": <event_json>,
   "handler_response": <handler_response_json>,
