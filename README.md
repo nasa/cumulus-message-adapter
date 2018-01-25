@@ -25,12 +25,6 @@ And then you can check tests pass with the following nosetests command:
 $ CUMULUS_ENV=testing nosetests -v -s
 ```
 
-Some example node.js code for handling the cumulus-message-adapter can be found and executed:
-
-```bash
-./examples/example-node-message-adapter-lib.js 
-```
-
 ### Linting
 
      $ pylint message
@@ -41,4 +35,10 @@ If changes are made to the codebase, a new zip archive should be created to repl
 
 ```bash
 $ zip -r cumulus-message-adapter.zip .
+```
+
+Then you can run some integration tests:
+
+```bash
+./examples/example-node-message-adapter-lib.js 
 ```
