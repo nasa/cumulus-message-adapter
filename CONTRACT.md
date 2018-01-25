@@ -134,12 +134,8 @@ In case there is a task execution error, the error should be caught by the libra
 
 ```json
 {
-  "workflow_config": {
-    // ...
-  },
-  "cumulus_meta": {
-    // ...
-  },
+  "workflow_config": {},
+  "cumulus_meta": {},
   "meta": {
     "foo": "bar"
   },
