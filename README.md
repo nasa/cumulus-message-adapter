@@ -1,6 +1,6 @@
 # Cumulus Message Adapter
 
-[![CircleCI](https://circleci.com/gh/cumulus-nasa/cumulus-sled.svg?style=svg)](https://circleci.com/gh/cumulus-nasa/cumulus-sled)
+[![CircleCI](https://circleci.com/gh/cumulus-nasa/cumulus-message-adapter.svg?style=svg)](https://circleci.com/gh/cumulus-nasa/cumulus-message-adapter)
 
 ## Development
 
