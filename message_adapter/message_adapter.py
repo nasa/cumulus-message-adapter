@@ -296,7 +296,7 @@ class message_adapter:
       exec ("message" + dictPath + " = value");
     return message;
 
-  def __assignOutputs(self, handlerResponse, event, messageConfig):
+  def _message__assignOutputs(self, handlerResponse, event, messageConfig):
     """
     * Applies a task's return value to an output message as defined in config.cumulus_message
     *
@@ -356,7 +356,7 @@ class message_adapter:
     * @param {*} messageConfig The cumulus_message object configured for the task
     * @returns {*} the output message to be returned
     """
-    result = self.__assignOutputs(handlerResponse, event, messageConfig);
+    result = self._message__assignOutputs(handlerResponse, event, messageConfig);
     result['exception'] = 'None';
     if 'replace' in result: del result['replace'];
     return self.__storeRemoteResponse(result);
