@@ -5,9 +5,9 @@ from types import *
 from datetime import datetime,timedelta
 import uuid
 from jsonpath_ng import jsonpath, parse
-import aws_sled
+import aws
 
-class message:
+class message_adapter:
   """
   transforms the cumulus message
   """
@@ -70,7 +70,7 @@ class message:
     * @param {string} arn An ARN to an Activity or Lambda to find. See "IMPORTANT!"
     * @returns {string} The name of the task being run
     """
-    sfn = aws_sled.stepFn()
+    sfn = aws.stepFn()
     executionArn = self.__getSfnExecutionArnByName(stateMachineArn, executionName);
     executionHistory = sfn.get_execution_history(
       executionArn=executionArn,
@@ -94,7 +94,7 @@ class message:
     * @returns {*} the full event data
     """
     if ('replace' in event):
-      s3 = aws_sled.s3()
+      s3 = aws.s3()
       data = s3.Object(event['replace']['Bucket'], event['replace']['Key']).get();
       if (data is not None):
         return json.loads(data['Body'].read().decode('utf-8'));
@@ -331,7 +331,7 @@ class message:
 
     if (roughDataSize < self.MAX_NON_S3_PAYLOAD_SIZE): return event;
 
-    s3 = aws_sled.s3();
+    s3 = aws.s3();
     s3Bucket = event['ingest_meta']['message_bucket']
     s3Key = ('/').join(['events', str(uuid.uuid4())])
     s3Params = {

@@ -1,4 +1,4 @@
-# Cumulus Sled Message Transformation
+# Cumulus Message Adapter
 
 [![CircleCI](https://circleci.com/gh/cumulus-nasa/cumulus-sled.svg?style=svg)](https://circleci.com/gh/cumulus-nasa/cumulus-sled)
 
@@ -25,10 +25,10 @@ And then you can check tests pass with the following nosetests command:
 $ CUMULUS_ENV=testing nosetests -v -s
 ```
 
-Some example node.js code for handling the cumulus-sled can be found and executed:
+Some example node.js code for handling the cumulus-message-adapter can be found and executed:
 
 ```bash
-./examples/example-node-sled-lib.js 
+./examples/example-node-message-adapter-lib.js 
 ```
 
 ### Linting
@@ -37,8 +37,8 @@ Some example node.js code for handling the cumulus-sled can be found and execute
 
 ### Contributing
 
-If changes are made to the codebase, a new zip archive should be created to replace `cumulus-sled.zip` for libraries that require it:
+If changes are made to the codebase, a new zip archive should be created to replace `cumulus-message-adapter.zip` for libraries that require it:
 
 ```bash
-$ zip -r cumulus-sled.zip .
+$ zip -r cumulus-message-adapter.zip .
 ```

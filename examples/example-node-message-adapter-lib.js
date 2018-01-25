@@ -14,7 +14,7 @@ function loadJsonFromFile(fileName) {
 /**
 * Integration Test for loadRemoteEvent
 */
-var child = cp.spawn('python', ['./cumulus-sled.zip', 'loadRemoteEvent'], { env: env });
+var child = cp.spawn('python', ['./cumulus-message-adapter.zip', 'loadRemoteEvent'], { env: env });
 
 child.stderr.pipe(process.stderr);
 
@@ -40,7 +40,7 @@ child.stdout.on('data', (data) => {
 * test :(.
 * TODO(aimee) Mock the response from AWS Step Functions API.
 */
-var child = cp.spawn('python', ['./cumulus-sled.zip', 'loadNestedEvent'], { env: env });
+var child = cp.spawn('python', ['./cumulus-message-adapter.zip', 'loadNestedEvent'], { env: env });
 
 child.stderr.pipe(process.stderr);
 
@@ -54,7 +54,7 @@ child.stdin.end();
 /*
 * Integration Test for createNextEvent 
 */
-var child = cp.spawn('python', ['./cumulus-sled.zip', 'createNextEvent']);
+var child = cp.spawn('python', ['./cumulus-message-adapter.zip', 'createNextEvent']);
 
 child.stderr.pipe(process.stderr);
 
