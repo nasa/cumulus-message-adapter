@@ -1,0 +1,3 @@
+{
+  "invokedFunctionArn": "arn:aws:lambda:us-west-2:123456789012:function:ExampleCloudFormationStackName-ExampleLambdaFunctionResourceName-AULC3LB8Q02F"
+}

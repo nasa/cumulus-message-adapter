@@ -1,11 +1,8 @@
 import json
 import os
 import re
-import sys
-from types import *
 from datetime import datetime,timedelta
 import uuid
-import boto3
 from jsonpath_ng import jsonpath, parse
 import aws_sled
 
@@ -44,12 +41,12 @@ class message:
 
     # Create a lookup table for finding events by their id
     for event in executionHistory['events']:
-      eventsById['event']['id'] = event;
+      eventsById[event['id']] = event;
 
     for step in executionHistory['events']:
       # Find the ARN in thie history (the API is awful here).  When found, return its
       # previousEventId's (TaskStateEntered) name
-      if (arn and
+      if (arn is not None and
           ((step['type'] == 'LambdaFunctionScheduled' and
             step['lambdaFunctionScheduledEventDetails']['resource'] == arn) or
           (step['type'] == 'ActivityScheduled' and
@@ -72,15 +69,14 @@ class message:
     * @param {string} arn An ARN to an Activity or Lambda to find. See "IMPORTANT!"
     * @returns {string} The name of the task being run
     """
-    region = os.getenv('AWS_DEFAULT_REGION', 'us-east-1');
-    sfn = boto3.client('stepfunctions', region_name=region);
+    sfn = aws_sled.stepFn()
     executionArn = self.__getSfnExecutionArnByName(stateMachineArn, executionName);
     executionHistory = sfn.get_execution_history(
       executionArn=executionArn,
       maxResults=40,
       reverseOrder=True
     );
-    self.__getTaskNameFromExecutionHistory(executionHistory, arn);
+    return self.__getTaskNameFromExecutionHistory(executionHistory, arn);
 
 
   ##################################
@@ -126,7 +122,7 @@ class message:
     """
     return self.__getConfig(event, event['cumulus_meta']['task']);
 
-  
+
   def __loadStepFunctionConfig(self, event, context):
     """
     * For StepFunctions, returns the configuration corresponding to the current execution
@@ -135,7 +131,7 @@ class message:
     * @returns {*} The task's configuration
     """
     meta = event['cumulus_meta'];
-    arn = context['invokedFunctionArn'] if 'invokedFunctionArn' in context else context['activityArn'];
+    arn = context['invokedFunctionArn'] if 'invokedFunctionArn' in context else context.get('activityArn');
     taskName = self.__getCurrentSfnTask(meta['state_machine'],meta['execution_name'],arn);
     return self.__getConfig(event, taskName) if taskName is not None else None;
 
@@ -176,9 +172,9 @@ class message:
     * @param {*} str A string containing a JSONPath template to resolve
     * @returns {*} The resolved object
     """
-    valueRegex = '^{{(.*)}}$';
-    arrayRegex = '^{\[(.*)\]}$';
-    templateRegex = '{([^}]+)}';
+    valueRegex = '^{{.*}}$';
+    arrayRegex = '^{\[.*\]}$';
+    templateRegex = '{[^}]+}';
 
     if (re.search(valueRegex, str)):
       matchData = parse(str[2:(len(str)-2)]).find(event);
@@ -210,7 +206,7 @@ class message:
     * @param {*} config A config object, containing paths
     * @returns {*} A config object with all JSONPaths resolved
     """
-    if isinstance(config, str):
+    if isinstance(config, str) or isinstance(config, unicode):
       return self.__resolvePathStr(event, config);
 
     elif isinstance(config, list):
@@ -225,7 +221,6 @@ class message:
       return result;
 
     return config;
-
 
   def __resolveConfigTemplates(self, event, config):
     """
@@ -253,33 +248,57 @@ class message:
     if ('cumulus_message' in config and 'input' in config['cumulus_message']):
       inputPath = config['cumulus_message']['input'];
       return self.__resolvePathStr(event, inputPath);
-    return event['payload'];
+    return event.get('payload');
 
-  """
-  * Interprets an incoming event as a Cumulus workflow message
-  *
-  * @param {*} event The input message sent to the Lambda
-  * @returns {*} message that is ready to pass to an inner task
-  """
   def loadNestedEvent(self, event, context):
+    """
+    * Interprets an incoming event as a Cumulus workflow message
+    *
+    * @param {*} event The input message sent to the Lambda
+    * @returns {*} message that is ready to pass to an inner task
+    """
     config = self.__loadConfig(event, context);
     finalConfig = self.__resolveConfigTemplates(event, config);
     finalPayload = self.__resolveInput(event, config);
-    return {
-            'input': finalPayload,
-            'config': finalConfig,
-            'messageConfig': config['cumulus_message']
-          };
+    response = {'input': finalPayload};
+    if finalConfig is not None: response['config'] = finalConfig;
+    if 'cumulus_message' in config: response['messageConfig'] = config['cumulus_message'];
+    return response;
 
   #############################
-  # Output message creation #
+  # Output message creation   #
   #############################
 
-  def assignOutputs(self, nestedResponse, event, messageConfig):
+  def __assignJsonPathValue(self, message, jspath, value):
+    """
+    * Assign (update or insert) a value to message based on jsonpath.
+    * Create the keys if jspath doesn't already exist in the message. In this case, we 
+    * support 'simple' jsonpath like $.path1.path2.path3....
+    * @param {*} message The message to be update
+    * @return {*} updated message
+    """
+    if len(parse(jspath).find(message)) > 0:
+      parse(jspath).update(message, value);
+    else:
+      paths = jspath.lstrip('$.').split('.');
+      currentItem = message;
+      dictPath = str();
+      keyNotFound = False;
+      for path in paths:
+        dictPath += "['" + path + "']";
+        if keyNotFound or path not in currentItem:
+          keyNotFound = True;
+          exec ("message" + dictPath + " = {}");
+        currentItem = eval ("message" + dictPath);
+
+      exec ("message" + dictPath + " = value");
+    return message;
+
+  def __assignOutputs(self, handlerResponse, event, messageConfig):
     """
     * Applies a task's return value to an output message as defined in config.cumulus_message
     *
-    * @param {*} nestedResponse The task's return value
+    * @param {*} handlerResponse The task's return value
     * @param {*} event The output message to apply the return value to
     * @param {*} messageConfig The cumulus_message configuration
     * @returns {*} The output message with the nested response applied
@@ -292,19 +311,19 @@ class message:
         sourcePath = output['source'];
         destPath = output['destination'];
         destJsonPath = destPath[2:(len(destPath)-2)];
-        value = self.__resolvePathStr(nestedResponse, sourcePath);
-        parse(destJsonPath).update(result, value);
+        value = self.__resolvePathStr(handlerResponse, sourcePath);
+        self.__assignJsonPathValue(result, destJsonPath, value);
     else:
-      result['payload'] = nestedResponse;
+      result['payload'] = handlerResponse;
 
     return result;
 
-  """
-  * Stores part of a response message in S3 if it is too big to send to StepFunctions
-  * @param {*} event The response message
-  * @returns {*} A response message, possibly referencing an S3 object for its contents
-  """
   def __storeRemoteResponse(self, event):
+    """
+    * Stores part of a response message in S3 if it is too big to send to StepFunctions
+    * @param {*} event The response message
+    * @returns {*} A response message, possibly referencing an S3 object for its contents
+    """
     jsonData = json.dumps(event);
     roughDataSize = len(jsonData) if event is not None else 0;
 
@@ -326,46 +345,17 @@ class message:
         'replace': s3Location
       };
 
-  """
-  * Creates the output message returned by a task
-  *
-  * @param {*} nestedResponse The response returned by the inner task code
-  * @param {*} event The input message sent to the Lambda
-  * @param {*} messageConfig The cumulus_message object configured for the task
-  * @returns {*} the output message to be returned
-  """
-  def createNextEvent(self, nestedResponse, event, messageConfig):
-    result = self.assignOutputs(nestedResponse, event, messageConfig);
+  def createNextEvent(self, handlerResponse, event, messageConfig):
+    """
+    * Creates the output message returned by a task
+    *
+    * @param {*} handlerResponse The response returned by the inner task code
+    * @param {*} event The input message sent to the Lambda
+    * @param {*} messageConfig The cumulus_message object configured for the task
+    * @returns {*} the output message to be returned
+    """
+    result = self.__assignOutputs(handlerResponse, event, messageConfig);
     result['exception'] = 'None';
     if 'replace' in result: del result['replace'];
     return self.__storeRemoteResponse(result);
-
-if __name__ == '__main__':
-  (scriptName, functionName) = sys.argv[0:2];
-  transformer = message();
-  exitCode = 1;
-  try:
-    if (functionName == 'loadNestedEvent'):
-      event = json.loads(sys.argv[2]);
-      context = json.loads(sys.argv[3]);
-      result = transformer.loadNestedEvent(event, context);
-    elif (functionName == 'createNextEvent'):
-      nestedResponse = json.loads(sys.argv[2]);
-      event = json.loads(sys.argv[3]);
-      messageConfig = json.loads(sys.argv[4]);
-      result = transformer.createNextEvent(nestedResponse, event, messageConfig);
-    elif (functionName == 'loadRemoteEvent'):
-      event = json.loads(sys.argv[2]);
-      result = transformer.loadRemoteEvent(event);
-    
-    if (result is not None and len(result) > 0):
-      sys.stdout.write(json.dumps(result));
-      sys.stdout.flush();
-      exitCode = 0;
-  except LookupError as le:
-    sys.stderr.write(le);
-  except:
-    sys.stderr.write("Unexpected error:"+ str(sys.exc_info()[0])+ ". " + str(sys.exc_info()[1]));
-
-  sys.exit(exitCode);
   

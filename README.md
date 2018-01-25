@@ -1,5 +1,7 @@
 # Cumulus Sled Message Transformation
 
+[![CircleCI](https://circleci.com/gh/cumulus-nasa/cumulus-sled.svg?style=svg)](https://circleci.com/gh/cumulus-nasa/cumulus-sled)
+
 ## Development
 
 ### Dependency Installation
@@ -20,5 +22,23 @@ $ SERVICES=s3 localstack start
 And then you can check tests pass with the following nosetests command:
 
 ```
-$ ENV=testing nosetests -v -s
+$ CUMULUS_ENV=testing nosetests -v -s
+```
+
+Some example node.js code for handling the cumulus-sled can be found and executed:
+
+```bash
+./examples/example-node-sled-lib.js 
+```
+
+### Linting
+
+     $ pylint message
+
+### Contributing
+
+If changes are made to the codebase, a new zip archive should be created to replace `cumulus-sled.zip` for libraries that require it:
+
+```bash
+$ zip -r cumulus-sled.zip .
 ```
