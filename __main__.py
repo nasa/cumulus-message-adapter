@@ -2,11 +2,11 @@
 import json
 import sys
 
-from message import message
+from message_adapter import message_adapter
 
 if __name__ == '__main__':
   functionName = sys.argv[1]
-  transformer = message.message()
+  transformer = message_adapter.message_adapter()
   exitCode = 1
   allInput = json.loads(raw_input())
   event = allInput['event']

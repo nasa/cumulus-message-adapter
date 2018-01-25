@@ -1,12 +1,12 @@
 """
-Tests for cumulus-sled
+Tests for cumulus-message-adapter
 """
 import os
 import json
 import unittest
 from mock import patch
 
-from message import aws_sled, message
+from message_adapter import aws, message_adapter
 
 class Test(unittest.TestCase):
     """ Test class """
@@ -18,8 +18,8 @@ class Test(unittest.TestCase):
     event_without_replace = {'input': ':baby_whale:'}
     test_uuid = 'aad93279-95d4-4ada-8c43-aa5823f8bbbc'
     next_event_object_key_name = "events/{0}".format(test_uuid)
-    s3 = aws_sled.s3()
-    sled_message = message.message()
+    s3 = aws.s3()
+    cumulus_message_adapter = message_adapter.message_adapter()
     test_folder = os.path.join(os.getcwd(), 'examples/messages')
 
     def setUp(self):
@@ -42,12 +42,12 @@ class Test(unittest.TestCase):
     # loadRemoteEvent tests
     def test_returns_remote_s3_object(self):
         """ Test remote s3 event is returned when 'replace' key is present """
-        result = self.sled_message.loadRemoteEvent(self.event_with_replace)
+        result = self.cumulus_message_adapter.loadRemoteEvent(self.event_with_replace)
         assert result == self.s3_object
 
     def test_returns_event(self):
         """ Test event argument is returned when 'replace' key is not present """
-        result = self.sled_message.loadRemoteEvent(self.event_without_replace)
+        result = self.cumulus_message_adapter.loadRemoteEvent(self.event_without_replace)
         assert result == self.event_without_replace
 
     # loadNestedEvent tests
@@ -85,19 +85,19 @@ class Test(unittest.TestCase):
                             'destination': '{{$.payload.out}}'}]}
         }
 
-        result = self.sled_message.loadNestedEvent(nested_event_local, {})
+        result = self.cumulus_message_adapter.loadNestedEvent(nested_event_local, {})
         assert result == nested_event_local_return
 
     # assignOutputs tests
     def test_result_payload_without_config(self):
         """ Test nestedResponse is returned when no config argument is passed """
-        result = self.sled_message._message__assignOutputs(self.nested_response, {}, None)
+        result = self.cumulus_message_adapter._message__assignOutputs(self.nested_response, {}, None)
         assert result['payload'] == self.nested_response
 
     def test_result_payload_without_config_outputs(self):
         """ Test nestedResponse is returned when config has no outputs key/value """
         message_config_without_outputs = {}
-        result = self.sled_message._message__assignOutputs(
+        result = self.cumulus_message_adapter._message__assignOutputs(
             self.nested_response, {}, message_config_without_outputs)
         assert result['payload'] == self.nested_response
 
@@ -111,7 +111,7 @@ class Test(unittest.TestCase):
             }]
         }
 
-        result = self.sled_message._message__assignOutputs(
+        result = self.cumulus_message_adapter._message__assignOutputs(
             self.nested_response, {}, message_config_with_simple_outputs)
         assert result['payload'] == 's3://source.jpg'
 
@@ -127,7 +127,7 @@ class Test(unittest.TestCase):
             }]
         }
 
-        result = self.sled_message._message__assignOutputs(
+        result = self.cumulus_message_adapter._message__assignOutputs(
             self.nested_response, {}, message_config_with_nested_outputs)
         assert result['payload'] == {'dataLocation': 's3://source.jpg'}
 
@@ -136,13 +136,13 @@ class Test(unittest.TestCase):
         """
         Test 'replace' key is deleted from value returned from createNextEvent
         """
-        result = self.sled_message.createNextEvent(
+        result = self.cumulus_message_adapter.createNextEvent(
             self.nested_response, self.event_with_replace, None)
         assert 'replace' not in result
 
     def test_small_result_returns_event(self):
         """ Test return result is the event result when it's not too big """
-        result = self.sled_message.createNextEvent(
+        result = self.cumulus_message_adapter.createNextEvent(
             self.nested_response, self.event_without_replace, None)
         expected_result = {
             'input': ':baby_whale:',
@@ -153,7 +153,7 @@ class Test(unittest.TestCase):
         }
         assert result == expected_result
 
-    @patch.object(sled_message, 'MAX_NON_S3_PAYLOAD_SIZE', 1)
+    @patch.object(cumulus_message_adapter, 'MAX_NON_S3_PAYLOAD_SIZE', 1)
     @patch('uuid.uuid4')
     def test_big_result_stored_remotely(self, uuid_mock):
         """
@@ -171,7 +171,7 @@ class Test(unittest.TestCase):
         }
 
         uuid_mock.return_value = self.test_uuid
-        create_next_event_result = self.sled_message.createNextEvent(
+        create_next_event_result = self.cumulus_message_adapter.createNextEvent(
             self.nested_response, event_with_ingest, None)
         expected_create_next_event_result = {
             'cumulus_meta': {'workflow': 'testing'},
@@ -196,10 +196,10 @@ class Test(unittest.TestCase):
         in_msg = json.loads(inp.read())
         out_msg = json.loads(out.read())
 
-        msg = self.sled_message.loadNestedEvent(in_msg, {})
+        msg = self.cumulus_message_adapter.loadNestedEvent(in_msg, {})
         messageConfig = msg.get('messageConfig');
         if 'messageConfig' in msg: del msg['messageConfig'];
-        result = self.sled_message.createNextEvent(msg, in_msg, messageConfig)
+        result = self.cumulus_message_adapter.createNextEvent(msg, in_msg, messageConfig)
         assert result == out_msg
 
     def test_jsonpath(self):
@@ -209,10 +209,10 @@ class Test(unittest.TestCase):
         in_msg = json.loads(inp.read())
         out_msg = json.loads(out.read())
 
-        msg = self.sled_message.loadNestedEvent(in_msg, {})
+        msg = self.cumulus_message_adapter.loadNestedEvent(in_msg, {})
         messageConfig = msg.get('messageConfig');
         if 'messageConfig' in msg: del msg['messageConfig'];
-        result = self.sled_message.createNextEvent(msg, in_msg, messageConfig)
+        result = self.cumulus_message_adapter.createNextEvent(msg, in_msg, messageConfig)
         assert result == out_msg
     
     def test_meta(self):
@@ -222,10 +222,10 @@ class Test(unittest.TestCase):
         in_msg = json.loads(inp.read())
         out_msg = json.loads(out.read())
 
-        msg = self.sled_message.loadNestedEvent(in_msg, {})
+        msg = self.cumulus_message_adapter.loadNestedEvent(in_msg, {})
         messageConfig = msg.get('messageConfig');
         if 'messageConfig' in msg: del msg['messageConfig'];
-        result = self.sled_message.createNextEvent(msg, in_msg, messageConfig)
+        result = self.cumulus_message_adapter.createNextEvent(msg, in_msg, messageConfig)
         assert result == out_msg
     
     def test_remote(self):
@@ -242,11 +242,11 @@ class Test(unittest.TestCase):
         self.s3.Bucket(bucket_name).create();
         self.s3.Object(bucket_name, key_name).put(Body=json.dumps(datasource));
 
-        remoteEvent = self.sled_message.loadRemoteEvent(in_msg);
-        msg = self.sled_message.loadNestedEvent(remoteEvent, {});
+        remoteEvent = self.cumulus_message_adapter.loadRemoteEvent(in_msg);
+        msg = self.cumulus_message_adapter.loadNestedEvent(remoteEvent, {});
         messageConfig = msg.get('messageConfig');
         if 'messageConfig' in msg: del msg['messageConfig'];
-        result = self.sled_message.createNextEvent(msg, remoteEvent, messageConfig)
+        result = self.cumulus_message_adapter.createNextEvent(msg, remoteEvent, messageConfig)
         
         delete_objects_object = {'Objects': [{'Key': key_name}]};
         self.s3.Bucket(bucket_name).delete_objects(Delete=delete_objects_object)
@@ -254,17 +254,18 @@ class Test(unittest.TestCase):
 
         assert result == out_msg 
 
-    @patch.object(sled_message, '_message__getCurrentSfnTask', return_value="Example")
+    @patch.object(cumulus_message_adapter, '_message__getCurrentSfnTask', return_value="Example")
     def test_sfn(self, getCurrentSfnTask_function):
         """ test sfn.input.json """
         inp = open(os.path.join(self.test_folder, 'sfn.input.json'))
         out = open(os.path.join(self.test_folder, 'sfn.output.json'))
         in_msg = json.loads(inp.read())
         out_msg = json.loads(out.read())
-        msg = self.sled_message.loadNestedEvent(in_msg, {})
+
+        msg = self.cumulus_message_adapter.loadNestedEvent(in_msg, {})
         messageConfig = msg.get('messageConfig');
         if 'messageConfig' in msg: del msg['messageConfig'];
-        result = self.sled_message.createNextEvent(msg, in_msg, messageConfig)
+        result = self.cumulus_message_adapter.createNextEvent(msg, in_msg, messageConfig)
         assert result == out_msg 
     
     def test_templates(self):
@@ -274,9 +275,8 @@ class Test(unittest.TestCase):
         in_msg = json.loads(inp.read())
         out_msg = json.loads(out.read())
 
-        msg = self.sled_message.loadNestedEvent(in_msg, {})
+        msg = self.cumulus_message_adapter.loadNestedEvent(in_msg, {})
         messageConfig = msg.get('messageConfig');
         if 'messageConfig' in msg: del msg['messageConfig'];
-        result = self.sled_message.createNextEvent(msg, in_msg, messageConfig)
+        result = self.cumulus_message_adapter.createNextEvent(msg, in_msg, messageConfig)
         assert result == out_msg
-

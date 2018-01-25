@@ -4,9 +4,9 @@ import re
 from datetime import datetime,timedelta
 import uuid
 from jsonpath_ng import jsonpath, parse
-import aws_sled
+import aws
 
-class message:
+class message_adapter:
   """
   transforms the cumulus message
   """
@@ -55,7 +55,7 @@ class message:
       elif step['type'] == 'TaskStateEntered': return step['stateEnteredEventDetails']['name'];
     raise LookupError('No task found for ' + arn);
 
-  def __getCurrentSfnTask(self, stateMachineArn, executionName, arn):
+  def _message__getCurrentSfnTask(self, stateMachineArn, executionName, arn):
     """
     * Given a state machine ARN, an execution name, and an optional Activity or Lambda ARN returns
     * the most recent task name started for the given ARN in that execution, or if no ARN is
@@ -69,7 +69,7 @@ class message:
     * @param {string} arn An ARN to an Activity or Lambda to find. See "IMPORTANT!"
     * @returns {string} The name of the task being run
     """
-    sfn = aws_sled.stepFn()
+    sfn = aws.stepFn()
     executionArn = self.__getSfnExecutionArnByName(stateMachineArn, executionName);
     executionHistory = sfn.get_execution_history(
       executionArn=executionArn,
@@ -93,7 +93,7 @@ class message:
     * @returns {*} the full event data
     """
     if ('replace' in event):
-      s3 = aws_sled.s3()
+      s3 = aws.s3()
       data = s3.Object(event['replace']['Bucket'], event['replace']['Key']).get();
       if (data is not None):
         return json.loads(data['Body'].read().decode('utf-8'));
@@ -132,7 +132,7 @@ class message:
     """
     meta = event['cumulus_meta'];
     arn = context['invokedFunctionArn'] if 'invokedFunctionArn' in context else context.get('activityArn');
-    taskName = self.__getCurrentSfnTask(meta['state_machine'],meta['execution_name'],arn);
+    taskName = self._message__getCurrentSfnTask(meta['state_machine'],meta['execution_name'],arn);
     return self.__getConfig(event, taskName) if taskName is not None else None;
 
   def __loadConfig(self, event, context):
@@ -294,7 +294,7 @@ class message:
       exec ("message" + dictPath + " = value");
     return message;
 
-  def __assignOutputs(self, handlerResponse, event, messageConfig):
+  def _message__assignOutputs(self, handlerResponse, event, messageConfig):
     """
     * Applies a task's return value to an output message as defined in config.cumulus_message
     *
@@ -329,7 +329,7 @@ class message:
 
     if (roughDataSize < self.MAX_NON_S3_PAYLOAD_SIZE): return event;
 
-    s3 = aws_sled.s3();
+    s3 = aws.s3();
     s3Bucket = event['ingest_meta']['message_bucket']
     s3Key = ('/').join(['events', str(uuid.uuid4())])
     s3Params = {
@@ -354,7 +354,7 @@ class message:
     * @param {*} messageConfig The cumulus_message object configured for the task
     * @returns {*} the output message to be returned
     """
-    result = self.__assignOutputs(handlerResponse, event, messageConfig);
+    result = self._message__assignOutputs(handlerResponse, event, messageConfig);
     result['exception'] = 'None';
     if 'replace' in result: del result['replace'];
     return self.__storeRemoteResponse(result);
