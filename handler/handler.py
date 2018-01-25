@@ -7,7 +7,7 @@ from os import path
 import json
 from jsonschema import validate
 
-from message import message
+from message.message import message
 
 def handler(event, context, handler_fn=None, handler_config=None):
     """

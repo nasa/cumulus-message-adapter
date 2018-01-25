@@ -1,6 +1,6 @@
 import unittest
 from os import path
-from cumulus_sled.handler import handler
+from handler.handler import handler
 
 def create_event ():
     return {
