@@ -121,7 +121,7 @@ A Cumulus Message or a Cumulus Remote Message.
 
 ## Error Handling
 
-Errors raised during execution of `cumulus-sled` functions are written to stderr. These errors are integration errors or bugs in the `cumulus-sled` code and should be raised during task execution so the root cause can be fixed.
+Errors raised during execution of `cumulus-sled` functions are written to stderr. These errors are integration errors or bugs in the `cumulus-sled` code and should be re-raised by libraries so the root cause can be fixed.
 
 Errors raised during task execution code, which is called by the library, may either be the result of a misconfiguration, a bug, or a task execution error. Libraries should raise errors in the case the origin is misconfiguration or a bug since this should be fixed in source code.
 
