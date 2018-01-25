@@ -20,7 +20,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 # Fields marked as "Optional" may be commented out.
 
 setup(
-    name='cumulus-sled',  # Required
+    name='cumulus-message-adpater',  # Required
 
     # Versions should comply with PEP 440:
     # https://www.python.org/dev/peps/pep-0440/
@@ -29,9 +29,9 @@ setup(
     # This is a one-line description or tagline of what your project does. This
     # corresponds to the "Summary" metadata field:
     # https://packaging.python.org/specifications/core-metadata/#summary
-    description='A python implementation of cumulus message transformation for sled',  # Required
+    description='A python implementation of cumulus message adapter',  # Required
     long_description=long_description,  # Optional
-    url='https://github.com/cumulus-nasa/sled-message',  # Optional
+    url='https://github.com/cumulus-nasa/cumulus-message-adpater',  # Optional
     author='Cumulus Authors',  # Optional
     author_email='info@developmentseed.org',  # Optional
     classifiers=[  # Optional
@@ -43,7 +43,7 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
     ],
-    keywords='nasa cumulu sled',  # Optional
+    keywords='nasa cumulus message adapter',  # Optional
     packages=find_packages(exclude=['.circleci', 'contrib', 'docs', 'tests']),  # Required
     install_requires=['jsonpath-ng', 'boto3'],  # Optional
 )

@@ -1,22 +1,22 @@
-# `cumulus-sled` Contract
+# `cumulus-message-adapter` Contract
 
-`cumulus-sled` is a command-line interface for preparing and outputting Cumulus Messages for Cumulus Tasks. This contract defines how libraries should call `cumulus-sled` to integrate a task into a Cumulus Workflow.
+`cumulus-message-adapter` is a command-line interface for preparing and outputting Cumulus Messages for Cumulus Tasks. This contract defines how libraries should call `cumulus-message-adapter` to integrate a task into a Cumulus Workflow.
 
-Every Cumulus Task includes a business function. `cumulus-sled` and a language-specific library for interacting with `cumulus-sled` are required to integrate a business function as a Cumulus Task into a Cumulus Workflow.
+Every Cumulus Task includes a business function. `cumulus-message-adapter` and a language-specific library for interacting with `cumulus-message-adapter` are required to integrate a business function as a Cumulus Task into a Cumulus Workflow.
 
-`cumulus-sled` functions are invoked via the command line and read from stdin. Calling `./cumulus-sled <function_name>` should be followed by a json blob sent to stdin as detailed below.
+`cumulus-message-adapter` functions are invoked via the command line and read from stdin. Calling `./cumulus-message-adapter <function_name>` should be followed by a json blob sent to stdin as detailed below.
 
-Note: The `python ./cumulus-sled.zip` is interchangeable with `__main__.py` if the `cumulus-sled.zip` is up-to-date with the code.
+Note: The `python ./cumulus-message-adapter.zip` is interchangeable with `__main__.py` if the `cumulus-message-adapter.zip` is up-to-date with the code.
 
 ```bash
 # Cumulus Message or Cumulus Remote Message in:
-python ./cumulus-sled.zip loadRemoteEvent
+python ./cumulus-message-adapter.zip loadRemoteEvent
 '{
   "event": <event_json>
 }'
 
 # Cumulus Message and Lambda Context in:
-python ./cumulus-sled.zip loadNestedEvent
+python ./cumulus-message-adapter.zip loadNestedEvent
 '{
   "event": <event_json>,
   "context": <context_json>
@@ -25,7 +25,7 @@ python ./cumulus-sled.zip loadNestedEvent
 # Call inner handler
 
 # Send result as <handler_response_json> to produce Cumulus Message out:
-python ./cumulus-sled.zip createNextEvent
+python ./cumulus-message-adapter.zip createNextEvent
 '{
   "event": <event_json>,
   "handler_response": <handler_response_json>,
@@ -82,7 +82,7 @@ Cumulus Messages come in 2 flavors: The full **Cumulus Message** and the **Cumul
 
 ### `loadRemoteEvent` input
 
-* `<event_json>` to cumulus-sled `loadRemoteEvent` should be either a full Cumulus Message or a Cumulus Remote Message, as defined above.
+* `<event_json>` to cumulus-message-adapter `loadRemoteEvent` should be either a full Cumulus Message or a Cumulus Remote Message, as defined above.
 
 ### `loadRemoteEvent` output
 
@@ -92,9 +92,9 @@ loadRemote output is a full Cumulus Message as a json blob.
 
 ### `loadNestedEvent` input
 
-* `<event_json>` to cumulus-sled `loadNestedEvent` should be a full Cumulus Message as defined above.
+* `<event_json>` to cumulus-message-adapter `loadNestedEvent` should be a full Cumulus Message as defined above.
 
-* `<context_json>` to cumulus-sled `loadNestedEvent` should be the context from the lambda.
+* `<context_json>` to cumulus-message-adapter `loadNestedEvent` should be the context from the lambda.
 
 **`loadNestedEvent` Details:**
 
