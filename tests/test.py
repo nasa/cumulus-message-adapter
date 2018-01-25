@@ -189,7 +189,6 @@ class Test(unittest.TestCase):
         assert remote_event_object == expected_remote_event_object
         assert create_next_event_result == expected_create_next_event_result
     
-    @unittest.skip("test is failing")
     def test_basic(self):
         """ test basic.input.json """
         inp = open(os.path.join(self.test_folder, 'basic.input.json'))
@@ -198,11 +197,11 @@ class Test(unittest.TestCase):
         out_msg = json.loads(out.read())
 
         msg = self.sled_message.loadNestedEvent(in_msg, {})
-
-        result = self.sled_message.createNextEvent(msg, in_msg, None)
+        messageConfig = msg.get('messageConfig');
+        if 'messageConfig' in msg: del msg['messageConfig'];
+        result = self.sled_message.createNextEvent(msg, in_msg, messageConfig)
         assert result == out_msg
 
-    @unittest.skip("test is failing")
     def test_jsonpath(self):
         """ test jsonpath.input.json """
         inp = open(os.path.join(self.test_folder, 'jsonpath.input.json'))
@@ -211,11 +210,11 @@ class Test(unittest.TestCase):
         out_msg = json.loads(out.read())
 
         msg = self.sled_message.loadNestedEvent(in_msg, {})
-
-        result = self.sled_message.createNextEvent(msg, in_msg, None)
+        messageConfig = msg.get('messageConfig');
+        if 'messageConfig' in msg: del msg['messageConfig'];
+        result = self.sled_message.createNextEvent(msg, in_msg, messageConfig)
         assert result == out_msg
     
-    @unittest.skip("test is failing")
     def test_meta(self):
         """ test meta.input.json """
         inp = open(os.path.join(self.test_folder, 'meta.input.json'))
@@ -224,11 +223,11 @@ class Test(unittest.TestCase):
         out_msg = json.loads(out.read())
 
         msg = self.sled_message.loadNestedEvent(in_msg, {})
-
-        result = self.sled_message.createNextEvent(msg, in_msg, None)
+        messageConfig = msg.get('messageConfig');
+        if 'messageConfig' in msg: del msg['messageConfig'];
+        result = self.sled_message.createNextEvent(msg, in_msg, messageConfig)
         assert result == out_msg
-     
-    @unittest.skip("test is failing")
+    
     def test_remote(self):
         """ test remote.input.json """
         inp = open(os.path.join(self.test_folder, 'remote.input.json'))
@@ -236,25 +235,38 @@ class Test(unittest.TestCase):
         in_msg = json.loads(inp.read())
         out_msg = json.loads(out.read())
 
-        msg = self.sled_message.loadNestedEvent(in_msg, {})
+        bucket_name = in_msg['replace']['Bucket'];
+        key_name = in_msg['replace']['Key'];
+        data_filename = os.path.join(self.test_folder, key_name);
+        with open(data_filename, 'r') as f: datasource = json.load(f)
+        self.s3.Bucket(bucket_name).create();
+        self.s3.Object(bucket_name, key_name).put(Body=json.dumps(datasource));
 
-        result = self.sled_message.createNextEvent(msg, in_msg, None)
+        remoteEvent = self.sled_message.loadRemoteEvent(in_msg);
+        msg = self.sled_message.loadNestedEvent(remoteEvent, {});
+        messageConfig = msg.get('messageConfig');
+        if 'messageConfig' in msg: del msg['messageConfig'];
+        result = self.sled_message.createNextEvent(msg, remoteEvent, messageConfig)
+        
+        delete_objects_object = {'Objects': [{'Key': key_name}]};
+        self.s3.Bucket(bucket_name).delete_objects(Delete=delete_objects_object)
+        self.s3.Bucket(bucket_name).delete()
+
         assert result == out_msg 
 
-    @unittest.skip("test is failing")
-    def test_sfn(self):
+    @patch.object(sled_message, '_message__getCurrentSfnTask', return_value="Example")
+    def test_sfn(self, getTaskNameFromExecutionHistory_function):
         """ test sfn.input.json """
         inp = open(os.path.join(self.test_folder, 'sfn.input.json'))
         out = open(os.path.join(self.test_folder, 'sfn.output.json'))
         in_msg = json.loads(inp.read())
         out_msg = json.loads(out.read())
-
         msg = self.sled_message.loadNestedEvent(in_msg, {})
-
-        result = self.sled_message.createNextEvent(msg, in_msg, None)
+        messageConfig = msg.get('messageConfig');
+        if 'messageConfig' in msg: del msg['messageConfig'];
+        result = self.sled_message.createNextEvent(msg, in_msg, messageConfig)
         assert result == out_msg 
     
-    @unittest.skip("test is failing")
     def test_templates(self):
         """ test templates.input.json """
         inp = open(os.path.join(self.test_folder, 'templates.input.json'))
@@ -263,6 +275,7 @@ class Test(unittest.TestCase):
         out_msg = json.loads(out.read())
 
         msg = self.sled_message.loadNestedEvent(in_msg, {})
-
-        result = self.sled_message.createNextEvent(msg, in_msg, None)
+        messageConfig = msg.get('messageConfig');
+        if 'messageConfig' in msg: del msg['messageConfig'];
+        result = self.sled_message.createNextEvent(msg, in_msg, messageConfig)
         assert result == out_msg
