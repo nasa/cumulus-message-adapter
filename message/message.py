@@ -1,7 +1,6 @@
 import json
 import os
 import re
-from types import *
 from datetime import datetime,timedelta
 import uuid
 from jsonpath_ng import jsonpath, parse
@@ -42,12 +41,12 @@ class message:
 
     # Create a lookup table for finding events by their id
     for event in executionHistory['events']:
-      eventsById['event']['id'] = event;
+      eventsById[event['id']] = event;
 
     for step in executionHistory['events']:
       # Find the ARN in thie history (the API is awful here).  When found, return its
       # previousEventId's (TaskStateEntered) name
-      if (arn and
+      if (arn is not None and
           ((step['type'] == 'LambdaFunctionScheduled' and
             step['lambdaFunctionScheduledEventDetails']['resource'] == arn) or
           (step['type'] == 'ActivityScheduled' and
@@ -77,7 +76,7 @@ class message:
       maxResults=40,
       reverseOrder=True
     );
-    self.__getTaskNameFromExecutionHistory(executionHistory, arn);
+    return self.__getTaskNameFromExecutionHistory(executionHistory, arn);
 
 
   ##################################
@@ -132,7 +131,7 @@ class message:
     * @returns {*} The task's configuration
     """
     meta = event['cumulus_meta'];
-    arn = context['invokedFunctionArn'] if 'invokedFunctionArn' in context else context['activityArn'];
+    arn = context['invokedFunctionArn'] if 'invokedFunctionArn' in context else context.get('activityArn');
     taskName = self.__getCurrentSfnTask(meta['state_machine'],meta['execution_name'],arn);
     return self.__getConfig(event, taskName) if taskName is not None else None;
 
@@ -173,9 +172,9 @@ class message:
     * @param {*} str A string containing a JSONPath template to resolve
     * @returns {*} The resolved object
     """
-    valueRegex = '^{{(.*)}}$';
-    arrayRegex = '^{\[(.*)\]}$';
-    templateRegex = '{([^}]+)}';
+    valueRegex = '^{{.*}}$';
+    arrayRegex = '^{\[.*\]}$';
+    templateRegex = '{[^}]+}';
 
     if (re.search(valueRegex, str)):
       matchData = parse(str[2:(len(str)-2)]).find(event);
@@ -207,7 +206,7 @@ class message:
     * @param {*} config A config object, containing paths
     * @returns {*} A config object with all JSONPaths resolved
     """
-    if isinstance(config, str):
+    if isinstance(config, str) or isinstance(config, unicode):
       return self.__resolvePathStr(event, config);
 
     elif isinstance(config, list):
@@ -249,7 +248,7 @@ class message:
     if ('cumulus_message' in config and 'input' in config['cumulus_message']):
       inputPath = config['cumulus_message']['input'];
       return self.__resolvePathStr(event, inputPath);
-    return event['payload'];
+    return event.get('payload');
 
   def loadNestedEvent(self, event, context):
     """
@@ -261,11 +260,10 @@ class message:
     config = self.__loadConfig(event, context);
     finalConfig = self.__resolveConfigTemplates(event, config);
     finalPayload = self.__resolveInput(event, config);
-    return {
-            'input': finalPayload,
-            'config': finalConfig,
-            'messageConfig': config['cumulus_message']
-          };
+    response = {'input': finalPayload};
+    if finalConfig is not None: response['config'] = finalConfig;
+    if 'cumulus_message' in config: response['messageConfig'] = config['cumulus_message'];
+    return response;
 
   #############################
   # Output message creation   #
