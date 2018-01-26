@@ -118,3 +118,28 @@ The output of `loadNestedEvent` is a json blob containing the keys `input`, `con
 ### `createNextEvent` output
 
 A Cumulus Message or a Cumulus Remote Message.
+
+## Error Handling
+
+Errors raised during execution of `cumulus-sled` functions are written to stderr. These errors are integration errors or bugs in the `cumulus-sled` code and should be re-raised by libraries so the root cause can be fixed.
+
+Errors raised during invocation of task application code, may either be the result of a misconfiguration, bug, or task execution error. Libraries should raise errors in the case the origin is misconfiguration or a bug since this should be fixed in source code.
+
+In case there is a task execution error - such as an AWS client error - the error should be caught by the library and returned as an additional `exception` field alongside the full event returned from `loadRemoteEvent`. For example, say:
+
+1. `loadRemoveEvent` successfully returns full Cumulus Message
+2. `loadNestedEvent` successfully returns object with input, config and messageConfig keys
+3. The library calls task application code an error is thrown
+4. Error is caught by library code and library handler returns the full Cumulus Message plus an exception field:
+
+```json
+{
+  "workflow_config": {},
+  "cumulus_meta": {},
+  "meta": {
+    "foo": "bar"
+  },
+  "payload": null,
+  "exception": "WorkflowError"
+}
+```
