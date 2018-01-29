@@ -12,6 +12,7 @@ references:
     working_directory: ~/repo
 
 jobs:
+  build:
     <<: *container
     steps:
       - checkout
