@@ -43,5 +43,25 @@ jobs:
           command: |
             . venv/bin/activate
             CUMULUS_ENV=testing nosetests -v -s
+  release:
+    steps:
+      - run:
+          name: Push tag to github
+          command: |
+            mkdir -p ~/.ssh
+            ssh-keyscan github.com >> ~/.ssh/known_hosts
+            VERSION=`awk -F\' '{print $2,$4}' version.py`
+            git tag $VERSION
+            git push origin $VERSION
 
-          
+workflows:
+  version: 2
+  build_test_release:
+    jobs:
+      - build
+      - release:
+          requires:
+            - build
+          filters:
+            branches:
+              only: abarciauskas-bgse_ci-build-release
