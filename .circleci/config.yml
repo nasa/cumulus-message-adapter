@@ -44,7 +44,7 @@ jobs:
             LOCALSTACK_HOST: localstack
           command: |
             . venv/bin/activate
-            CUMULUS_ENV=testing nosetests -v -s
+            # CUMULUS_ENV=testing nosetests -v -s
   release:
     <<: *container
     steps:
