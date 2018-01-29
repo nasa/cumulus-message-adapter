@@ -46,6 +46,7 @@ jobs:
             . venv/bin/activate
             CUMULUS_ENV=testing nosetests -v -s
   release:
+    <<: *container
     steps:
       - run:
           name: Push tag to github
