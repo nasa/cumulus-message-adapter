@@ -19,7 +19,10 @@ if __name__ == '__main__':
       result = transformer.loadNestedEvent(event, context)
     elif (functionName == 'createNextEvent'):
       handlerResponse = allInput['handler_response']
-      messageConfig = allInput['message_config']
+      if 'message_config' in allInput:
+        messageConfig = allInput['message_config']
+      else:
+        messageConfig = None
       result = transformer.createNextEvent(handlerResponse, event, messageConfig)
 
     if (result is not None and len(result) > 0):
