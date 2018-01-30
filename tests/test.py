@@ -85,7 +85,7 @@ class Test(unittest.TestCase):
                             'destination': '{{$.payload.out}}'}]}
         }
 
-        result = self.cumulus_message_adapter.loadNestedEvent(nested_event_local, {})
+        result = self.cumulus_message_adapter.loadNestedEvent(nested_event_local, None)
         assert result == nested_event_local_return
 
     # assignOutputs tests
@@ -196,7 +196,7 @@ class Test(unittest.TestCase):
         in_msg = json.loads(inp.read())
         out_msg = json.loads(out.read())
 
-        msg = self.cumulus_message_adapter.loadNestedEvent(in_msg, {})
+        msg = self.cumulus_message_adapter.loadNestedEvent(in_msg, None)
         messageConfig = msg.get('messageConfig');
         if 'messageConfig' in msg: del msg['messageConfig'];
         result = self.cumulus_message_adapter.createNextEvent(msg, in_msg, messageConfig)
@@ -209,7 +209,7 @@ class Test(unittest.TestCase):
         in_msg = json.loads(inp.read())
         out_msg = json.loads(out.read())
 
-        msg = self.cumulus_message_adapter.loadNestedEvent(in_msg, {})
+        msg = self.cumulus_message_adapter.loadNestedEvent(in_msg, None)
         messageConfig = msg.get('messageConfig');
         if 'messageConfig' in msg: del msg['messageConfig'];
         result = self.cumulus_message_adapter.createNextEvent(msg, in_msg, messageConfig)
@@ -222,7 +222,7 @@ class Test(unittest.TestCase):
         in_msg = json.loads(inp.read())
         out_msg = json.loads(out.read())
 
-        msg = self.cumulus_message_adapter.loadNestedEvent(in_msg, {})
+        msg = self.cumulus_message_adapter.loadNestedEvent(in_msg, None)
         messageConfig = msg.get('messageConfig');
         if 'messageConfig' in msg: del msg['messageConfig'];
         result = self.cumulus_message_adapter.createNextEvent(msg, in_msg, messageConfig)
@@ -243,7 +243,7 @@ class Test(unittest.TestCase):
         self.s3.Object(bucket_name, key_name).put(Body=json.dumps(datasource));
 
         remoteEvent = self.cumulus_message_adapter.loadRemoteEvent(in_msg);
-        msg = self.cumulus_message_adapter.loadNestedEvent(remoteEvent, {});
+        msg = self.cumulus_message_adapter.loadNestedEvent(remoteEvent, None);
         messageConfig = msg.get('messageConfig');
         if 'messageConfig' in msg: del msg['messageConfig'];
         result = self.cumulus_message_adapter.createNextEvent(msg, remoteEvent, messageConfig)
@@ -262,7 +262,7 @@ class Test(unittest.TestCase):
         in_msg = json.loads(inp.read())
         out_msg = json.loads(out.read())
 
-        msg = self.cumulus_message_adapter.loadNestedEvent(in_msg, {})
+        msg = self.cumulus_message_adapter.loadNestedEvent(in_msg, None)
         messageConfig = msg.get('messageConfig');
         if 'messageConfig' in msg: del msg['messageConfig'];
         result = self.cumulus_message_adapter.createNextEvent(msg, in_msg, messageConfig)
@@ -275,7 +275,7 @@ class Test(unittest.TestCase):
         in_msg = json.loads(inp.read())
         out_msg = json.loads(out.read())
 
-        msg = self.cumulus_message_adapter.loadNestedEvent(in_msg, {})
+        msg = self.cumulus_message_adapter.loadNestedEvent(in_msg, None)
         messageConfig = msg.get('messageConfig');
         if 'messageConfig' in msg: del msg['messageConfig'];
         result = self.cumulus_message_adapter.createNextEvent(msg, in_msg, messageConfig)
