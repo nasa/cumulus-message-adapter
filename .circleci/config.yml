@@ -50,6 +50,7 @@ jobs:
     <<: *container
     steps:
       - checkout
+      - add_ssh_keys
       - run:
           name: Push tag to github
           command: |
