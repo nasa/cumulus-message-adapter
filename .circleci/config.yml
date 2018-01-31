@@ -58,7 +58,10 @@ jobs:
             ssh-keyscan github.com >> ~/.ssh/known_hosts
             VERSION=`awk -F\' '{print $2,$4}' message_adapter/version.py`
             git tag $VERSION
-            git push origin $VERSION
+            PUSH_TAG=`git push origin $VERSION`
+            echo $PUSH_TAG
+            CREATE_RELEASE=`curl -X POST -u "cumulusgit:${CUMULUSGIT_GITHUB_API_ACCESS_TOKEN}" https://api.github.com/repos/cumulus-nasa/cumulus-message-adapter/releases --data '{"tag_name": "$VERSION"}'`
+            echo $CREATE_RELEASE
 
 workflows:
   version: 2
