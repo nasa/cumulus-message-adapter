@@ -61,9 +61,9 @@ jobs:
                 git tag $VERSION
                 git push origin $VERSION
                 DATA=$(echo '{"tag_name": "'$VERSION'"}' | tr -d '[:space:]')
-                curl -X POST -u "cumulusgit:$CUMULUSGIT_GITHUB_API_ACCESS_TOKEN" \
-                  https://api.github.com/repos/cumulus-nasa/cumulus-message-adapter/releases \
-                  --data $DATA
+                curl -X POST -u cumulusgit:$CUMULUSGIT_GITHUB_API_ACCESS_TOKEN \
+                    https://api.github.com/repos/cumulus-nasa/cumulus-message-adapter/releases \
+                    --data $DATA
             fi
             make clean
             make cumulus-message-adapter.zip
