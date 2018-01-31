@@ -1,1 +1,2 @@
 jsonpath-ng>=1.4.2
+boto3
