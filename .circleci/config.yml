@@ -63,14 +63,16 @@ jobs:
                 git push origin $VERSION
                 curl -X POST -u "cumulusgit:${CUMULUSGIT_GITHUB_API_ACCESS_TOKEN}" https://api.github.com/repos/cumulus-nasa/cumulus-message-adapter/releases --data '{"tag_name": "$VERSION"}'
             fi
-            make clean
-            make cumulus-message-adapter.zip
+            #make clean
+            #make cumulus-message-adapter.zip
+            UPLOAD_URL=$(curl https://api.github.com/repos/cumulus-nasa/cumulus-message-adapter/releases/tags/v0.0.2 | jq '.upload_url')
+            echo $UPLOAD_URL
 
 workflows:
   version: 2
   build_test_release:
     jobs:
-      - build
+      #- build
       - release:
           requires:
             - build
