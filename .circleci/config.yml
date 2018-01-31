@@ -68,10 +68,13 @@ jobs:
             make clean
             make cumulus-message-adapter.zip
             UPLOAD_URL_TEMPLATE=$(curl https://api.github.com/repos/cumulus-nasa/cumulus-message-adapter/releases/tags/v0.0.2 | jq '.upload_url')
+            echo $UPLOAD_URL_TEMPLATE
             UPLOAD_URL="${UPLOAD_URL_TEMPLATE//{?name,label\}/?name=cumulus-message-adapter.zip}"
+            echo $UPLOAD_URL
             curl -X POST -u "cumulusgit:${CUMULUSGIT_GITHUB_API_ACCESS_TOKEN}" \
               -H "Content-Type: application/zip" \
-              --data @./cumulus-message-adapter.zip $UPLOAD_URL
+              $UPLOAD_URL \
+              --data @./cumulus-message-adapter.zip
 
 workflows:
   version: 2
