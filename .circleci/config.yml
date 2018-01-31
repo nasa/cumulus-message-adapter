@@ -60,9 +60,8 @@ jobs:
             if [ !$(git tag -l "$VERSION") ]; then
                 git tag $VERSION
                 git push origin $VERSION
+                curl -X POST -u "cumulusgit:${CUMULUSGIT_GITHUB_API_ACCESS_TOKEN}" https://api.github.com/repos/cumulus-nasa/cumulus-message-adapter/releases --data '{"tag_name": "$VERSION"}'
             fi
-            CREATE_RELEASE=`curl -X POST -u "cumulusgit:${CUMULUSGIT_GITHUB_API_ACCESS_TOKEN}" https://api.github.com/repos/cumulus-nasa/cumulus-message-adapter/releases --data '{"tag_name": "$VERSION"}'`
-            echo $CREATE_RELEASE
 
 workflows:
   version: 2
