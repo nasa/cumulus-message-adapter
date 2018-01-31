@@ -61,19 +61,20 @@ jobs:
             then
                 git tag $VERSION
                 git push origin $VERSION
-                curl -X POST -u "cumulusgit:${CUMULUSGIT_GITHUB_API_ACCESS_TOKEN}" \
+                CREATE_RELEASE=`curl -X POST -u "cumulusgit:${CUMULUSGIT_GITHUB_API_ACCESS_TOKEN}" \
                   https://api.github.com/repos/cumulus-nasa/cumulus-message-adapter/releases \
-                  --data '{"tag_name": "$VERSION"}'
+                  --data '{"tag_name": "$VERSION"}'`
+                echo `CREATE_RELEASE: $CREATE_RELEASE`
             fi
             make clean
             make cumulus-message-adapter.zip
             UPLOAD_URL_TEMPLATE=$(curl https://api.github.com/repos/cumulus-nasa/cumulus-message-adapter/releases/tags/v0.0.2 | jq '.upload_url' --raw-output)
-            echo $UPLOAD_URL_TEMPLATE
             UPLOAD_URL=${UPLOAD_URL_TEMPLATE//{?name,label\}/?name=cumulus-message-adapter.zip}
-            curl -X POST -u "cumulusgit:${CUMULUSGIT_GITHUB_API_ACCESS_TOKEN}" \
+            CREATE_RELEASE_ASSET=`curl -X POST -u "cumulusgit:${CUMULUSGIT_GITHUB_API_ACCESS_TOKEN}" \
               -H "Content-Type: application/zip" \
               $UPLOAD_URL \
-              --data @./cumulus-message-adapter.zip
+              --data @./cumulus-message-adapter.zip`
+            echo `CREATE_RELEASE_ASSET: $CREATE_RELEASE_ASSET`
 
 workflows:
   version: 2
