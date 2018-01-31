@@ -74,8 +74,8 @@ workflows:
     jobs:
       #- build
       - release:
-          requires:
-            - build
+          # requires:
+          #   - build
           filters:
             branches:
               only: abarciauskas-bgse_ci-build-release
