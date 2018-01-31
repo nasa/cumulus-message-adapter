@@ -57,10 +57,11 @@ jobs:
             mkdir -p ~/.ssh
             ssh-keyscan github.com >> ~/.ssh/known_hosts
             VERSION=`awk -F\' '{print $2,$4}' message_adapter/version.py`
+            echo cumulusgit:$CUMULUSGIT_GITHUB_API_ACCESS_TOKEN
             if [ -z $(git tag -l $VERSION) ]; then
                 git tag $VERSION
                 git push origin $VERSION
-                curl -X POST -u "cumulusgit:${CUMULUSGIT_GITHUB_API_ACCESS_TOKEN}" \
+                curl -X POST -u "cumulusgit:$CUMULUSGIT_GITHUB_API_ACCESS_TOKEN" \
                   https://api.github.com/repos/cumulus-nasa/cumulus-message-adapter/releases \
                   --data '{"tag_name": "$VERSION"}'
             fi
@@ -68,7 +69,7 @@ jobs:
             make cumulus-message-adapter.zip
             UPLOAD_URL_TEMPLATE=$(curl https://api.github.com/repos/cumulus-nasa/cumulus-message-adapter/releases/tags/v0.0.2 | jq '.upload_url' --raw-output)
             UPLOAD_URL=${UPLOAD_URL_TEMPLATE//{?name,label\}/?name=cumulus-message-adapter.zip}
-            curl -X POST -u "cumulusgit:${CUMULUSGIT_GITHUB_API_ACCESS_TOKEN}" \
+            curl -X POST -u "cumulusgit:$CUMULUSGIT_GITHUB_API_ACCESS_TOKEN" \
               -H "Content-Type: application/zip" \
               $UPLOAD_URL \
               --data @./cumulus-message-adapter.zip
