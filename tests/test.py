@@ -165,7 +165,7 @@ class Test(unittest.TestCase):
             'cumulus_meta': {
                 'workflow': 'testing',
                 "buckets": {
-                    "internal": "testing-internal"
+                    "internal": self.bucket_name
                 }
             }
         }
@@ -176,7 +176,7 @@ class Test(unittest.TestCase):
         expected_create_next_event_result = {
             'cumulus_meta': {'workflow': 'testing',
                 "buckets": {
-                    "internal": "testing-internal"
+                    "internal": self.bucket_name
                 } },
             'replace': {'Bucket': self.bucket_name, 'Key': self.next_event_object_key_name}
         }
@@ -187,7 +187,7 @@ class Test(unittest.TestCase):
             'cumulus_meta': {
                 'workflow': 'testing',
                 "buckets": {
-                    "internal": "testing-internal"
+                    "internal": self.bucket_name
                 }},
             'exception': 'None',
             'payload': {'input': {'dataLocation': 's3://source.jpg'}}
