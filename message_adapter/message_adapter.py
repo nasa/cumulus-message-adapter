@@ -55,7 +55,7 @@ class message_adapter:
       elif step['type'] == 'TaskStateEntered': return step['stateEnteredEventDetails']['name'];
     raise LookupError('No task found for ' + arn);
 
-  def _message__getCurrentSfnTask(self, stateMachineArn, executionName, arn):
+  def __getCurrentSfnTask(self, stateMachineArn, executionName, arn):
     """
     * Given a state machine ARN, an execution name, and an optional Activity or Lambda ARN returns
     * the most recent task name started for the given ARN in that execution, or if no ARN is
@@ -131,8 +131,11 @@ class message_adapter:
     * @returns {*} The task's configuration
     """
     meta = event['cumulus_meta'];
-    arn = context['invokedFunctionArn'] if 'invokedFunctionArn' in context else context.get('activityArn');
-    taskName = self._message__getCurrentSfnTask(meta['state_machine'],meta['execution_name'],arn);
+    if 'invokedFunctionArn' in context:
+      arn = context['invokedFunctionArn'];
+    else:
+      arn = context.get('invoked_function_arn', context.get('activityArn'));
+    taskName = self.__getCurrentSfnTask(meta['state_machine'],meta['execution_name'],arn);
     return self.__getConfig(event, taskName) if taskName is not None else None;
 
   def __loadConfig(self, event, context):
@@ -294,7 +297,7 @@ class message_adapter:
       exec ("message" + dictPath + " = value");
     return message;
 
-  def _message__assignOutputs(self, handlerResponse, event, messageConfig):
+  def __assignOutputs(self, handlerResponse, event, messageConfig):
     """
     * Applies a task's return value to an output message as defined in config.cumulus_message
     *
@@ -354,7 +357,7 @@ class message_adapter:
     * @param {*} messageConfig The cumulus_message object configured for the task
     * @returns {*} the output message to be returned
     """
-    result = self._message__assignOutputs(handlerResponse, event, messageConfig);
+    result = self.__assignOutputs(handlerResponse, event, messageConfig);
     result['exception'] = 'None';
     if 'replace' in result: del result['replace'];
     return self.__storeRemoteResponse(result);
