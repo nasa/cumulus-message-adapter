@@ -10,20 +10,19 @@ references:
       - name: localstack
         image: localstack/localstack
     working_directory: ~/repo
+  # Download and cache dependencies
+  restore_cahce: &restore_cache
+    keys:
+    - v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
+    # fallback to using the latest cache if no exact match is found
+    - v1-dependencies-
 
 jobs:
   build:
     <<: *container
     steps:
       - checkout
-
-      # Download and cache dependencies
-      - restore_cache:
-          keys:
-          - v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
-          # fallback to using the latest cache if no exact match is found
-          - v1-dependencies-
-
+      - *restore_cache
       - run:
           name: install dependencies
           command: |
@@ -32,12 +31,10 @@ jobs:
             . venv/bin/activate
             pip install -r requirements.txt
             pip install -r requirements-dev.txt
-
       - save_cache:
           paths:
             - ./venv
           key: v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
-        
       - run:
           name: run tests
           environment:
@@ -45,13 +42,14 @@ jobs:
           command: |
             . venv/bin/activate
             # CUMULUS_ENV=testing nosetests -v -s
+
   release:
     <<: *container
     steps:
+      - checkout
       - run:
           name: Push tag to github
           command: |
-            ls
             mkdir -p ~/.ssh
             ssh-keyscan github.com >> ~/.ssh/known_hosts
             VERSION=`awk -F\' '{print $2,$4}' message_adapter/version.py`
