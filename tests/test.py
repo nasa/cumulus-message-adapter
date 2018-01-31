@@ -12,7 +12,7 @@ class Test(unittest.TestCase):
     """ Test class """
 
     s3_object = {'input': ':blue_whale:'}
-    bucket_name = 'testing-bucket'
+    bucket_name = 'testing-internal'
     key_name = 'blue_whale-event.json'
     event_with_replace = {'replace': {'Bucket': bucket_name, 'Key': key_name}}
     event_without_replace = {'input': ':baby_whale:'}
@@ -162,11 +162,11 @@ class Test(unittest.TestCase):
         """
 
         event_with_ingest = {
-            'ingest_meta': {
-                'message_bucket': self.bucket_name
-            },
             'cumulus_meta': {
-                'workflow': 'testing'
+                'workflow': 'testing',
+                "buckets": {
+                    "internal": "testing-internal"
+                }
             }
         }
 
@@ -174,15 +174,21 @@ class Test(unittest.TestCase):
         create_next_event_result = self.cumulus_message_adapter.createNextEvent(
             self.nested_response, event_with_ingest, None)
         expected_create_next_event_result = {
-            'cumulus_meta': {'workflow': 'testing'},
+            'cumulus_meta': {'workflow': 'testing',
+                "buckets": {
+                    "internal": "testing-internal"
+                } },
             'replace': {'Bucket': self.bucket_name, 'Key': self.next_event_object_key_name}
         }
         remote_event = self.s3.Object(self.bucket_name, self.next_event_object_key_name).get()
         remote_event_object = json.loads(
             remote_event['Body'].read().decode('utf-8'))
         expected_remote_event_object = {
-            'cumulus_meta': {'workflow': 'testing'},
-            'ingest_meta': {'message_bucket': 'testing-bucket'},
+            'cumulus_meta': {
+                'workflow': 'testing',
+                "buckets": {
+                    "internal": "testing-internal"
+                }},
             'exception': 'None',
             'payload': {'input': {'dataLocation': 's3://source.jpg'}}
         }
