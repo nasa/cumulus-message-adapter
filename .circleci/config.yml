@@ -60,13 +60,14 @@ jobs:
             if [ -z $(git ls-remote --tags origin | grep $VERSION) ]; then
                 git tag $VERSION
                 git push origin $VERSION
+                DATA=$(echo '{"tag_name": "'$VERSION'"}' | tr -d '[:space:]')
                 curl -X POST -u "cumulusgit:$CUMULUSGIT_GITHUB_API_ACCESS_TOKEN" \
                   https://api.github.com/repos/cumulus-nasa/cumulus-message-adapter/releases \
-                  --data '{"tag_name": "$VERSION"}'
+                  --data $DATA
             fi
             make clean
             make cumulus-message-adapter.zip
-            UPLOAD_URL_TEMPLATE=$(curl https://api.github.com/repos/cumulus-nasa/cumulus-message-adapter/releases/tags/v0.0.2 | jq '.upload_url' --raw-output)
+            UPLOAD_URL_TEMPLATE=$(curl https://api.github.com/repos/cumulus-nasa/cumulus-message-adapter/releases/tags/$VERSION | jq '.upload_url' --raw-output)
             UPLOAD_URL=${UPLOAD_URL_TEMPLATE//{?name,label\}/?name=cumulus-message-adapter.zip}
             curl -X POST -u "cumulusgit:$CUMULUSGIT_GITHUB_API_ACCESS_TOKEN" \
               -H "Content-Type: application/zip" \
