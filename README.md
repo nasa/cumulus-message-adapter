@@ -31,10 +31,11 @@ $ CUMULUS_ENV=testing nosetests -v -s
 
 ### Contributing
 
-If changes are made to the codebase, a new zip archive should be created to replace `cumulus-message-adapter.zip` for libraries that require it:
+If changes are made to the codebase, you can create the cumulus-message-adapter zip archive for testing libraries that require it:
 
 ```bash
-$ zip -r cumulus-message-adapter.zip .
+$ make clean
+$ make cumulus-message-adapter.zip
 ```
 
 Then you can run some integration tests:
