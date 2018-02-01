@@ -53,6 +53,10 @@ jobs:
       - add_ssh_keys
       - run:
           name: Tag, release, deploy release asset
+          environment:
+            GIT_PATH: cumulus-nasa/cumulus-message-adapter
+            GIT_API_URL: https://api.github.com/repos
+            ZIPFILENAME: cumulus-message-adapter.zip
           command: |
             mkdir -p ~/.ssh
             ssh-keyscan github.com >> ~/.ssh/known_hosts
@@ -66,18 +70,18 @@ jobs:
               CREATE_RELEASE_REQUEST_BODY=$(echo '{"tag_name": "'$VERSION'", "name": "'$VERSION'"}' | tr -d '[:space:]')
               echo "Creating release for tag ${VERSION}"
               curl -X POST -u cumulusgit:$CUMULUSGIT_GITHUB_API_ACCESS_TOKEN \
-                  https://api.github.com/repos/cumulus-nasa/cumulus-message-adapter/releases \
+                  $GIT_API_URL/$GIT_PATH/releases \
                   --data $CREATE_RELEASE_REQUEST_BODY | jq .
-              echo "Building cumulus-message-adapter.zip"
+              echo "Building ${ZIPFILENAME}"
               make clean
-              make cumulus-message-adapter.zip
-              UPLOAD_URL_TEMPLATE=$(curl https://api.github.com/repos/cumulus-nasa/cumulus-message-adapter/releases/tags/$VERSION | jq '.upload_url' --raw-output)
-              UPLOAD_URL=${UPLOAD_URL_TEMPLATE//{?name,label\}/?name=cumulus-message-adapter.zip}
+              make $ZIPFILENAME
+              UPLOAD_URL_TEMPLATE=$(curl $GIT_API_URL/$GIT_PATH/releases/tags/$VERSION | jq '.upload_url' --raw-output)
+              UPLOAD_URL=${UPLOAD_URL_TEMPLATE//{?name,label\}/?name=$ZIPFILENAME}
               echo "Uploading release to ${UPLOAD_URL}"
               curl -X POST -u cumulusgit:$CUMULUSGIT_GITHUB_API_ACCESS_TOKEN \
                 -H "Content-Type: application/zip" \
                 $UPLOAD_URL \
-                --data-binary @./cumulus-message-adapter.zip | jq .
+                --data-binary @./$ZIPFILENAME | jq .
             fi
 
 workflows:
@@ -90,4 +94,4 @@ workflows:
             - build
           filters:
             branches:
-              only: master
+              only: abarciauskas-bgse_ci-build-release
