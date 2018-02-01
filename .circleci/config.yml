@@ -90,4 +90,4 @@ workflows:
             - build
           filters:
             branches:
-              only: abarciauskas-bgse_ci-build-release
+              only: master
