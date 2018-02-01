@@ -10,7 +10,7 @@ Read more about how the `cumulus-message-adapter` works in the [CONTRACT.md](./C
 
 [CircleCI](https://circleci.com/gh/cumulus-nasa/cumulus-message-adapter) manages releases and release assets.
 
-Whenever CircleCI passes on the master branch of cumulus-message-adapter and `message_adapter/version.py` has a new version, CircleCI will:
+Whenever CircleCI passes on the master branch of cumulus-message-adapter and `message_adapter/version.py` has been updated with a version that doesn't match an existing tag, CircleCI will:
 
 * Create a new tag with `tag_name` of the string in `message_adapter/version.py`
 * Create a new release off the new new tag, with name equal to `tag_name` (equal to version).
