@@ -3,3 +3,4 @@
 *.egg-info
 .vscode
 cumulus-message-adapter.zip
+/dist/
