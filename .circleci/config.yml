@@ -3,25 +3,32 @@
 # Check https://circleci.com/docs/2.0/language-python/ for more details
 #
 version: 2
-jobs:
-  build:
+references:
+  container: &container
     docker:
       - image: circleci/python:2.7.13
       - name: localstack
         image: localstack/localstack
-
     working_directory: ~/repo
+  # Download and cache dependencies
+  restore_cache: &restore_cache
+    restore_cache:
+      keys:
+        - v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
+        # fallback to using the latest cache if no exact match is found
+        - v1-dependencies-
+  save_cache: &save_cache
+    save_cache:
+      paths:
+        - ./venv
+      key: v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
 
+jobs:
+  build:
+    <<: *container
     steps:
       - checkout
-
-      # Download and cache dependencies
-      - restore_cache:
-          keys:
-          - v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
-          # fallback to using the latest cache if no exact match is found
-          - v1-dependencies-
-
+      - *restore_cache
       - run:
           name: install dependencies
           command: |
@@ -30,12 +37,7 @@ jobs:
             . venv/bin/activate
             pip install -r requirements.txt
             pip install -r requirements-dev.txt
-
-      - save_cache:
-          paths:
-            - ./venv
-          key: v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
-        
+      - *save_cache
       - run:
           name: run tests
           environment:
@@ -44,4 +46,52 @@ jobs:
             . venv/bin/activate
             CUMULUS_ENV=testing nosetests -v -s
 
-          
+  release:
+    <<: *container
+    steps:
+      - checkout
+      - add_ssh_keys
+      - run:
+          name: Tag, release, deploy release asset
+          environment:
+            GIT_PATH: cumulus-nasa/cumulus-message-adapter
+            GIT_API_URL: https://api.github.com/repos
+            ZIPFILENAME: cumulus-message-adapter.zip
+          command: |
+            mkdir -p ~/.ssh
+            ssh-keyscan github.com >> ~/.ssh/known_hosts
+            VERSION=`awk -F\' '{print $2,$4}' message_adapter/version.py`
+            # Only tag and release if the version doesn't already exist
+            if [ -z $(git ls-remote --tags origin | grep $VERSION) ]; then
+              git tag $VERSION
+              echo "Pushing tag ${VERSION}"
+              git push origin $VERSION
+              # strip white space from create release request body
+              CREATE_RELEASE_REQUEST_BODY=$(echo '{"tag_name": "'$VERSION'", "name": "'$VERSION'"}' | tr -d '[:space:]')
+              echo "Creating release for tag ${VERSION}"
+              curl -X POST -u cumulusgit:$CUMULUSGIT_GITHUB_API_ACCESS_TOKEN \
+                  $GIT_API_URL/$GIT_PATH/releases \
+                  --data $CREATE_RELEASE_REQUEST_BODY | jq .
+              echo "Building ${ZIPFILENAME}"
+              make clean
+              make $ZIPFILENAME
+              UPLOAD_URL_TEMPLATE=$(curl $GIT_API_URL/$GIT_PATH/releases/tags/$VERSION | jq '.upload_url' --raw-output)
+              UPLOAD_URL=${UPLOAD_URL_TEMPLATE//{?name,label\}/?name=$ZIPFILENAME}
+              echo "Uploading release to ${UPLOAD_URL}"
+              curl -X POST -u cumulusgit:$CUMULUSGIT_GITHUB_API_ACCESS_TOKEN \
+                -H "Content-Type: application/zip" \
+                $UPLOAD_URL \
+                --data-binary @./$ZIPFILENAME | jq .
+            fi
+
+workflows:
+  version: 2
+  build_test_release:
+    jobs:
+      - build
+      - release:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
