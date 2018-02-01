@@ -21,7 +21,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 __version__ = imp.load_source('version', 'message_adapter/version.py').__version__
 
 setup(
-    name='cumulus-message-adpater',  # Required
+    name='cumulus-message-adapter',  # Required
 
     # Versions should comply with PEP 440:
     # https://www.python.org/dev/peps/pep-0440/
@@ -32,7 +32,7 @@ setup(
     # https://packaging.python.org/specifications/core-metadata/#summary
     description='A python implementation of cumulus message adapter',  # Required
     long_description=long_description,  # Optional
-    url='https://github.com/cumulus-nasa/cumulus-message-adpater',  # Optional
+    url='https://github.com/cumulus-nasa/cumulus-message-adapter',  # Optional
     author='Cumulus Authors',  # Optional
     author_email='info@developmentseed.org',  # Optional
     classifiers=[  # Optional

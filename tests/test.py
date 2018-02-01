@@ -91,13 +91,13 @@ class Test(unittest.TestCase):
     # assignOutputs tests
     def test_result_payload_without_config(self):
         """ Test nestedResponse is returned when no config argument is passed """
-        result = self.cumulus_message_adapter._message__assignOutputs(self.nested_response, {}, None)
+        result = self.cumulus_message_adapter._message_adapter__assignOutputs(self.nested_response, {}, None)
         assert result['payload'] == self.nested_response
 
     def test_result_payload_without_config_outputs(self):
         """ Test nestedResponse is returned when config has no outputs key/value """
         message_config_without_outputs = {}
-        result = self.cumulus_message_adapter._message__assignOutputs(
+        result = self.cumulus_message_adapter._message_adapter__assignOutputs(
             self.nested_response, {}, message_config_without_outputs)
         assert result['payload'] == self.nested_response
 
@@ -111,7 +111,7 @@ class Test(unittest.TestCase):
             }]
         }
 
-        result = self.cumulus_message_adapter._message__assignOutputs(
+        result = self.cumulus_message_adapter._message_adapter__assignOutputs(
             self.nested_response, {}, message_config_with_simple_outputs)
         assert result['payload'] == 's3://source.jpg'
 
@@ -127,7 +127,7 @@ class Test(unittest.TestCase):
             }]
         }
 
-        result = self.cumulus_message_adapter._message__assignOutputs(
+        result = self.cumulus_message_adapter._message_adapter__assignOutputs(
             self.nested_response, {}, message_config_with_nested_outputs)
         assert result['payload'] == {'dataLocation': 's3://source.jpg'}
 
@@ -254,7 +254,7 @@ class Test(unittest.TestCase):
 
         assert result == out_msg 
 
-    @patch.object(cumulus_message_adapter, '_message__getCurrentSfnTask', return_value="Example")
+    @patch.object(cumulus_message_adapter, '_message_adapter__getCurrentSfnTask', return_value="Example")
     def test_sfn(self, getCurrentSfnTask_function):
         """ test sfn.input.json """
         inp = open(os.path.join(self.test_folder, 'sfn.input.json'))
