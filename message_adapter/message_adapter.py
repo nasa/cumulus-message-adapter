@@ -333,7 +333,7 @@ class message_adapter:
     if (roughDataSize < self.MAX_NON_S3_PAYLOAD_SIZE): return event;
 
     s3 = aws.s3();
-    s3Bucket = event['ingest_meta']['message_bucket']
+    s3Bucket = event['cumulus_meta']['buckets']['internal']
     s3Key = ('/').join(['events', str(uuid.uuid4())])
     s3Params = {
       'Expires': datetime.utcnow() + timedelta(days=7), # Expire in a week
