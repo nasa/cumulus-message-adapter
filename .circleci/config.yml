@@ -44,7 +44,7 @@ jobs:
             LOCALSTACK_HOST: localstack
           command: |
             . venv/bin/activate
-            # CUMULUS_ENV=testing nosetests -v -s
+            CUMULUS_ENV=testing nosetests -v -s
 
   release:
     <<: *container
@@ -78,10 +78,10 @@ workflows:
   version: 2
   build_test_release:
     jobs:
-      #- build
+      - build
       - release:
-          # requires:
-          #   - build
+          requires:
+            - build
           filters:
             branches:
               only: abarciauskas-bgse_ci-build-release
