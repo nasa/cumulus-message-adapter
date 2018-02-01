@@ -13,7 +13,7 @@ Read more about how the `cumulus-message-adapter` works in the [CONTRACT.md](./C
 Whenever CircleCI passes on the master branch of cumulus-message-adapter and `message_adapter/version.py` has been updated with a version that doesn't match an existing tag, CircleCI will:
 
 * Create a new tag with `tag_name` of the string in `message_adapter/version.py`
-* Create a new release off the new new tag, with name equal to `tag_name` (equal to version).
+* Create a new release using the new tag, with a name equal to `tag_name` (equal to version).
 * Build a `cumulus-message-adapter.zip` file and attach it as a release asset to the newly created release. The zip file is created using the [`Makefile`]('./Makefile') in the root of this repository.
 
 These steps are fully detailed in the [`.circleci/config.yml`](./.circleci/config.yml) file.
