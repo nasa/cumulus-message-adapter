@@ -2,7 +2,7 @@
 
 [![CircleCI](https://circleci.com/gh/cumulus-nasa/cumulus-message-adapter.svg?style=svg)](https://circleci.com/gh/cumulus-nasa/cumulus-message-adapter)
 
-`cumulus-message-adapter` is a command-line interface for preparing and outputting Cumulus Messages for Cumulus Tasks. `cumulus-message-adapter` supports Cumulus developers integrate a task into a Cumulus Workflow.
+`cumulus-message-adapter` is a command-line interface for preparing and outputting Cumulus Messages for Cumulus Tasks. `cumulus-message-adapter` helps Cumulus developers integrate a task into a Cumulus Workflow.
 
 Read more about how the `cumulus-message-adapter` works in the [CONTRACT.md](./CONTRACT.md).
 
