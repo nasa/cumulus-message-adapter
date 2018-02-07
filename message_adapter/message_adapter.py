@@ -3,7 +3,7 @@ import re
 from datetime import datetime, timedelta
 import uuid
 from jsonpath_ng import parse
-import message_adapter.aws as aws
+from message_adapter import aws
 
 
 class message_adapter:
