@@ -3,7 +3,7 @@ import re
 from datetime import datetime, timedelta
 import uuid
 from jsonpath_ng import parse
-from message_adapter import aws
+from .aws import stepFn, s3
 
 
 class message_adapter:
@@ -70,7 +70,7 @@ class message_adapter:
         * @param {string} arn An ARN to an Activity or Lambda to find. See "IMPORTANT!"
         * @returns {string} The name of the task being run
         """
-        sfn = aws.stepFn()
+        sfn = stepFn()
         executionArn = self.__getSfnExecutionArnByName(stateMachineArn, executionName)
         executionHistory = sfn.get_execution_history(
             executionArn=executionArn,
@@ -93,8 +93,8 @@ class message_adapter:
         * @returns {*} the full event data
         """
         if ('replace' in event):
-            s3 = aws.s3()
-            data = s3.Object(event['replace']['Bucket'], event['replace']['Key']).get()
+            _s3 = s3()
+            data = _s3.Object(event['replace']['Bucket'], event['replace']['Key']).get()
             if (data is not None):
                 return json.loads(data['Body'].read().decode('utf-8'))
         return event
@@ -334,7 +334,7 @@ class message_adapter:
         if (roughDataSize < self.MAX_NON_S3_PAYLOAD_SIZE):
             return event
 
-        s3 = aws.s3()
+        _s3 = s3()
         s3Bucket = event['cumulus_meta']['buckets']['internal']
         s3Key = ('/').join(['events', str(uuid.uuid4())])
         s3Params = {
@@ -343,7 +343,7 @@ class message_adapter:
         }
         s3Location = {'Bucket': s3Bucket, 'Key': s3Key}
 
-        s3.Object(s3Bucket, s3Key).put(**s3Params)
+        _s3.Object(s3Bucket, s3Key).put(**s3Params)
 
         return {
             'cumulus_meta': event['cumulus_meta'],
