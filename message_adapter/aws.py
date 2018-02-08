@@ -2,12 +2,14 @@
 import os
 import boto3
 
+
 def localhost_s3_url():
     if 'LOCALSTACK_HOST' in os.environ:
         localhost_s3_url = 'http://%s:4572' % os.environ['LOCALSTACK_HOST']
     else:
         localhost_s3_url = 'http://localhost:4572'
     return localhost_s3_url
+
 
 def s3():
     """ Determines the endpoint for the S3 service """
@@ -22,6 +24,7 @@ def s3():
             verify=False
         )
     return boto3.resource('s3')
+
 
 # Localstack doesn't support step functions. This is an interim solution so we
 # don't make requests to the AWS API in testing.
