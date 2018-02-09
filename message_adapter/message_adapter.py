@@ -85,7 +85,7 @@ class message_adapter:
 
     # Events stored externally
 
-    def loadRemoteEvent(self, event):
+    def loadRemoteEvent(self, event, schemas=None):
         """
         * Looks at a Cumulus message. If the message has part of its data stored remotely in
         * S3, fetches that data and returns it, otherwise it just returns the full message
@@ -252,7 +252,7 @@ class message_adapter:
             return self.__resolvePathStr(event, inputPath)
         return event.get('payload')
 
-    def loadNestedEvent(self, event, context):
+    def loadNestedEvent(self, event, context, schemas=None):
         """
         * Interprets an incoming event as a Cumulus workflow message
         *
@@ -350,7 +350,7 @@ class message_adapter:
             'replace': s3Location
         }
 
-    def createNextEvent(self, handlerResponse, event, messageConfig):
+    def createNextEvent(self, handlerResponse, event, messageConfig, schemas=None):
         """
         * Creates the output message returned by a task
         *
