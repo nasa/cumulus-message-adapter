@@ -3,6 +3,7 @@ import re
 from datetime import datetime, timedelta
 import uuid
 from jsonpath_ng import parse
+from jsonschema import validate
 from .aws import stepFn, s3
 
 
@@ -154,6 +155,13 @@ class message_adapter:
 
         raise LookupError('Unknown event source: ' + source)
 
+    def __validate_json(self, document, schema_filepath):
+        """
+        check that json is valid based on a schema
+        """
+        schema = json.load(open(schema_filepath))
+        return validate(document, schema)
+
     # Config templating
     def __resolvePathStr(self, event, str):
         """
@@ -263,6 +271,10 @@ class message_adapter:
         finalConfig = self.__resolveConfigTemplates(event, config)
         finalPayload = self.__resolveInput(event, config)
         response = {'input': finalPayload}
+        if schemas and schemas.get('input'):
+            self.__validate_json(finalPayload, schemas['input'])
+        if schemas and schemas.get('config'):
+            self.__validate_json(finalConfig, schemas['config'])
         if finalConfig is not None:
             response['config'] = finalConfig
         if 'cumulus_message' in config:
@@ -359,6 +371,8 @@ class message_adapter:
         * @param {*} messageConfig The cumulus_message object configured for the task
         * @returns {*} the output message to be returned
         """
+        if schemas and schemas.get('output'):
+            self.__validate_json(handlerResponse, schemas['output'])
         result = self.__assignOutputs(handlerResponse, event, messageConfig)
         result['exception'] = 'None'
         if 'replace' in result:

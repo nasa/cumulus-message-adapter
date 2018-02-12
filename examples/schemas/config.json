@@ -1,0 +1,7 @@
+{
+  "properties": {
+    "boolean_option": {
+      "type": "boolean"
+    }
+  }
+}
