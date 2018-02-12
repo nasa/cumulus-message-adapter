@@ -294,9 +294,10 @@ class Test(unittest.TestCase):
         inp = open(os.path.join(self.test_folder, 'templates.input.json'))
         schema_filepath = os.path.join(self.schemas_folder, 'input.json')
         schemas = { "input": schema_filepath }
+        adapter = message_adapter.message_adapter(schemas)
         in_msg = json.loads(inp.read())
         in_msg["payload"]= { "hello": "world" }
-        msg = self.cumulus_message_adapter.loadNestedEvent(in_msg, {}, schemas)
+        msg = adapter.loadNestedEvent(in_msg, {})
         assert msg["input"]["hello"] == "world"
 
     def test_failing_input_jsonschema(self):
@@ -304,10 +305,11 @@ class Test(unittest.TestCase):
         inp = open(os.path.join(self.test_folder, 'templates.input.json'))
         schema_filepath = os.path.join(self.schemas_folder, 'input.json')
         schemas = { "input": schema_filepath }
+        adapter = message_adapter.message_adapter(schemas)
         in_msg = json.loads(inp.read())
         in_msg["payload"]= { "hello": 1 }
         try:
-            msg = self.cumulus_message_adapter.loadNestedEvent(in_msg, {}, schemas)
+            msg = adapter.loadNestedEvent(in_msg, {})
         except ValidationError as e:
             assert e.message == "1 is not of type u'string'"
             pass
@@ -317,10 +319,11 @@ class Test(unittest.TestCase):
         inp = open(os.path.join(self.test_folder, 'templates.input.json'))
         schema_filepath = os.path.join(self.schemas_folder, 'config.json')
         schemas = { "config": schema_filepath }
+        adapter = message_adapter.message_adapter(schemas)
         in_msg = json.loads(inp.read())
         in_msg["workflow_config"]["Example"]["boolean_option"] = '{{$.meta.boolean_option}}'
         in_msg["meta"]["boolean_option"] = True
-        msg = self.cumulus_message_adapter.loadNestedEvent(in_msg, {}, schemas)
+        msg = adapter.loadNestedEvent(in_msg, {})
         assert msg["config"]["boolean_option"] == True
 
     def test_failing_config_jsonschema(self):
@@ -328,11 +331,12 @@ class Test(unittest.TestCase):
         inp = open(os.path.join(self.test_folder, 'templates.input.json'))
         schema_filepath = os.path.join(self.schemas_folder, 'config.json')
         schemas = { "config": schema_filepath }
+        adapter = message_adapter.message_adapter(schemas)
         in_msg = json.loads(inp.read())
         in_msg["workflow_config"]["Example"]["boolean_option"] = '{{$.meta.boolean_option}}'
         in_msg["meta"]["boolean_option"] = "notgoingtowork"
         try:
-            msg = self.cumulus_message_adapter.loadNestedEvent(in_msg, {}, schemas)
+            msg = adapter.loadNestedEvent(in_msg, {})
         except ValidationError as e:
             assert e.message == "'notgoingtowork' is not of type u'boolean'"
             pass
@@ -342,11 +346,12 @@ class Test(unittest.TestCase):
         inp = open(os.path.join(self.test_folder, 'templates.input.json'))
         schema_filepath = os.path.join(self.schemas_folder, 'output.json')
         schemas = { "output": schema_filepath }
+        adapter = message_adapter.message_adapter(schemas)
         in_msg = json.loads(inp.read())
-        msg = self.cumulus_message_adapter.loadNestedEvent(in_msg, {}, schemas)
+        msg = adapter.loadNestedEvent(in_msg, {})
         messageConfig = msg.get('messageConfig');
         handler_response = { "goodbye": "world" }
-        result = self.cumulus_message_adapter.createNextEvent(handler_response, in_msg, messageConfig, schemas)
+        result = adapter.createNextEvent(handler_response, in_msg, messageConfig)
         assert result["payload"]["goodbye"] == "world"
     
     def test_failing_output_jsonschema(self):
@@ -354,12 +359,13 @@ class Test(unittest.TestCase):
         inp = open(os.path.join(self.test_folder, 'templates.input.json'))
         schema_filepath = os.path.join(self.schemas_folder, 'output.json')
         schemas = { "output": schema_filepath }
+        adapter = message_adapter.message_adapter(schemas)
         in_msg = json.loads(inp.read())
-        msg = self.cumulus_message_adapter.loadNestedEvent(in_msg, {}, schemas)
+        msg = adapter.loadNestedEvent(in_msg, {})
         messageConfig = msg.get('messageConfig');
         handler_response = { "goodbye": 1 }
         try:
-            result = self.cumulus_message_adapter.createNextEvent(handler_response, in_msg, messageConfig, schemas)
+            result = adapter.createNextEvent(handler_response, in_msg, messageConfig,)
         except ValidationError as e:
             assert e.message == "1 is not of type u'string'"
             pass

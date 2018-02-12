@@ -14,6 +14,9 @@ class message_adapter:
     # Maximum message payload size that will NOT be stored in S3. Anything bigger will be.
     MAX_NON_S3_PAYLOAD_SIZE = 10000
 
+    def __init__(self, schemas=None):
+        self.schemas = schemas
+
     def __getSfnExecutionArnByName(self, stateMachineArn, executionName):
         """
         * Given a state machine arn and execution name, returns the execution's ARN
@@ -86,7 +89,7 @@ class message_adapter:
 
     # Events stored externally
 
-    def loadRemoteEvent(self, event, schemas=None):
+    def loadRemoteEvent(self, event):
         """
         * Looks at a Cumulus message. If the message has part of its data stored remotely in
         * S3, fetches that data and returns it, otherwise it just returns the full message
@@ -260,13 +263,14 @@ class message_adapter:
             return self.__resolvePathStr(event, inputPath)
         return event.get('payload')
 
-    def loadNestedEvent(self, event, context, schemas=None):
+    def loadNestedEvent(self, event, context):
         """
         * Interprets an incoming event as a Cumulus workflow message
         *
         * @param {*} event The input message sent to the Lambda
         * @returns {*} message that is ready to pass to an inner task
         """
+        schemas = self.schemas
         config = self.__loadConfig(event, context)
         finalConfig = self.__resolveConfigTemplates(event, config)
         finalPayload = self.__resolveInput(event, config)
@@ -362,7 +366,7 @@ class message_adapter:
             'replace': s3Location
         }
 
-    def createNextEvent(self, handlerResponse, event, messageConfig, schemas=None):
+    def createNextEvent(self, handlerResponse, event, messageConfig):
         """
         * Creates the output message returned by a task
         *
@@ -371,6 +375,7 @@ class message_adapter:
         * @param {*} messageConfig The cumulus_message object configured for the task
         * @returns {*} the output message to be returned
         """
+        schemas = self.schemas
         if schemas and schemas.get('output'):
             self.__validate_json(handlerResponse, schemas['output'])
         result = self.__assignOutputs(handlerResponse, event, messageConfig)
