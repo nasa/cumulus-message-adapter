@@ -311,7 +311,7 @@ class Test(unittest.TestCase):
         try:
             msg = adapter.loadNestedEvent(in_msg, {})
         except ValidationError as e:
-            assert e.message == "1 is not of type u'string'"
+            assert e.message == "input schema: 1 is not of type u'string'"
             pass
 
     def test_config_jsonschema(self):
@@ -338,7 +338,7 @@ class Test(unittest.TestCase):
         try:
             msg = adapter.loadNestedEvent(in_msg, {})
         except ValidationError as e:
-            assert e.message == "'notgoingtowork' is not of type u'boolean'"
+            assert e.message == "config schema: 'notgoingtowork' is not of type u'boolean'"
             pass
 
     def test_output_jsonschema(self):
@@ -367,6 +367,6 @@ class Test(unittest.TestCase):
         try:
             result = adapter.createNextEvent(handler_response, in_msg, messageConfig,)
         except ValidationError as e:
-            assert e.message == "1 is not of type u'string'"
+            assert e.message == "output schema: 1 is not of type u'string'"
             pass
     

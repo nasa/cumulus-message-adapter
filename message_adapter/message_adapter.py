@@ -158,12 +158,19 @@ class message_adapter:
 
         raise LookupError('Unknown event source: ' + source)
 
-    def __validate_json(self, document, schema_filepath):
+    def __validate_json(self, document, schema_type):
         """
         check that json is valid based on a schema
         """
-        schema = json.load(open(schema_filepath))
-        return validate(document, schema)
+        schemas = self.schemas
+        if schemas and schemas.get(schema_type):
+            schema_filepath = schemas[schema_type]
+            schema = json.load(open(schema_filepath))
+            try:
+                validate(document, schema)
+            except Exception as e:
+                e.message = '{} schema: {}'.format(schema_type, e.message)
+                raise e
 
     # Config templating
     def __resolvePathStr(self, event, str):
@@ -270,15 +277,12 @@ class message_adapter:
         * @param {*} event The input message sent to the Lambda
         * @returns {*} message that is ready to pass to an inner task
         """
-        schemas = self.schemas
         config = self.__loadConfig(event, context)
         finalConfig = self.__resolveConfigTemplates(event, config)
         finalPayload = self.__resolveInput(event, config)
         response = {'input': finalPayload}
-        if schemas and schemas.get('input'):
-            self.__validate_json(finalPayload, schemas['input'])
-        if schemas and schemas.get('config'):
-            self.__validate_json(finalConfig, schemas['config'])
+        self.__validate_json(finalPayload, 'input')
+        self.__validate_json(finalConfig, 'config')
         if finalConfig is not None:
             response['config'] = finalConfig
         if 'cumulus_message' in config:
@@ -375,9 +379,7 @@ class message_adapter:
         * @param {*} messageConfig The cumulus_message object configured for the task
         * @returns {*} the output message to be returned
         """
-        schemas = self.schemas
-        if schemas and schemas.get('output'):
-            self.__validate_json(handlerResponse, schemas['output'])
+        self.__validate_json(handlerResponse, 'output')
         result = self.__assignOutputs(handlerResponse, event, messageConfig)
         result['exception'] = 'None'
         if 'replace' in result:
