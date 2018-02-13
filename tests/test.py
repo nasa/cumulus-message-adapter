@@ -164,9 +164,7 @@ class Test(unittest.TestCase):
         event_with_ingest = {
             'cumulus_meta': {
                 'workflow': 'testing',
-                "buckets": {
-                    "internal": self.bucket_name
-                }
+                "system_bucket": self.bucket_name
             }
         }
 
@@ -174,10 +172,10 @@ class Test(unittest.TestCase):
         create_next_event_result = self.cumulus_message_adapter.createNextEvent(
             self.nested_response, event_with_ingest, None)
         expected_create_next_event_result = {
-            'cumulus_meta': {'workflow': 'testing',
-                "buckets": {
-                    "internal": self.bucket_name
-                } },
+            'cumulus_meta': {
+                'workflow': 'testing',
+                'system_bucket': self.bucket_name
+            },
             'replace': {'Bucket': self.bucket_name, 'Key': self.next_event_object_key_name}
         }
         remote_event = self.s3.Object(self.bucket_name, self.next_event_object_key_name).get()
@@ -186,9 +184,8 @@ class Test(unittest.TestCase):
         expected_remote_event_object = {
             'cumulus_meta': {
                 'workflow': 'testing',
-                "buckets": {
-                    "internal": self.bucket_name
-                }},
+                'system_bucket': self.bucket_name
+            },
             'exception': 'None',
             'payload': {'input': {'dataLocation': 's3://source.jpg'}}
         }
