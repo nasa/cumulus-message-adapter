@@ -335,7 +335,7 @@ class message_adapter:
             return event
 
         _s3 = s3()
-        s3Bucket = event['cumulus_meta']['buckets']['internal']
+        s3Bucket = event['cumulus_meta']['system_bucket']
         s3Key = ('/').join(['events', str(uuid.uuid4())])
         s3Params = {
             'Expires': datetime.utcnow() + timedelta(days=7),  # Expire in a week
