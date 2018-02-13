@@ -39,7 +39,7 @@ These functions should be run in the order outlined above. The output of `loadRe
 
 ## Cumulus Message schemas
 
-Cumulus Messages come in 2 flavors: The full **Cumulus Message** and the **Cumulus Remote Message**. The Cumulus Remote Message points to a full Cumulus Message stored in S3 because of size limitations.
+Cumulus Messages come in 2 flavors: The full **Cumulus Message** and the **Cumulus Remote Message**. Because of the potential size of a Cumulus message, mainly the `"payload"` field, if the message size is greater than 10000 bytes, the full message will be stored to S3 Bucket. The Cumulus Remote Message points to a full Cumulus Message stored in S3. 
 
 #### Cumulus Message example:
 
@@ -69,6 +69,8 @@ Cumulus Messages come in 2 flavors: The full **Cumulus Message** and the **Cumul
 
 #### Cumulus Remote Message example:
 
+The message may contain a reference to an S3 Bucket and Key, as follows:
+
 ```json
 {
   "replace": {
@@ -78,7 +80,6 @@ Cumulus Messages come in 2 flavors: The full **Cumulus Message** and the **Cumul
   "cumulus_meta": {}
 }
 ```
-
 
 ## `loadRemoteEvent` input and output
 
@@ -139,7 +140,7 @@ An example of the `<schemas_json>` that should be passed to `loadNestedEvent`:
 
 ### `createNextEvent` output
 
-A Cumulus Message or a Cumulus Remote Message.
+A Cumulus Message or a Cumulus Remote Message. When a task output message is too big, the Cumulus Message Adapter will store the message to S3 Bucket under `$.cumulus_meta.buckets.internal`, and return a new message with an S3 reference as in the input example.
 
 ## Error Handling
 
