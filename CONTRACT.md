@@ -15,11 +15,12 @@ python ./cumulus-message-adapter.zip loadRemoteEvent
   "event": <event_json>
 }'
 
-# Cumulus Message and Lambda Context in:
+# Cumulus Message, Lambda Context, and schemas in:
 python ./cumulus-message-adapter.zip loadNestedEvent
 '{
   "event": <event_json>,
-  "context": <context_json>
+  "context": <context_json>,
+  "schemas": <schemas_json>
 }'
 
 # Call inner handler
@@ -29,7 +30,8 @@ python ./cumulus-message-adapter.zip createNextEvent
 '{
   "event": <event_json>,
   "handler_response": <handler_response_json>,
-  "message_config": <message_config_json>
+  "message_config": <message_config_json>,
+  "schemas": <schemas_json>
 }'
 ```
 
@@ -97,11 +99,22 @@ loadRemote output is a full Cumulus Message as a json blob.
 
 * `<context_json>` to cumulus-message-adapter `loadNestedEvent` should be the context from the lambda.
 
+* `<schemas_json>` to cumulus-message-adapter `loadNestedEvent` should be an object with filepaths to json schemas for the `input` and `config` properties that a "business function" expects to receive
+
 **`loadNestedEvent` Details:**
 
-`loadNestedEvent` requests metadata from the AWS Step Function API and uses that metadata to self-identify by determining which task in the workflow is "in-progress". This is roundabout way of the lambda asking `whoami` and will be removed once AWS updates the lambda context object.
+`loadNestedEvent` requests metadata from the AWS Step Function API and uses that metadata to self-identify by determining which task in the workflow is "in-progress". This is a roundabout way of the lambda asking `whoami` and will be removed once AWS updates the lambda context object.
 
 The task name found associated with the running task is used to look up the task-specific configuration and construct the values of `config` and `messageConfig` fields sent to the business function. For example, if the current execution is associated with task named `'Task1'`, then the `config` object sent to the business function is the value of `workflow_config['Task1']` and the `messageConfig` object sent to the business function is the value of `workflow_config['Task1']['cumulus_message']`. These configurations are used to dispatch values to other parts of the Cumulus Message, via URL templates, which are required by the business function or `createNextEvent`.
+
+An example of the `<schemas_json>` that should be passed to `loadNestedEvent`:
+
+```json
+{
+  "input": "/filepath/to/input.json",
+  "config": "/filepath/to/config.json"
+}
+```
 
 ### `loadNestedEvent` output
 
@@ -115,6 +128,15 @@ The output of `loadNestedEvent` is a json blob containing the keys `input`, `con
 * `<handler_response_json>` is arbitrary json - whatever the "business function" returns.
 * `<event_json>` is a full Cumulus Message and should be whatever is returned from `loadRemoteEvent`.
 * `<message_config_json>` should be the value of the `messageConfig` key returned from `loadNestedEvent`.
+* `<schemas_json>` should be an object with filepaths to the json schema for the `output` that a "business function" expects to return.
+
+An example of the `<schemas_json>` that should be passed to `loadNestedEvent`:
+
+```json
+{
+  "output": "/filepath/to/output.json"
+}
+```
 
 ### `createNextEvent` output
 
@@ -122,7 +144,7 @@ A Cumulus Message or a Cumulus Remote Message. When a task output message is too
 
 ## Error Handling
 
-Errors raised during execution of `cumulus-sled` functions are written to stderr. These errors are integration errors or bugs in the `cumulus-sled` code and should be re-raised by libraries so the root cause can be fixed.
+Errors raised during execution of `cumulus-message-adapter` functions are written to stderr. These errors are integration errors or bugs in the `cumulus-message-adapter` code and should be re-raised by libraries so the root cause can be fixed.
 
 Errors raised during invocation of task application code, may either be the result of a misconfiguration, bug, or task execution error. Libraries should raise errors in the case the origin is misconfiguration or a bug since this should be fixed in source code.
 

@@ -43,7 +43,7 @@ $ CUMULUS_ENV=testing nosetests -v -s
 
 ### Linting
 
-     $ pylint message
+     $ pylint message_adapter
 
 ### Contributing
 

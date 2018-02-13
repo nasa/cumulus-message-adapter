@@ -3,6 +3,7 @@ import re
 from datetime import datetime, timedelta
 import uuid
 from jsonpath_ng import parse
+from jsonschema import validate
 from .aws import stepFn, s3
 
 
@@ -12,6 +13,9 @@ class message_adapter:
     """
     # Maximum message payload size that will NOT be stored in S3. Anything bigger will be.
     MAX_NON_S3_PAYLOAD_SIZE = 10000
+
+    def __init__(self, schemas=None):
+        self.schemas = schemas
 
     def __getSfnExecutionArnByName(self, stateMachineArn, executionName):
         """
@@ -154,6 +158,20 @@ class message_adapter:
 
         raise LookupError('Unknown event source: ' + source)
 
+    def __validate_json(self, document, schema_type):
+        """
+        check that json is valid based on a schema
+        """
+        schemas = self.schemas
+        if schemas and schemas.get(schema_type):
+            schema_filepath = schemas[schema_type]
+            schema = json.load(open(schema_filepath))
+            try:
+                validate(document, schema)
+            except Exception as e:
+                e.message = '{} schema: {}'.format(schema_type, e.message)
+                raise e
+
     # Config templating
     def __resolvePathStr(self, event, str):
         """
@@ -263,6 +281,8 @@ class message_adapter:
         finalConfig = self.__resolveConfigTemplates(event, config)
         finalPayload = self.__resolveInput(event, config)
         response = {'input': finalPayload}
+        self.__validate_json(finalPayload, 'input')
+        self.__validate_json(finalConfig, 'config')
         if finalConfig is not None:
             response['config'] = finalConfig
         if 'cumulus_message' in config:
@@ -359,6 +379,7 @@ class message_adapter:
         * @param {*} messageConfig The cumulus_message object configured for the task
         * @returns {*} the output message to be returned
         """
+        self.__validate_json(handlerResponse, 'output')
         result = self.__assignOutputs(handlerResponse, event, messageConfig)
         result['exception'] = 'None'
         if 'replace' in result:
