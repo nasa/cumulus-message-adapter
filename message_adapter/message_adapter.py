@@ -1,3 +1,4 @@
+import os
 import json
 import re
 from datetime import datetime, timedelta
@@ -5,7 +6,6 @@ import uuid
 from jsonpath_ng import parse
 from jsonschema import validate
 from .aws import stepFn, s3
-
 
 class message_adapter:
     """
@@ -158,13 +158,20 @@ class message_adapter:
 
         raise LookupError('Unknown event source: ' + source)
 
+    def __get_jsonschema(self, schema_type):
+        schemas = self.schemas
+        root_dir = os.environ.get("LAMBDA_TASK_ROOT", '')
+        has_schema = schemas and schemas.get(schema_type)
+        rel_filepath = schemas.get(schema_type) if has_schema else 'schemas/{}.json'.format(schema_type)
+        filepath = os.path.join(root_dir, rel_filepath)
+        return filepath if os.path.exists(filepath) else None
+
     def __validate_json(self, document, schema_type):
         """
         check that json is valid based on a schema
         """
-        schemas = self.schemas
-        if schemas and schemas.get(schema_type):
-            schema_filepath = schemas[schema_type]
+        schema_filepath = self.__get_jsonschema(schema_type)
+        if schema_filepath:
             schema = json.load(open(schema_filepath))
             try:
                 validate(document, schema)
