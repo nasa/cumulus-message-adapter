@@ -33,8 +33,8 @@ if __name__ == '__main__':
                 sys.stdout.write(json.dumps(result))
                 sys.stdout.flush()
                 exitCode = 0
-      except LookupError as le:
-          sys.stderr.write("Lookup error: " + str(le))
-      except:
-          sys.stderr.write("Unexpected error:"+ str(sys.exc_info()[0])+ ". " + str(sys.exc_info()[1]))
-      sys.exit(exitCode)
+    except LookupError as le:
+        sys.stderr.write("Lookup error: " + str(le))
+    except:
+        sys.stderr.write("Unexpected error:"+ str(sys.exc_info()[0])+ ". " + str(sys.exc_info()[1]))
+        sys.exit(exitCode)
