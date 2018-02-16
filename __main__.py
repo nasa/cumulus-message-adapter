@@ -29,10 +29,10 @@ if __name__ == '__main__':
             else:
                 messageConfig = None
             result = transformer.createNextEvent(handlerResponse, event, messageConfig)
-            if (result is not None and len(result) > 0):
-                sys.stdout.write(json.dumps(result))
-                sys.stdout.flush()
-                exitCode = 0
+        if (result is not None and len(result) > 0):
+            sys.stdout.write(json.dumps(result))
+            sys.stdout.flush()
+            exitCode = 0
     except LookupError as le:
         sys.stderr.write("Lookup error: " + str(le))
     except:
