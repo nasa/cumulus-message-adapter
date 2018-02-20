@@ -233,7 +233,9 @@ class message_adapter:
         * @param {*} config A config object, containing paths
         * @returns {*} A config object with all JSONPaths resolved
         """
-        if isinstance(config, str) or isinstance(config, unicode):
+        if isinstance(config, str):
+            return self.__resolvePathStr(event, config)
+        elif isinstance(config, unicode):
             return self.__resolvePathStr(event, config)
 
         elif isinstance(config, list):
