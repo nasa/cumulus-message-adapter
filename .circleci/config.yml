@@ -89,7 +89,7 @@ jobs:
           environment:
             LOCALSTACK_HOST: localstack
           command: |
-            . venv/bin/activate
+            . ~/venv36/bin/activate
             CUMULUS_ENV=testing nosetests -v -s
 
   release:
