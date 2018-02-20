@@ -4,31 +4,53 @@
 #
 version: 2
 references:
-  container: &container
+  container_python27: &container_python27
     docker:
       - image: circleci/python:2.7.13
       - name: localstack
         image: localstack/localstack
     working_directory: ~/repo
+
+  container_python36: &container_python36
+    docker:
+      - image: circleci/python:3.6.2
+      - name: localstack
+        image: localstack/localstack
+    working_directory: ~/repo
+
   # Download and cache dependencies
-  restore_cache: &restore_cache
+  restore_cache_python27: &restore_cache_python27
     restore_cache:
       keys:
         - v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
         # fallback to using the latest cache if no exact match is found
         - v1-dependencies-
-  save_cache: &save_cache
+
+  restore_cache_python36: &restore_cache_python36
+    restore_cache:
+      keys:
+        - v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
+        # fallback to using the latest cache if no exact match is found
+        - v1-dependencies-
+
+  save_cache_python27: &save_cache_python27
+    save_cache:
+      paths:
+        - ./venv
+      key: v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
+
+  save_cache_python36: &save_cache_python36
     save_cache:
       paths:
         - ./venv
       key: v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
 
 jobs:
-  build:
-    <<: *container
+  build_python27:
+    <<: *container_python27
     steps:
       - checkout
-      - *restore_cache
+      - *restore_cache_python27
       - run:
           name: install dependencies
           command: |
@@ -38,7 +60,30 @@ jobs:
             pip install -r requirements.txt
             pip install -r requirements-dev.txt
             pip install .
-      - *save_cache
+      - *save_cache_python27
+      - run:
+          name: run tests
+          environment:
+            LOCALSTACK_HOST: localstack
+          command: |
+            . venv/bin/activate
+            CUMULUS_ENV=testing nosetests -v -s
+
+  build_python36:
+    <<: *container_python36
+    steps:
+      - checkout
+      - *restore_cache_python36
+      - run:
+          name: install dependencies
+          command: |
+            pip install virtualenv
+            virtualenv venv
+            . venv/bin/activate
+            pip install -r requirements.txt
+            pip install -r requirements-dev.txt
+            pip install .
+      - *save_cache_python36
       - run:
           name: run tests
           environment:
@@ -48,7 +93,7 @@ jobs:
             CUMULUS_ENV=testing nosetests -v -s
 
   release:
-    <<: *container
+    <<: *container_python36
     steps:
       - checkout
       - add_ssh_keys
@@ -76,6 +121,7 @@ jobs:
               echo "Building ${ZIPFILENAME}"
               make clean
               make $ZIPFILENAME
+              # TODO: make sure zipfile built, it not, fail
               UPLOAD_URL_TEMPLATE=$(curl $GIT_API_URL/$GIT_PATH/releases/tags/$VERSION | jq '.upload_url' --raw-output)
               UPLOAD_URL=${UPLOAD_URL_TEMPLATE//{?name,label\}/?name=$ZIPFILENAME}
               echo "Uploading release to ${UPLOAD_URL}"
@@ -84,15 +130,24 @@ jobs:
                 $UPLOAD_URL \
                 --data-binary @./$ZIPFILENAME | jq .
             fi
+      - run:
+          name: Deploy to PyPi
+          command: |
+             . ~/venv36/bin/activate
+            pip install twine
+            python setup.py sdist
+            twine upload --username "${PYPI_USER}" --password "${PYPI_PASS}" dist/*
 
 workflows:
   version: 2
-  build_test_release:
+  build_test_release_python27:
     jobs:
-      - build
-      - release:
+      - build_python27
+      - build_python36
+      - release_github:
           requires:
-            - build
+            - build_python27
+            - build_python36
           filters:
             branches:
               only: master
