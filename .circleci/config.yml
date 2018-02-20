@@ -140,13 +140,17 @@ jobs:
 
 workflows:
   version: 2
-  build_test_release_python27:
+  build_test_27:
     jobs:
       - build_python27
+      - release:
+          requires:
+            - build_python27
+  build_test_36_release:
+    jobs:
       - build_python36
       - release_github:
           requires:
-            - build_python27
             - build_python36
           filters:
             branches:
