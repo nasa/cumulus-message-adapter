@@ -316,10 +316,8 @@ class Test(unittest.TestCase):
         schemas = { 'config': 'config.json' }
         adapter = message_adapter.message_adapter(schemas)
         in_msg = json.loads(inp.read())
-        in_msg["workflow_config"]["Example"]["boolean_option"] = '{{$.meta.boolean_option}}'
-        in_msg["meta"]["boolean_option"] = True
         msg = adapter.loadNestedEvent(in_msg, {})
-        assert msg["config"]["boolean_option"] == True
+        assert msg["config"]["inlinestr"] == 'prefixbarsuffix'
 
     def test_failing_config_jsonschema(self):
         """ test a failing input schema """
