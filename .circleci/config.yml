@@ -158,9 +158,6 @@ workflows:
       - publish_github:
           requires:
             - build_python36
-          # filters:
-          #   branches:
-          #     only: master
       - publish_pypi:
           requires:
             - release_github
