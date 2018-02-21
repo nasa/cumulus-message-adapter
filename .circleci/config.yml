@@ -158,12 +158,12 @@ workflows:
   build_test_36_publish:
     jobs:
       - build_python36
-      - publish_github:
-          requires:
-            - build_python36
+      # - publish_github:
+      #     requires:
+      #       - build_python36
       - publish_pypi:
           requires:
-            - publish_github
+            - build_python36
           # filters:
           #   branches:
           #     only: master
