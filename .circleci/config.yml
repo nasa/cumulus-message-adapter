@@ -143,9 +143,6 @@ workflows:
   build_test_27:
     jobs:
       - build_python27
-      - release:
-          requires:
-            - build_python27
   build_test_36_release:
     jobs:
       - build_python36
