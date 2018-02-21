@@ -67,6 +67,7 @@ jobs:
             LOCALSTACK_HOST: localstack
           command: |
             . venv/bin/activate
+            pylint __main__.py -E
             CUMULUS_ENV=testing nosetests -v -s
 
   build_python36:
@@ -90,6 +91,7 @@ jobs:
             LOCALSTACK_HOST: localstack
           command: |
             . ~/venv36/bin/activate
+            pylint __main__.py
             CUMULUS_ENV=testing nosetests -v -s
 
   publish_github:
@@ -161,9 +163,12 @@ workflows:
       - publish_github:
           requires:
             - build_python36
+          # filters:
+          #   branches:
+          #     only: master
       - publish_pypi:
           requires:
-            - build_python36
-          filters:
-            branches:
-              only: master
+            - publish_github
+          # filters:
+          #   branches:
+          #     only: master
