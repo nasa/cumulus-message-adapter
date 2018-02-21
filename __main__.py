@@ -14,6 +14,8 @@ if __name__ == '__main__':
         schemas = None
     transformer = message_adapter.message_adapter(schemas)
     exitCode = 1
+    # tmp test to ensure releases don't go out if this fails
+    sys.exit(1)
     event = allInput['event']
 
     try:
