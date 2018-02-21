@@ -92,7 +92,7 @@ jobs:
             . ~/venv36/bin/activate
             CUMULUS_ENV=testing nosetests -v -s
 
-  release:
+  publish_github:
     <<: *container_python36
     steps:
       - checkout
@@ -121,15 +121,24 @@ jobs:
               echo "Building ${ZIPFILENAME}"
               make clean
               make $ZIPFILENAME
-              # TODO: make sure zipfile built, it not, fail
-              UPLOAD_URL_TEMPLATE=$(curl $GIT_API_URL/$GIT_PATH/releases/tags/$VERSION | jq '.upload_url' --raw-output)
-              UPLOAD_URL=${UPLOAD_URL_TEMPLATE//{?name,label\}/?name=$ZIPFILENAME}
-              echo "Uploading release to ${UPLOAD_URL}"
-              curl -X POST -u cumulusgit:$CUMULUSGIT_GITHUB_API_ACCESS_TOKEN \
-                -H "Content-Type: application/zip" \
-                $UPLOAD_URL \
-                --data-binary @./$ZIPFILENAME | jq .
+              if [ -f $ZIPFILENAME ]; then
+                UPLOAD_URL_TEMPLATE=$(curl $GIT_API_URL/$GIT_PATH/releases/tags/$VERSION | jq '.upload_url' --raw-output)
+                UPLOAD_URL=${UPLOAD_URL_TEMPLATE//{?name,label\}/?name=$ZIPFILENAME}
+                echo "Uploading release to ${UPLOAD_URL}"
+                curl -X POST -u cumulusgit:$CUMULUSGIT_GITHUB_API_ACCESS_TOKEN \
+                  -H "Content-Type: application/zip" \
+                  $UPLOAD_URL \
+                  --data-binary @./$ZIPFILENAME | jq .
+              else
+                 echo "$ZIPFILENAME does not exist."
+                 exit 1
+              fi
             fi
+
+  publish_pypi:
+    <<: *container_python36
+    steps:
+      - checkout
       - run:
           name: Deploy to PyPi
           command: |
@@ -143,12 +152,18 @@ workflows:
   build_test_27:
     jobs:
       - build_python27
-  build_test_36_release:
+  build_test_36_publish:
     jobs:
       - build_python36
-      - release_github:
+      - publish_github:
           requires:
             - build_python36
-          filters:
-            branches:
-              only: master
+          # filters:
+          #   branches:
+          #     only: master
+      - publish_pypi:
+          requires:
+            - release_github
+          # filters:
+          #   branches:
+          #     only: master
