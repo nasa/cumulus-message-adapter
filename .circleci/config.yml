@@ -91,7 +91,7 @@ jobs:
             LOCALSTACK_HOST: localstack
           command: |
             . ~/venv36/bin/activate
-            pylint __main__.py
+            pylint __main__.py -E
             CUMULUS_ENV=testing nosetests -v -s
 
   publish_github:
