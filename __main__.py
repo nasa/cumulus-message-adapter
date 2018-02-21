@@ -16,9 +16,6 @@ if __name__ == '__main__':
     exitCode = 1
     event = allInput['event']
 
-    # try out pylint
-    doabadthing
-
     try:
         if (functionName == 'loadRemoteEvent'):
             result = transformer.loadRemoteEvent(event)
