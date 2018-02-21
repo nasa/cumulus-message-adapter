@@ -142,7 +142,6 @@ jobs:
       - run:
           name: Deploy to PyPi
           command: |
-            . ~/venv36/bin/activate
             pip install twine
             python setup.py sdist
             twine upload --username "${PYPI_USER}" --password "${PYPI_PASS}" dist/*
