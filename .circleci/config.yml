@@ -42,7 +42,7 @@ references:
   save_cache_python36: &save_cache_python36
     save_cache:
       paths:
-        - ./venv
+        - ./venv36
       key: v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
 
 jobs:
@@ -138,11 +138,10 @@ jobs:
   publish_pypi:
     <<: *container_python36
     steps:
-      - checkout
+      - *restore_cache_python36
       - run:
           name: Deploy to PyPi
           command: |
-            ~/.local/bin/virtualenv ~/venv36
             . ~/venv36/bin/activate
             pip install twine
             python setup.py sdist
