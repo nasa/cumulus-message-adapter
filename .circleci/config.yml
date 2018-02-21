@@ -138,6 +138,7 @@ jobs:
   publish_pypi:
     <<: *container_python36
     steps:
+      - checkout
       - *restore_cache_python36
       - run:
           name: Deploy to PyPi
