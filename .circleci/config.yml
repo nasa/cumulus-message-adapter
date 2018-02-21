@@ -160,7 +160,7 @@ workflows:
             - build_python36
       - publish_pypi:
           requires:
-            - release_github
+            - publish_github
           # filters:
           #   branches:
           #     only: master
