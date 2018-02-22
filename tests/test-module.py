@@ -362,3 +362,4 @@ class Test(unittest.TestCase):
         except ValidationError as e:
             assert e.message == "output schema: 1 is not of type u'string'"
             pass
+
