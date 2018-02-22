@@ -1,0 +1,31 @@
+{
+  "properties": {
+    "bar": {
+      "type": "string"
+    },
+    "inlinestr": {
+      "type": "string"
+    },
+    "array": {
+      "type": "array"
+    },
+    "object": {
+      "type": "object"
+    }
+  },
+  "anyOf": [
+    {
+      "required": [
+        "bar"
+      ]
+    },
+    {
+      "required": [
+        "inlinestr",
+        "array",
+        "object"
+      ]
+    }
+  ],
+  "additionalProperties": false
+}
