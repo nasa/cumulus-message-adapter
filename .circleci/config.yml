@@ -4,51 +4,98 @@
 #
 version: 2
 references:
-  container: &container
+  container_python27: &container_python27
     docker:
       - image: circleci/python:2.7.13
       - name: localstack
         image: localstack/localstack
     working_directory: ~/repo
+
+  container_python36: &container_python36
+    docker:
+      - image: circleci/python:3.6.2
+      - name: localstack
+        image: localstack/localstack
+    working_directory: ~/repo
+
   # Download and cache dependencies
-  restore_cache: &restore_cache
+  restore_cache_python27: &restore_cache_python27
     restore_cache:
       keys:
         - v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
         # fallback to using the latest cache if no exact match is found
         - v1-dependencies-
-  save_cache: &save_cache
+
+  restore_cache_python36: &restore_cache_python36
+    restore_cache:
+      keys:
+        - v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
+        # fallback to using the latest cache if no exact match is found
+        - v1-dependencies-
+
+  save_cache_python27: &save_cache_python27
     save_cache:
       paths:
-        - ./venv
+        - ~/venv27
+      key: v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
+
+  save_cache_python36: &save_cache_python36
+    save_cache:
+      paths:
+        - ~/venv36
       key: v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
 
 jobs:
-  build:
-    <<: *container
+  build_python27:
+    <<: *container_python27
     steps:
       - checkout
-      - *restore_cache
+      - *restore_cache_python27
       - run:
           name: install dependencies
           command: |
             pip install virtualenv
-            virtualenv venv
-            . venv/bin/activate
+            virtualenv ~/venv27
+            . ~/venv27/bin/activate
             pip install -r requirements.txt
             pip install -r requirements-dev.txt
             pip install .
-      - *save_cache
+      - *save_cache_python27
       - run:
           name: run tests
           environment:
             LOCALSTACK_HOST: localstack
           command: |
-            . venv/bin/activate
+            . ~/venv27/bin/activate
+            pylint __main__.py -E
             CUMULUS_ENV=testing nosetests -v -s
 
-  release:
-    <<: *container
+  build_python36:
+    <<: *container_python36
+    steps:
+      - checkout
+      - *restore_cache_python36
+      - run:
+          name: install dependencies
+          command: |
+            pip install --user virtualenv
+            ~/.local/bin/virtualenv ~/venv36
+            . ~/venv36/bin/activate
+            pip install -r requirements.txt
+            pip install -r requirements-dev.txt
+            pip install .
+      - *save_cache_python36
+      - run:
+          name: run tests
+          environment:
+            LOCALSTACK_HOST: localstack
+          command: |
+            . ~/venv36/bin/activate
+            pylint __main__.py -E
+            CUMULUS_ENV=testing nosetests -v -s
+
+  publish_github:
+    <<: *container_python36
     steps:
       - checkout
       - add_ssh_keys
@@ -76,23 +123,52 @@ jobs:
               echo "Building ${ZIPFILENAME}"
               make clean
               make $ZIPFILENAME
-              UPLOAD_URL_TEMPLATE=$(curl $GIT_API_URL/$GIT_PATH/releases/tags/$VERSION | jq '.upload_url' --raw-output)
-              UPLOAD_URL=${UPLOAD_URL_TEMPLATE//{?name,label\}/?name=$ZIPFILENAME}
-              echo "Uploading release to ${UPLOAD_URL}"
-              curl -X POST -u cumulusgit:$CUMULUSGIT_GITHUB_API_ACCESS_TOKEN \
-                -H "Content-Type: application/zip" \
-                $UPLOAD_URL \
-                --data-binary @./$ZIPFILENAME | jq .
+              if [ -f $ZIPFILENAME ]; then
+                UPLOAD_URL_TEMPLATE=$(curl $GIT_API_URL/$GIT_PATH/releases/tags/$VERSION | jq '.upload_url' --raw-output)
+                UPLOAD_URL=${UPLOAD_URL_TEMPLATE//{?name,label\}/?name=$ZIPFILENAME}
+                echo "Uploading release to ${UPLOAD_URL}"
+                curl -X POST -u cumulusgit:$CUMULUSGIT_GITHUB_API_ACCESS_TOKEN \
+                  -H "Content-Type: application/zip" \
+                  $UPLOAD_URL \
+                  --data-binary @./$ZIPFILENAME | jq .
+              else
+                 echo "$ZIPFILENAME does not exist."
+                 exit 1
+              fi
             fi
+
+  publish_pypi:
+    <<: *container_python36
+    steps:
+      - checkout
+      - *restore_cache_python36
+      - run:
+          name: Deploy to PyPi
+          command: |
+            pip install --user virtualenv
+            ~/.local/bin/virtualenv ~/venv36
+            . ~/venv36/bin/activate
+            pip install twine
+            python setup.py sdist
+            twine upload --username "${PYPI_USER}" --password "${PYPI_PASS}" dist/*
 
 workflows:
   version: 2
-  build_test_release:
+  build_test_27:
     jobs:
-      - build
-      - release:
+      - build_python27
+  build_test_36_publish:
+    jobs:
+      - build_python36
+      - publish_github:
           requires:
-            - build
+            - build_python36
+          filters:
+            branches:
+              only: master
+      - publish_pypi:
+          requires:
+            - publish_github
           filters:
             branches:
               only: master

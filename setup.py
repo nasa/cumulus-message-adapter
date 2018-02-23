@@ -39,7 +39,7 @@ setup(
     # This is a one-line description or tagline of what your project does. This
     # corresponds to the "Summary" metadata field:
     # https://packaging.python.org/specifications/core-metadata/#summary
-    description='A python implementation of cumulus message adapter',  # Required
+    description='A command-line interface for preparing and outputting Cumulus Messages for Cumulus Tasks',  # Required
     long_description=long_description,  # Optional
     url='https://github.com/cumulus-nasa/cumulus-message-adapter',  # Optional
     author='Cumulus Authors',  # Optional
