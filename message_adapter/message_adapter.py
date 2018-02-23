@@ -212,11 +212,12 @@ class message_adapter:
             return [item.value for item in matchData] if len(matchData) > 0 else []
 
         elif (re.search(templateRegex, str)):
-            matches = re.search(templateRegex, str)
-            if matches:
-                matchData = parse(matches.group(0).lstrip('{').rstrip('}')).find(event)
+            matches = re.findall(templateRegex, str)
+            for match in matches:
+                matchData = parse(match.lstrip('{').rstrip('}')).find(event)
                 if len(matchData) > 0:
-                    return str.replace(matches.group(0), matchData[0].value)
+                    str = str.replace(match, matchData[0].value)
+            return str
         else:
             return str
 
