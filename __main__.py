@@ -5,9 +5,16 @@ import sys
 
 from message_adapter import message_adapter
 
+# use input with both python 2 & 3
+try:
+    import __builtin__
+    input = getattr(__builtin__, 'raw_input')
+except (ImportError, AttributeError):
+    pass
+
 if __name__ == '__main__':
     functionName = sys.argv[1]
-    allInput = json.loads(raw_input())
+    allInput = json.loads(input())
     if 'schemas' in allInput:
         schemas = allInput['schemas']
     else:
