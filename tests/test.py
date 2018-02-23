@@ -274,6 +274,20 @@ class Test(unittest.TestCase):
         result = self.cumulus_message_adapter.createNextEvent(msg, in_msg, messageConfig)
         assert result == out_msg 
     
+    @patch.object(cumulus_message_adapter, '_message_adapter__getCurrentSfnTask', return_value="Example")
+    def test_inline_template(self, getCurrentSfnTask_function):
+        """ test sfn.input.json """
+        inp = open(os.path.join(self.test_folder, 'inline_template.input.json'))
+        out = open(os.path.join(self.test_folder, 'inline_template.output.json'))
+        in_msg = json.loads(inp.read())
+        out_msg = json.loads(out.read())
+
+        msg = self.cumulus_message_adapter.loadNestedEvent(in_msg, {})
+        messageConfig = msg.get('messageConfig');
+        if 'messageConfig' in msg: del msg['messageConfig'];
+        result = self.cumulus_message_adapter.createNextEvent(msg, in_msg, messageConfig)
+        assert result == out_msg 
+
     def test_templates(self):
         """ test templates.input.json """
         inp = open(os.path.join(self.test_folder, 'templates.input.json'))
