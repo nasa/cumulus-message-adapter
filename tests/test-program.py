@@ -4,7 +4,6 @@ Tests for cumulus-message-adapter command-line interface
 import os
 import json
 import subprocess
-import sys
 import unittest
 
 class Test(unittest.TestCase):
@@ -16,14 +15,18 @@ class Test(unittest.TestCase):
         """
         execute an external command command, and returns command exit status, stdout and stderr
         """
-        process = subprocess.Popen([cmd], shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        outstr, errorstr = process.communicate(input=inputMessage)
+        process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE)
+        outstr, errorstr = process.communicate(
+            input=inputMessage.encode())
         exitstatus = process.poll()
-        return exitstatus, str(outstr), str(errorstr)
+        if errorstr:
+            print (errorstr.decode()) # pylint: disable=superfluous-parens
+        return exitstatus, outstr.decode(), errorstr.decode()
 
-    def transformMessages(self, testcase):
+    def transformMessages(self, testcase): #pylint: disable=too-many-locals
         """
-        transform cumulus messages, and check if the commands are successful and outputs are correct.
+        transform cumulus messages, and check if the command return status and outputs are correct.
         Each test case (such as 'basic') has its corresponding example messages and schemas.
         """
         inp = open(os.path.join(self.test_folder, '{}.input.json'.format(testcase)))
@@ -35,22 +38,27 @@ class Test(unittest.TestCase):
         }
         allInput = {'event': in_msg, 'schemas': schemas}
         currentDirectory = os.getcwd()
-        remoteEventCmd = ' '.join(['python', currentDirectory, 'loadRemoteEvent'])
-        (exitstatus, remoteEvent, errorstr) = self.executeCommand(remoteEventCmd, json.dumps(allInput)) # pylint: disable=unused-variable
+        remoteEventCmd = ['python', currentDirectory, 'loadRemoteEvent']
+        (exitstatus, remoteEvent, errorstr) = self.executeCommand( # pylint: disable=unused-variable
+            remoteEventCmd, json.dumps(allInput))
         assert exitstatus == 0
         fullEvent = json.loads(remoteEvent)
 
         allInput = {'event': fullEvent, 'context': {}, 'schemas': schemas}
-        loadNestedEvent = ' '.join(['python', currentDirectory, 'loadNestedEvent'])
-        (exitstatus, nestedEvent, errorstr) = self.executeCommand(loadNestedEvent, json.dumps(allInput))
+        loadNestedEvent = ['python', currentDirectory, 'loadNestedEvent']
+        (exitstatus, nestedEvent, errorstr) = self.executeCommand( # pylint: disable=unused-variable
+            loadNestedEvent, json.dumps(allInput))
         assert exitstatus == 0
 
         msg = json.loads(nestedEvent)
         messageConfig = msg.get('messageConfig')
-        if 'messageConfig' in msg: del msg['messageConfig']
-        allInput = {'handler_response':msg, 'event': fullEvent, 'message_config': messageConfig, 'schemas': schemas}
-        createNextEvent = ' '.join(['python', currentDirectory, 'createNextEvent'])
-        (exitstatus, nextEvent, errorstr) = self.executeCommand(createNextEvent, json.dumps(allInput))
+        if 'messageConfig' in msg:
+            del msg['messageConfig']
+        allInput = {'handler_response': msg, 'event': fullEvent,
+                    'message_config': messageConfig, 'schemas': schemas}
+        createNextEvent = ['python', currentDirectory, 'createNextEvent']
+        (exitstatus, nextEvent, errorstr) = self.executeCommand(
+            createNextEvent, json.dumps(allInput))
         assert exitstatus == 0
 
         out = open(os.path.join(self.test_folder, '{}.output.json'.format(testcase)))
@@ -58,23 +66,23 @@ class Test(unittest.TestCase):
         assert json.loads(nextEvent) == out_msg
 
     def test_basic(self):
-        """ test basic """
+        """ test basic message """
         self.transformMessages('basic')
 
     def test_jsonpath(self):
-        """ test jsonpath """
+        """ test jsonpath message """
         self.transformMessages('jsonpath')
-    
+
     def test_meta(self):
-        """ test meta """
+        """ test meta message """
         self.transformMessages('meta')
 
     def test_remote(self):
-        """ test remote """
+        """ test remote message """
         self.transformMessages('meta')
 
     def test_templates(self):
-        """ test templates """
+        """ test templates message """
         self.transformMessages('templates')
 
     def test_validation_failure_case(self):
@@ -82,7 +90,5 @@ class Test(unittest.TestCase):
         try:
             self.transformMessages("invalidinput")
         except AssertionError:
-            pass
             return
         assert False
-
