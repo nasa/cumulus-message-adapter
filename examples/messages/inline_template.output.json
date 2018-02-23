@@ -1,7 +1,8 @@
 {
   "workflow_config": {
     "Example": {
-      "inlinestr": "prefix{meta.foo}suffix",
+      "inlinestr": "prefix{meta.foo}suffix{meta.foo2}",
+      "inlineignore": "prefix{random}should{meta.foo}",
       "array": "{[$.meta.foo]}",
       "object": "{{$.meta}}"
     }
@@ -22,7 +23,10 @@
       "inlinestr": "prefixbarsuffixbar2",
       "inlineignore": "prefix{random}shouldbar",
       "array": ["bar"],
-      "object": { "foo": "bar" }
+      "object": { 
+        "foo": "bar",
+        "foo2": "bar2"
+      }
     }
   },
   "exception": "None"

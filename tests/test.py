@@ -276,7 +276,7 @@ class Test(unittest.TestCase):
     
     @patch.object(cumulus_message_adapter, '_message_adapter__getCurrentSfnTask', return_value="Example")
     def test_inline_template(self, getCurrentSfnTask_function):
-        """ test sfn.input.json """
+        """ test inline_template.input.json """
         inp = open(os.path.join(self.test_folder, 'inline_template.input.json'))
         out = open(os.path.join(self.test_folder, 'inline_template.output.json'))
         in_msg = json.loads(inp.read())
