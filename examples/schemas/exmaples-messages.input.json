@@ -1,0 +1,12 @@
+{
+  "properties": {
+    "anykey": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "anykey"
+  ],
+  "additionalProperties": false
+}
+

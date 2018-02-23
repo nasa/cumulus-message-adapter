@@ -1,0 +1,15 @@
+{
+  "properties": {
+    "input": {
+      "type": "object"
+    },
+    "config": {
+      "type": "object"
+    },
+    "anykey": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}
+

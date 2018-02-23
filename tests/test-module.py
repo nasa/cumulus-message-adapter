@@ -94,13 +94,14 @@ class Test(unittest.TestCase):
     # assignOutputs tests
     def test_result_payload_without_config(self):
         """ Test nestedResponse is returned when no config argument is passed """
-        result = self.cumulus_message_adapter._message_adapter__assignOutputs(self.nested_response, {}, None)
+        result = self.cumulus_message_adapter._message_adapter__assignOutputs( # pylint: disable=no-member
+            self.nested_response, {}, None) 
         assert result['payload'] == self.nested_response
 
     def test_result_payload_without_config_outputs(self):
         """ Test nestedResponse is returned when config has no outputs key/value """
         message_config_without_outputs = {}
-        result = self.cumulus_message_adapter._message_adapter__assignOutputs(
+        result = self.cumulus_message_adapter._message_adapter__assignOutputs( # pylint: disable=no-member
             self.nested_response, {}, message_config_without_outputs)
         assert result['payload'] == self.nested_response
 
@@ -114,7 +115,7 @@ class Test(unittest.TestCase):
             }]
         }
 
-        result = self.cumulus_message_adapter._message_adapter__assignOutputs(
+        result = self.cumulus_message_adapter._message_adapter__assignOutputs( # pylint: disable=no-member
             self.nested_response, {}, message_config_with_simple_outputs)
         assert result['payload'] == 's3://source.jpg'
 
@@ -130,7 +131,7 @@ class Test(unittest.TestCase):
             }]
         }
 
-        result = self.cumulus_message_adapter._message_adapter__assignOutputs(
+        result = self.cumulus_message_adapter._message_adapter__assignOutputs( # pylint: disable=no-member
             self.nested_response, {}, message_config_with_nested_outputs)
         assert result['payload'] == {'dataLocation': 's3://source.jpg'}
 
@@ -203,8 +204,8 @@ class Test(unittest.TestCase):
         out_msg = json.loads(out.read())
 
         msg = self.cumulus_message_adapter.loadNestedEvent(in_msg, {})
-        messageConfig = msg.get('messageConfig');
-        if 'messageConfig' in msg: del msg['messageConfig'];
+        messageConfig = msg.get('messageConfig')
+        if 'messageConfig' in msg: del msg['messageConfig']
         result = self.cumulus_message_adapter.createNextEvent(msg, in_msg, messageConfig)
         assert result == out_msg
 
@@ -216,8 +217,8 @@ class Test(unittest.TestCase):
         out_msg = json.loads(out.read())
 
         msg = self.cumulus_message_adapter.loadNestedEvent(in_msg, {})
-        messageConfig = msg.get('messageConfig');
-        if 'messageConfig' in msg: del msg['messageConfig'];
+        messageConfig = msg.get('messageConfig')
+        if 'messageConfig' in msg: del msg['messageConfig']
         result = self.cumulus_message_adapter.createNextEvent(msg, in_msg, messageConfig)
         assert result == out_msg
     
@@ -229,8 +230,8 @@ class Test(unittest.TestCase):
         out_msg = json.loads(out.read())
 
         msg = self.cumulus_message_adapter.loadNestedEvent(in_msg, {})
-        messageConfig = msg.get('messageConfig');
-        if 'messageConfig' in msg: del msg['messageConfig'];
+        messageConfig = msg.get('messageConfig')
+        if 'messageConfig' in msg: del msg['messageConfig']
         result = self.cumulus_message_adapter.createNextEvent(msg, in_msg, messageConfig)
         assert result == out_msg
     
@@ -241,20 +242,20 @@ class Test(unittest.TestCase):
         in_msg = json.loads(inp.read())
         out_msg = json.loads(out.read())
 
-        bucket_name = in_msg['replace']['Bucket'];
-        key_name = in_msg['replace']['Key'];
-        data_filename = os.path.join(self.test_folder, key_name);
+        bucket_name = in_msg['replace']['Bucket']
+        key_name = in_msg['replace']['Key']
+        data_filename = os.path.join(self.test_folder, key_name)
         with open(data_filename, 'r') as f: datasource = json.load(f)
-        self.s3.Bucket(bucket_name).create();
-        self.s3.Object(bucket_name, key_name).put(Body=json.dumps(datasource));
+        self.s3.Bucket(bucket_name).create()
+        self.s3.Object(bucket_name, key_name).put(Body=json.dumps(datasource))
 
-        remoteEvent = self.cumulus_message_adapter.loadRemoteEvent(in_msg);
-        msg = self.cumulus_message_adapter.loadNestedEvent(remoteEvent, {});
-        messageConfig = msg.get('messageConfig');
-        if 'messageConfig' in msg: del msg['messageConfig'];
+        remoteEvent = self.cumulus_message_adapter.loadRemoteEvent(in_msg)
+        msg = self.cumulus_message_adapter.loadNestedEvent(remoteEvent, {})
+        messageConfig = msg.get('messageConfig')
+        if 'messageConfig' in msg: del msg['messageConfig']
         result = self.cumulus_message_adapter.createNextEvent(msg, remoteEvent, messageConfig)
         
-        delete_objects_object = {'Objects': [{'Key': key_name}]};
+        delete_objects_object = {'Objects': [{'Key': key_name}]}
         self.s3.Bucket(bucket_name).delete_objects(Delete=delete_objects_object)
         self.s3.Bucket(bucket_name).delete()
 
@@ -269,8 +270,8 @@ class Test(unittest.TestCase):
         out_msg = json.loads(out.read())
 
         msg = self.cumulus_message_adapter.loadNestedEvent(in_msg, {})
-        messageConfig = msg.get('messageConfig');
-        if 'messageConfig' in msg: del msg['messageConfig'];
+        messageConfig = msg.get('messageConfig')
+        if 'messageConfig' in msg: del msg['messageConfig']
         result = self.cumulus_message_adapter.createNextEvent(msg, in_msg, messageConfig)
         assert result == out_msg 
     
@@ -296,8 +297,8 @@ class Test(unittest.TestCase):
         out_msg = json.loads(out.read())
 
         msg = self.cumulus_message_adapter.loadNestedEvent(in_msg, {})
-        messageConfig = msg.get('messageConfig');
-        if 'messageConfig' in msg: del msg['messageConfig'];
+        messageConfig = msg.get('messageConfig')
+        if 'messageConfig' in msg: del msg['messageConfig']
         result = self.cumulus_message_adapter.createNextEvent(msg, in_msg, messageConfig)
         assert result == out_msg
 
@@ -319,7 +320,7 @@ class Test(unittest.TestCase):
         in_msg = json.loads(inp.read())
         in_msg["payload"]= { "hello": 1 }
         try:
-            msg = adapter.loadNestedEvent(in_msg, {})
+            adapter.loadNestedEvent(in_msg, {})
         except ValidationError as e:
             assert e.message == "input schema: 1 is not of type u'string'"
             pass
@@ -342,7 +343,7 @@ class Test(unittest.TestCase):
         in_msg["workflow_config"]["Example"]["boolean_option"] = '{{$.meta.boolean_option}}'
         in_msg["meta"]["boolean_option"] = "notgoingtowork"
         try:
-            msg = adapter.loadNestedEvent(in_msg, {})
+            adapter.loadNestedEvent(in_msg, {})
         except ValidationError as e:
             assert e.message == "config schema: 'notgoingtowork' is not of type u'boolean'"
             pass
@@ -354,7 +355,7 @@ class Test(unittest.TestCase):
         adapter = message_adapter.message_adapter(schemas)
         in_msg = json.loads(inp.read())
         msg = adapter.loadNestedEvent(in_msg, {})
-        messageConfig = msg.get('messageConfig');
+        messageConfig = msg.get('messageConfig')
         handler_response = { "goodbye": "world" }
         result = adapter.createNextEvent(handler_response, in_msg, messageConfig)
         assert result["payload"]["goodbye"] == "world"
@@ -366,10 +367,11 @@ class Test(unittest.TestCase):
         adapter = message_adapter.message_adapter(schemas)
         in_msg = json.loads(inp.read())
         msg = adapter.loadNestedEvent(in_msg, {})
-        messageConfig = msg.get('messageConfig');
+        messageConfig = msg.get('messageConfig')
         handler_response = { "goodbye": 1 }
         try:
-            result = adapter.createNextEvent(handler_response, in_msg, messageConfig,)
+            adapter.createNextEvent(handler_response, in_msg, messageConfig,)
         except ValidationError as e:
             assert e.message == "output schema: 1 is not of type u'string'"
             pass
+
