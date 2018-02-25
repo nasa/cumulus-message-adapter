@@ -2,6 +2,7 @@
   "workflow_config": {
     "Example": {
       "bar": "{meta.foo}",
+      "provider": "{$.meta.provider}",
       "cumulus_message": {
         "outputs": [
           {
@@ -23,11 +24,25 @@
   },
   "meta": {
     "foo": "bar",
+    "provider": {
+      "id": "MODAPS",
+      "config": {
+          "num_connections": 5
+      }
+    },
     "baz": "anyvalue"
   },
   "payload": {
     "input": { "anykey": "anyvalue" },
-    "config": { "bar": "bar" }
+    "config": { 
+      "bar": "bar",
+      "provider": {
+        "id": "MODAPS",
+        "config": {
+            "num_connections": 5
+        }
+      }
+    }
   },
   "exception": "None"
 }
