@@ -107,7 +107,7 @@ loadRemote output is a full Cumulus Message as a json blob.
 
 The task name found associated with the running task is used to look up the task-specific configuration and construct the values of `config` and `messageConfig` fields sent to the business function. For example, if the current execution is associated with task named `'Task1'`, then the `config` object sent to the business function is the value of `workflow_config['Task1']` and the `messageConfig` object sent to the business function is the value of `workflow_config['Task1']['cumulus_message']`. These configurations are used to dispatch values to other parts of the Cumulus Message, via URL templates, which are required by the business function or `createNextEvent`.
 
-An example of the `<schemas_json>` that should be passed to `createNextEvent`:
+An example of the `<schemas_json>` that should be passed to `loadNestedEvent`:
 
 ```json
 {
@@ -130,7 +130,7 @@ The output of `loadNestedEvent` is a json blob containing the keys `input`, `con
 * `<message_config_json>` should be the value of the `messageConfig` key returned from `loadNestedEvent`.
 * `<schemas_json>` should be an object with filepaths to the json schema for the `output` that a "business function" expects to return.
 
-An example of the `<schemas_json>` that should be passed to `loadNestedEvent`:
+An example of the `<schemas_json>` that should be passed to `createNextEvent`:
 
 ```json
 {
