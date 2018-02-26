@@ -145,8 +145,7 @@ jobs:
       - run:
           name: Deploy to PyPi
           command: |
-            pip install --user virtualenv
-            ~/.local/bin/virtualenv ~/venv27
+            virtualenv ~/venv27
             . ~/venv27/bin/activate
             pip install twine
             python setup.py sdist
