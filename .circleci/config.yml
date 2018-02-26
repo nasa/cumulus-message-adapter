@@ -95,7 +95,7 @@ jobs:
             CUMULUS_ENV=testing nosetests -v -s
 
   publish_github:
-    <<: *container_python36
+    <<: *container_python27
     steps:
       - checkout
       - add_ssh_keys
@@ -138,31 +138,28 @@ jobs:
             fi
 
   publish_pypi:
-    <<: *container_python36
+    <<: *container_python27
     steps:
       - checkout
-      - *restore_cache_python36
+      - *restore_cache_python27
       - run:
           name: Deploy to PyPi
           command: |
             pip install --user virtualenv
-            ~/.local/bin/virtualenv ~/venv36
-            . ~/venv36/bin/activate
+            ~/.local/bin/virtualenv ~/venv27
+            . ~/venv27/bin/activate
             pip install twine
             python setup.py sdist
             twine upload --username "${PYPI_USER}" --password "${PYPI_PASS}" dist/*
 
 workflows:
   version: 2
-  build_test_27:
+  build_test_27_publish:
     jobs:
       - build_python27
-  build_test_36_publish:
-    jobs:
-      - build_python36
       - publish_github:
           requires:
-            - build_python36
+            - build_python27
           filters:
             branches:
               only: master
@@ -172,3 +169,6 @@ workflows:
           filters:
             branches:
               only: master
+  build_test_36:
+    jobs:
+      - build_python36
