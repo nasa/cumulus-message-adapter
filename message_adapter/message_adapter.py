@@ -216,7 +216,10 @@ class message_adapter:
             for match in matches:
                 matchData = parse(match.lstrip('{').rstrip('}')).find(event)
                 if len(matchData) > 0:
-                    str = str.replace(match, matchData[0].value)
+                    if type(matchData[0].value) is dict:
+                        str = matchData[0].value
+                    else:
+                        str = str.replace(match, matchData[0].value)
             return str
         else:
             return str
