@@ -130,7 +130,7 @@ The output of `loadNestedEvent` is a json blob containing the keys `input`, `con
 * `<message_config_json>` should be the value of the `messageConfig` key returned from `loadNestedEvent`.
 * `<schemas_json>` should be an object with filepaths to the json schema for the `output` that a "business function" expects to return.
 
-An example of the `<schemas_json>` that should be passed to `loadNestedEvent`:
+An example of the `<schemas_json>` that should be passed to `createNextEvent`:
 
 ```json
 {
