@@ -42,8 +42,6 @@ child.stdout.on('data', (data) => {
 */
 var child = cp.spawn('python', ['./cumulus-message-adapter.zip', 'loadNestedEvent'], { env: env });
 
-//child.stderr.pipe(process.stderr);
-
 // example context object
 const contextObject = JSON.parse(loadJsonFromFile('examples/contexts/simple-context.json'));
 
