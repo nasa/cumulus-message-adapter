@@ -35,26 +35,36 @@ child.stdout.on('data', (data) => {
 */
 
 /**
-* This will fail with "Lookup error: 'events'". * At the moment localstack
-* doesn't support step functions so there is no way to do a complete integration
-* test :(.
+* This is a failure case for "Lookup error: 'events'".
+* At the moment localstack doesn't support step functions.
+*
 * TODO(aimee) Mock the response from AWS Step Functions API.
 */
 var child = cp.spawn('python', ['./cumulus-message-adapter.zip', 'loadNestedEvent'], { env: env });
 
-// TODO(aimee): Uncomment this pipe if we can write a passing test (e.g. stub call to AWS Step Function API)
-// child.stderr.pipe(process.stderr);
+//child.stderr.pipe(process.stderr);
 
 // example context object
 const contextObject = JSON.parse(loadJsonFromFile('examples/contexts/simple-context.json'));
 
 const fullInput = JSON.stringify({'event': eventObject, 'context': contextObject});
+
 child.stdin.write(fullInput);
 child.stdin.end();
 
+child.on('close', (code) => {
+  assert.equal(code, 1);
+  console.log('loadNestedEvent exit code test passed');
+});
+
+child.stderr.on('data', (data) => {
+  assert.equal(data.toString(), "Lookup error: 'events'");
+  console.log('loadNestedEvent stderr message test passed');
+});
+
 /*
 * Integration Test for createNextEvent 
-*/
+// */
 var child = cp.spawn('python', ['./cumulus-message-adapter.zip', 'createNextEvent']);
 
 child.stderr.pipe(process.stderr);
