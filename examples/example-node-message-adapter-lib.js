@@ -58,7 +58,7 @@ child.on('close', (code) => {
 });
 
 child.stderr.on('data', (data) => {
-  assert.equal(data.toString(), "Lookup error: 'events'");
+  assert.equal(data.toString(), "Unexpected error:<class \'botocore.exceptions.DataNotFoundError\'>. Unable to load data for: endpoints");
   console.log('loadNestedEvent stderr message test passed');
 });
 
