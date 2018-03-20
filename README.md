@@ -59,3 +59,10 @@ Then you can run some integration tests:
 ```bash
 ./examples/example-node-message-adapter-lib.js 
 ```
+
+
+### Troubleshooting
+
+* Error: "DistutilsOptionError: must supply either home or prefix/exec-prefix — not both" when running `make cumulus-message-adapter.zip`
+  * [Solution](https://stackoverflow.com/a/24357384)
+
