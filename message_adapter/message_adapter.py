@@ -52,9 +52,10 @@ class message_adapter:
             # previousEventId's (TaskStateEntered) name
             if (arn is not None and
                     ((step['type'] == 'LambdaFunctionScheduled' and
-                        step['lambdaFunctionScheduledEventDetails']['resource'] == arn) or
-                        (step['type'] == 'ActivityScheduled' and
-                            step['activityScheduledEventDetails']['resource'] == arn))):
+                      step['lambdaFunctionScheduledEventDetails']['resource'] == arn) or
+                     (step['type'] == 'ActivityScheduled' and
+                      step['activityScheduledEventDetails']['resource'] == arn)) and
+                    'stateEnteredEventDetails' in eventsById[step['previousEventId']]):
                 return eventsById[step['previousEventId']]['stateEnteredEventDetails']['name']
             elif step['type'] == 'TaskStateEntered':
                 return step['stateEnteredEventDetails']['name']
