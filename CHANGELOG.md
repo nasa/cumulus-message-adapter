@@ -1,13 +1,10 @@
 # Changelog
-All notable changes to this project will be documented in this file.
+All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-
-### Fixed
-- move CHANGES.txt to CHANGELOG.md with content for all releases, using same format as cumulus core
 
 ## [v1.0.4] - 2018-03-21
 
@@ -25,7 +22,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [v1.0.2] - 2018-02-28
 
 ### Fixed
-- docs: fix typo
 - fix pypi release to use correct virtualenv
 
 ## [v1.0.1] - 2018-02-26
