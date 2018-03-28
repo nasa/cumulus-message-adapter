@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - docs: add troubleshooting section to readme
 
 ### Fixed
-- fix `sys.exit` indentation
+- fix `sys.exit` indentation to fix lookup errors throwing JSON.parse errors in cumulus-message-adapter-js#index.js because main.py was exiting 0 instead of 1
 
 ## [v1.0.2] - 2018-02-28
 
@@ -46,12 +46,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [v0.0.10] - 2018-02-16
 
 ### Fixed
-- fix indentation
+- fix indentation to fix missing result output from __main__.py
 
 ## [v0.0.9] - 2018-02-15
 
 ### Fixed
-- fix indenting in __main__.py
+- fix indenting in __main__.py to fix catching `LookupError` exceptions
 
 ### Changed
 - update boto3 dependency from >=1.5.12 to >=1.5.27
@@ -71,7 +71,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - add jsonschema validation
 - docs: descriptions of cumulus message schemas and the `createNextEvent` output
-
 
 ## [v0.0.5] - 2018-02-13
 
