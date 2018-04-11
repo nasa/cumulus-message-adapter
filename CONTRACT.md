@@ -140,7 +140,7 @@ An example of the `<schemas_json>` that should be passed to `createNextEvent`:
 
 ### `createNextEvent` output
 
-A Cumulus Message or a Cumulus Remote Message. When a task output message is too big, the Cumulus Message Adapter will store the message to S3 Bucket under `$.cumulus_meta.buckets.internal`, and return a new message with an S3 reference as in the input example.
+A Cumulus Message or a Cumulus Remote Message. When a task output message is too big, the Cumulus Message Adapter will store the message to S3 Bucket under `$.cumulus_meta.system_bucket`, and return a new message with an S3 reference as in the input example.
 
 ## Error Handling
 
