@@ -1,6 +1,6 @@
 # Cumulus Message Adapter
 
-[![CircleCI](https://circleci.com/gh/cumulus-nasa/cumulus-message-adapter.svg?style=svg)](https://circleci.com/gh/cumulus-nasa/cumulus-message-adapter)
+[![CircleCI](https://circleci.com/gh/nasa/cumulus-message-adapter.svg?style=svg)](https://circleci.com/gh/nasa/cumulus-message-adapter)
 
 `cumulus-message-adapter` is a command-line interface for preparing and outputting Cumulus Messages for Cumulus Tasks. `cumulus-message-adapter` helps Cumulus developers integrate a task into a Cumulus Workflow.
 
@@ -8,7 +8,7 @@ Read more about how the `cumulus-message-adapter` works in the [CONTRACT.md](./C
 
 ## Releases
 
-[CircleCI](https://circleci.com/gh/cumulus-nasa/cumulus-message-adapter) manages releases and release assets.
+[CircleCI](https://circleci.com/gh/nasa/cumulus-message-adapter) manages releases and release assets.
 
 Whenever CircleCI passes on the master branch of cumulus-message-adapter and `message_adapter/version.py` has been updated with a version that doesn't match an existing tag, CircleCI will:
 
