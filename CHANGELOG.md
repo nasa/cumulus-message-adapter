@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [v1.0.5] - 2018-07-18
+
+### Added
+- add `cumulus_meta` property with two attributes `state_machine` and `execution_name` to task event message [CUMULUS-685]
+
 ## [v1.0.4] - 2018-03-21
 
 ### Fixed
@@ -104,19 +109,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Initial release
 
-[Unreleased]: https://github.com/cumulus-nasa/cumulus-message-adapter/compare/v1.0.4...HEAD
-[v1.0.4]: https://github.com/cumulus-nasa/cumulus-message-adapter/compare/v1.0.3...v1.0.4
-[v1.0.3]: https://github.com/cumulus-nasa/cumulus-message-adapter/compare/v1.0.2...v1.0.3
-[v1.0.2]: https://github.com/cumulus-nasa/cumulus-message-adapter/compare/v1.0.1...v1.0.2
-[v1.0.1]: https://github.com/cumulus-nasa/cumulus-message-adapter/compare/v1.0.0...v1.0.1
-[v1.0.0]: https://github.com/cumulus-nasa/cumulus-message-adapter/compare/v0.0.10...v1.0.0
-[v0.0.10]: https://github.com/cumulus-nasa/cumulus-message-adapter/compare/v0.0.9...v0.0.10
-[v0.0.9]: https://github.com/cumulus-nasa/cumulus-message-adapter/compare/v0.0.8...v0.0.9
-[v0.0.8]: https://github.com/cumulus-nasa/cumulus-message-adapter/compare/v0.0.7...v0.0.8
-[v0.0.7]: https://github.com/cumulus-nasa/cumulus-message-adapter/compare/v0.0.6...v0.0.7
-[v0.0.6]: https://github.com/cumulus-nasa/cumulus-message-adapter/compare/v0.0.5...v0.0.6
-[v0.0.5]: https://github.com/cumulus-nasa/cumulus-message-adapter/compare/v0.0.4...v0.0.5
-[v0.0.4]: https://github.com/cumulus-nasa/cumulus-message-adapter/compare/v0.0.3...v0.0.4
-[v0.0.3]: https://github.com/cumulus-nasa/cumulus-message-adapter/compare/v0.0.2...v0.0.3
-[v0.0.2]: https://github.com/cumulus-nasa/cumulus-message-adapter/compare/v0.0.1...v0.0.2
-[v0.0.1]: https://github.com/cumulus-nasa/cumulus-message-adapter/compare/35f1cb9fcdb3f3e68f49be92ed84f6d7bad4cfb2...v0.0.1
+[Unreleased]: https://github.com/nasa/cumulus-message-adapter/compare/v1.0.5...HEAD
+[v1.0.5]: https://github.com/nasa/cumulus-message-adapter/compare/v1.0.4...v1.0.5
+[v1.0.4]: https://github.com/nasa/cumulus-message-adapter/compare/v1.0.3...v1.0.4
+[v1.0.3]: https://github.com/nasa/cumulus-message-adapter/compare/v1.0.2...v1.0.3
+[v1.0.2]: https://github.com/nasa/cumulus-message-adapter/compare/v1.0.1...v1.0.2
+[v1.0.1]: https://github.com/nasa/cumulus-message-adapter/compare/v1.0.0...v1.0.1
+[v1.0.0]: https://github.com/nasa/cumulus-message-adapter/compare/v0.0.10...v1.0.0
+[v0.0.10]: https://github.com/nasa/cumulus-message-adapter/compare/v0.0.9...v0.0.10
+[v0.0.9]: https://github.com/nasa/cumulus-message-adapter/compare/v0.0.8...v0.0.9
+[v0.0.8]: https://github.com/nasa/cumulus-message-adapter/compare/v0.0.7...v0.0.8
+[v0.0.7]: https://github.com/nasa/cumulus-message-adapter/compare/v0.0.6...v0.0.7
+[v0.0.6]: https://github.com/nasa/cumulus-message-adapter/compare/v0.0.5...v0.0.6
+[v0.0.5]: https://github.com/nasa/cumulus-message-adapter/compare/v0.0.4...v0.0.5
+[v0.0.4]: https://github.com/nasa/cumulus-message-adapter/compare/v0.0.3...v0.0.4
+[v0.0.3]: https://github.com/nasa/cumulus-message-adapter/compare/v0.0.2...v0.0.3
+[v0.0.2]: https://github.com/nasa/cumulus-message-adapter/compare/v0.0.1...v0.0.2
+[v0.0.1]: https://github.com/nasa/cumulus-message-adapter/compare/35f1cb9fcdb3f3e68f49be92ed84f6d7bad4cfb2...v0.0.1

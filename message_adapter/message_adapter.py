@@ -219,8 +219,8 @@ class message_adapter:
                 if len(matchData) > 0:
                     str = str.replace(match, matchData[0].value)
             return str
-        else:
-            return str
+
+        return str
 
         raise LookupError('Could not resolve path ' + str)
 
@@ -303,6 +303,15 @@ class message_adapter:
             response['config'] = finalConfig
         if 'cumulus_message' in config:
             response['messageConfig'] = config['cumulus_message']
+
+        # add cumulus_meta property, only selective attributes are added
+        attributes = ['state_machine', 'execution_name']
+        if (event.has_key('cumulus_meta')
+                and all(attribute in event['cumulus_meta'] for attribute in attributes)):
+            response['cumulus_meta'] = {}
+            for attribute in attributes:
+                response['cumulus_meta'][attribute] = event['cumulus_meta'][attribute]
+
         return response
 
     #############################
