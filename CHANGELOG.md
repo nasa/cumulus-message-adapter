@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [v1.0.5] - 2018-07-18
 
 ### Added
-- add `cumulus_meta` property with two attributes `state_machine` and `execution_name` to task event message [CUMULUS-685]
+- add `cumulus_config` property with two attributes `state_machine` and `execution_name` to task event message [CUMULUS-685]
 
 ## [v1.0.4] - 2018-03-21
 
