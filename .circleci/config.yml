@@ -102,7 +102,7 @@ jobs:
       - run:
           name: Tag, release, deploy release asset
           environment:
-            GIT_PATH: cumulus-nasa/cumulus-message-adapter
+            GIT_PATH: nasa/cumulus-message-adapter
             GIT_API_URL: https://api.github.com/repos
             ZIPFILENAME: cumulus-message-adapter.zip
           command: |

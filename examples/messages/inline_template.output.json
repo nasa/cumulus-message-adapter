@@ -27,6 +27,10 @@
         "foo": "bar",
         "foo2": "bar2"
       }
+    },
+    "cumulus_config": {
+      "state_machine": "arn:aws:states:us-east-1:1234:stateMachine:MySfn",
+      "execution_name": "MyExecution__id-1234"
     }
   },
   "exception": "None"

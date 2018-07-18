@@ -41,7 +41,7 @@ setup(
     # https://packaging.python.org/specifications/core-metadata/#summary
     description='A command-line interface for preparing and outputting Cumulus Messages for Cumulus Tasks',  # Required
     long_description=long_description,  # Optional
-    url='https://github.com/cumulus-nasa/cumulus-message-adapter',  # Optional
+    url='https://github.com/nasa/cumulus-message-adapter',  # Optional
     author='Cumulus Authors',  # Optional
     author_email='info@developmentseed.org',  # Optional
     classifiers=[  # Optional
