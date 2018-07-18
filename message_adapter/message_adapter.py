@@ -306,7 +306,7 @@ class message_adapter:
 
         # add cumulus_meta property, only selective attributes are added
         attributes = ['state_machine', 'execution_name']
-        if (event.has_key('cumulus_meta')
+        if ('cumulus_meta' in event
                 and all(attribute in event['cumulus_meta'] for attribute in attributes)):
             response['cumulus_meta'] = {}
             for attribute in attributes:
