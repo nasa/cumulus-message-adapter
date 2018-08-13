@@ -90,10 +90,10 @@ class message_adapter:
 
     # Events stored externally
 
-    def loadRemoteEvent(self, event):
+    def loadAndUpdateRemoteEvent(self, event, context):
         """
         * Looks at a Cumulus message. If the message has part of its data stored remotely in
-        * S3, fetches that data and returns it, otherwise it just returns the full message
+        * S3, fetches that data, otherwise it returns the full message, both cases updated with task metadata
         * @param {*} event The input Lambda event in the Cumulus message protocol
         * @returns {*} the full event data
         """
@@ -101,18 +101,7 @@ class message_adapter:
             _s3 = s3()
             data = _s3.Object(event['replace']['Bucket'], event['replace']['Key']).get()
             if (data is not None):
-                return json.loads(data['Body'].read().decode('utf-8'))
-        return event
-
-    # Update event task metadata
-
-    def updateRemoteEvent(self, event, context):
-        """
-        * Updates cumulus message with task information.
-        * @param {*} event An event in the Cumulus message format with remote parts resolved
-        * @param {*} context The context object passed to AWS Lambda or containing an activityArn
-        * @returns {*} The updated Cumulus message
-        """
+                event = json.loads(data['Body'].read().decode('utf-8'))
         if ('meta' in event and 'workflow_tasks' in event['meta']):
             cumulus_meta = event['cumulus_meta']
             taskName = self.__getCurrentSfnTask(cumulus_meta['state_machine'], cumulus_meta['execution_name'], context['invoked_function_arn'])
