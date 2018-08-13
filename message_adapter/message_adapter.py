@@ -104,6 +104,21 @@ class message_adapter:
                 return json.loads(data['Body'].read().decode('utf-8'))
         return event
 
+    # Update event task metadata
+
+    def updateRemoteEvent(self, event, context):
+        """
+        * Updates cumulus message with task information.
+        * @param {*} event An event in the Cumulus message format with remote parts resolved
+        * @param {*} context The context object passed to AWS Lambda or containing an activityArn
+        * @returns {*} The updated Cumulus message
+        """
+        if ('meta' in event and 'workflow_tasks' in event['meta']):
+            cumulus_meta = event['cumulus_meta']
+            taskName = self.__getCurrentSfnTask(cumulus_meta['state_machine'], cumulus_meta['execution_name'], context['invoked_function_arn'])
+            event['meta']['workflow_tasks'][taskName] = { name: context['function_name'], version: context['function_version'], arn: context['invoked_function_arn']}
+        return event
+
     # Loading task configuration from workload template
 
     def __getConfig(self, event, taskName):
