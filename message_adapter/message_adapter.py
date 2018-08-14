@@ -104,12 +104,12 @@ class message_adapter:
                 event = json.loads(data['Body'].read().decode('utf-8'))
         if ('meta' in event and 'workflow_tasks' in event['meta']):
             cumulus_meta = event['cumulus_meta']
-            taskName = self.__getCurrentSfnTask(cumulus_meta['state_machine'], cumulus_meta['execution_name'], context['invoked_function_arn'])
-            event['meta']['workflow_tasks'][taskName] = {
-                name: context.get('function_name'),
-                version: context.get('function_version'),
-                arn: context.get('invoked_function_arn')
-            }
+            taskMeta = {}
+            taskMeta['name'] = context.get('function_name', context.get('functionName'))
+            taskMeta['version'] = context.get('function_version', context.get('functionVersion'))
+            taskMeta['arn'] = context.get('invoked_function_arn', context.get('invokedFunctionArn', context.get('activityArn')))
+            taskName = self.__getCurrentSfnTask(cumulus_meta['state_machine'], cumulus_meta['execution_name'], taskMeta['arn'])
+            event['meta']['workflow_tasks'][taskName] = taskMeta
         return event
 
     # Loading task configuration from workload template
