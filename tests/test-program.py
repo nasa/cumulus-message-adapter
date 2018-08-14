@@ -36,9 +36,9 @@ class Test(unittest.TestCase):
             'output': 'schemas/exmaples-messages.output.json',
             'config': 'schemas/examples-messages.config.json'
         }
-        allInput = {'event': in_msg, 'schemas': schemas}
+        allInput = {'event': in_msg, 'context': {}, 'schemas': schemas}
         currentDirectory = os.getcwd()
-        remoteEventCmd = ['python', currentDirectory, 'loadRemoteEvent']
+        remoteEventCmd = ['python', currentDirectory, 'loadAndUpdateRemoteEvent']
         (exitstatus, remoteEvent, errorstr) = self.executeCommand( # pylint: disable=unused-variable
             remoteEventCmd, json.dumps(allInput))
         assert exitstatus == 0

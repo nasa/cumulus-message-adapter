@@ -42,15 +42,15 @@ class Test(unittest.TestCase):
         self.s3.Bucket(self.bucket_name).delete_objects(Delete=delete_objects_object)
         self.s3.Bucket(self.bucket_name).delete()
 
-    # loadRemoteEvent tests
+    # loadAndUpdateRemoteEvent tests
     def test_returns_remote_s3_object(self):
         """ Test remote s3 event is returned when 'replace' key is present """
-        result = self.cumulus_message_adapter.loadRemoteEvent(self.event_with_replace)
+        result = self.cumulus_message_adapter.loadAndUpdateRemoteEvent(self.event_with_replace, {})
         assert result == self.s3_object
 
     def test_returns_event(self):
         """ Test event argument is returned when 'replace' key is not present """
-        result = self.cumulus_message_adapter.loadRemoteEvent(self.event_without_replace)
+        result = self.cumulus_message_adapter.loadAndUpdateRemoteEvent(self.event_without_replace, {})
         assert result == self.event_without_replace
 
     # loadNestedEvent tests
@@ -249,7 +249,7 @@ class Test(unittest.TestCase):
         self.s3.Bucket(bucket_name).create()
         self.s3.Object(bucket_name, key_name).put(Body=json.dumps(datasource))
 
-        remoteEvent = self.cumulus_message_adapter.loadRemoteEvent(in_msg)
+        remoteEvent = self.cumulus_message_adapter.loadAndUpdateRemoteEvent(in_msg, {})
         msg = self.cumulus_message_adapter.loadNestedEvent(remoteEvent, {})
         messageConfig = msg.get('messageConfig')
         if 'messageConfig' in msg: del msg['messageConfig']
