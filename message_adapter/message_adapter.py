@@ -1,6 +1,7 @@
 import os
 import json
 import re
+import warnings
 from datetime import datetime, timedelta
 import uuid
 from jsonpath_ng import parse
@@ -89,6 +90,16 @@ class message_adapter:
     ##################################
 
     # Events stored externally
+
+    def loadRemoteEvent(self, event):
+        """
+        Maintained for backwards compatibility
+        """
+        warnings.warn(
+            'loadRemoteEvent is deprecated and will be removed in a future version',
+            DeprecationWarning
+        )
+        return loadAndUpdateRemoteEvent(self, event, None)
 
     def loadAndUpdateRemoteEvent(self, event, context):
         """
