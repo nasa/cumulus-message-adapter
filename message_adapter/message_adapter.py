@@ -102,7 +102,7 @@ class message_adapter:
             data = _s3.Object(event['replace']['Bucket'], event['replace']['Key']).get()
             if (data is not None):
                 event = json.loads(data['Body'].read().decode('utf-8'))
-        if ('meta' in event and 'workflow_tasks' in event['meta']):
+        if (context and 'meta' in event and 'workflow_tasks' in event['meta']):
             cumulus_meta = event['cumulus_meta']
             taskMeta = {}
             taskMeta['name'] = context.get('function_name', context.get('functionName'))

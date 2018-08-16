@@ -24,7 +24,7 @@ class Test(unittest.TestCase):
             print (errorstr.decode()) # pylint: disable=superfluous-parens
         return exitstatus, outstr.decode(), errorstr.decode()
 
-    def transformMessages(self, testcase): #pylint: disable=too-many-locals
+    def transformMessages(self, testcase, context={}): #pylint: disable=too-many-locals
         """
         transform cumulus messages, and check if the command return status and outputs are correct.
         Each test case (such as 'basic') has its corresponding example messages and schemas.
@@ -36,7 +36,7 @@ class Test(unittest.TestCase):
             'output': 'schemas/exmaples-messages.output.json',
             'config': 'schemas/examples-messages.config.json'
         }
-        allInput = {'event': in_msg, 'context': {}, 'schemas': schemas}
+        allInput = {'event': in_msg, 'context': context, 'schemas': schemas}
         currentDirectory = os.getcwd()
         remoteEventCmd = ['python', currentDirectory, 'loadAndUpdateRemoteEvent']
         (exitstatus, remoteEvent, errorstr) = self.executeCommand( # pylint: disable=unused-variable
@@ -44,7 +44,7 @@ class Test(unittest.TestCase):
         assert exitstatus == 0
         fullEvent = json.loads(remoteEvent)
 
-        allInput = {'event': fullEvent, 'context': {}, 'schemas': schemas}
+        allInput = {'event': fullEvent, 'context': context, 'schemas': schemas}
         loadNestedEvent = ['python', currentDirectory, 'loadNestedEvent']
         (exitstatus, nestedEvent, errorstr) = self.executeCommand( # pylint: disable=unused-variable
             loadNestedEvent, json.dumps(allInput))
@@ -76,6 +76,14 @@ class Test(unittest.TestCase):
     def test_meta(self):
         """ test meta message """
         self.transformMessages('meta')
+
+    def test_context(self):
+        """ test storing taskmeta in message """
+        self.transformMessages('context', {
+            'function_name': 'fakeStep',
+            'function_version': 1,
+            'invoked_function_arn': 'arn:aws:lambda:us-east-1:123:function:fakeStep:1'
+        })
 
     def test_remote(self):
         """ test remote message """
