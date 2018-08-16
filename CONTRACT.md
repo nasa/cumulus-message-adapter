@@ -10,7 +10,7 @@ Note: The `python ./cumulus-message-adapter.zip` is interchangeable with `__main
 
 ```bash
 # Cumulus Message or Cumulus Remote Message in:
-python ./cumulus-message-adapter.zip loadRemoteEvent
+python ./cumulus-message-adapter.zip loadAndUpdateRemoteEvent
 '{
   "event": <event_json>
 }'
@@ -35,7 +35,7 @@ python ./cumulus-message-adapter.zip createNextEvent
 }'
 ```
 
-These functions should be run in the order outlined above. The output of `loadRemoteEvent` should be sent as `<event_json>` to `createNextEvent`. The output of the `loadNestedEvent` should be fed to a "business function" and the output should be the `<handler_response_json>` sent to `createNextEvent`. More details on these values is provided in sections below.
+These functions should be run in the order outlined above. The output of `loadAndUpdateRemoteEvent` should be sent as `<event_json>` to `createNextEvent`. The output of the `loadNestedEvent` should be fed to a "business function" and the output should be the `<handler_response_json>` sent to `createNextEvent`. More details on these values is provided in sections below.
 
 ## Cumulus Message schemas
 
@@ -81,15 +81,17 @@ The message may contain a reference to an S3 Bucket and Key, as follows:
 }
 ```
 
-## `loadRemoteEvent` input and output
+## `loadAndUpdateRemoteEvent` input and output
 
-### `loadRemoteEvent` input
+### `loadAndUpdateRemoteEvent` input
 
-* `<event_json>` to cumulus-message-adapter `loadRemoteEvent` should be either a full Cumulus Message or a Cumulus Remote Message, as defined above.
+* `<event_json>` to cumulus-message-adapter `loadAndUpdateRemoteEvent` should be either a full Cumulus Message or a Cumulus Remote Message, as defined above.
 
-### `loadRemoteEvent` output
+* `<context_json>` to cumulus-message-adapter `loadAndUpdateRemoteEvent` should be the context from the lambda.
 
-loadRemote output is a full Cumulus Message as a json blob.
+### `loadAndUpdateRemoteEvent` output
+
+loadAndUpdateRemote output is a full Cumulus Message as a json blob.
 
 ## `loadNestedEvent`
 
@@ -126,7 +128,7 @@ The output of `loadNestedEvent` is a json blob containing the keys `input`, `con
 ### `createNextEvent` input
 
 * `<handler_response_json>` is arbitrary json - whatever the "business function" returns.
-* `<event_json>` is a full Cumulus Message and should be whatever is returned from `loadRemoteEvent`.
+* `<event_json>` is a full Cumulus Message and should be whatever is returned from `loadAndUpdateRemoteEvent`.
 * `<message_config_json>` should be the value of the `messageConfig` key returned from `loadNestedEvent`.
 * `<schemas_json>` should be an object with filepaths to the json schema for the `output` that a "business function" expects to return.
 
@@ -148,7 +150,7 @@ Errors raised during execution of `cumulus-message-adapter` functions are writte
 
 Errors raised during invocation of task application code, may either be the result of a misconfiguration, bug, or task execution error. Libraries should raise errors in the case the origin is misconfiguration or a bug since this should be fixed in source code.
 
-In case there is a task execution error - such as an AWS client error - the error should be caught by the library and returned as an additional `exception` field alongside the full event returned from `loadRemoteEvent`. For example, say:
+In case there is a task execution error - such as an AWS client error - the error should be caught by the library and returned as an additional `exception` field alongside the full event returned from `loadAndUpdateRemoteEvent`. For example, say:
 
 1. `loadRemoveEvent` successfully returns full Cumulus Message
 2. `loadNestedEvent` successfully returns object with input, config and messageConfig keys

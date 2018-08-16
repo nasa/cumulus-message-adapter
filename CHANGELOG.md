@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [v1.0.6] - 2018-08-16
+
+### Added
+- Record task name and version in message meta if available.
+
 ## [v1.0.5] - 2018-07-18
 
 ### Added

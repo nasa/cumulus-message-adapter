@@ -1,0 +1,5 @@
+{
+    "function_name": "fakeStep",
+    "function_version": 1,
+    "invoked_function_arn": "arn:aws:lambda:us-east-1:123:function:fakeStep:1"
+}

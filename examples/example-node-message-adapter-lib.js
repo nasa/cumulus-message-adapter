@@ -12,22 +12,24 @@ function loadJsonFromFile(fileName) {
 }
 
 /**
-* Integration Test for loadRemoteEvent
+* Integration Test for loadAndUpdateRemoteEvent
 */
-var child = cp.spawn('python', ['./cumulus-message-adapter.zip', 'loadRemoteEvent'], { env: env });
+var child = cp.spawn('python', ['./cumulus-message-adapter.zip', 'loadAndUpdateRemoteEvent'], { env: env });
 
 child.stderr.pipe(process.stderr);
 
 // example event object
 const eventObject = JSON.parse(loadJsonFromFile('examples/messages/sfn.input.json'));
+// example context object
+const contextObject = JSON.parse(loadJsonFromFile('examples/contexts/simple-context.json'));
 
-child.stdin.write(JSON.stringify({'event': eventObject}));
+child.stdin.write(JSON.stringify({'event': eventObject, 'context': contextObject}));
 child.stdin.end();
 
 child.stdout.on('data', (data) => {
   const expectedResponse = eventObject;
   assert.deepEqual(JSON.parse(data.toString()), expectedResponse);
-  console.log('loadRemoteEvent test passed');
+  console.log('loadAndUpdateRemoteEvent test passed');
 });
 
 /**

@@ -24,10 +24,10 @@ if __name__ == '__main__':
     event = allInput['event']
 
     try:
-        if (functionName == 'loadRemoteEvent'):
-            result = transformer.loadRemoteEvent(event)
+        context = allInput.get('context')
+        if (functionName == 'loadAndUpdateRemoteEvent'):
+            result = transformer.loadAndUpdateRemoteEvent(event, context)
         elif (functionName == 'loadNestedEvent'):
-            context = allInput['context']
             result = transformer.loadNestedEvent(event, context)
         elif (functionName == 'createNextEvent'):
             handlerResponse = allInput['handler_response']
