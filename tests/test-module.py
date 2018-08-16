@@ -22,6 +22,7 @@ class Test(unittest.TestCase):
     s3 = aws.s3()
     cumulus_message_adapter = message_adapter.message_adapter()
     test_folder = os.path.join(os.getcwd(), 'examples/messages')
+    context_folder = os.path.join(os.getcwd(), 'examples/contexts')
     schemas_folder = os.path.join(os.getcwd(), 'examples/schemas')
     os.environ["LAMBDA_TASK_ROOT"] = os.path.join(os.getcwd(), 'examples')
 
@@ -45,12 +46,12 @@ class Test(unittest.TestCase):
     # loadAndUpdateRemoteEvent tests
     def test_returns_remote_s3_object(self):
         """ Test remote s3 event is returned when 'replace' key is present """
-        result = self.cumulus_message_adapter.loadAndUpdateRemoteEvent(self.event_with_replace, {})
+        result = self.cumulus_message_adapter.loadAndUpdateRemoteEvent(self.event_with_replace, None)
         assert result == self.s3_object
 
     def test_returns_event(self):
         """ Test event argument is returned when 'replace' key is not present """
-        result = self.cumulus_message_adapter.loadAndUpdateRemoteEvent(self.event_without_replace, {})
+        result = self.cumulus_message_adapter.loadAndUpdateRemoteEvent(self.event_without_replace, None)
         assert result == self.event_without_replace
 
     # loadNestedEvent tests
@@ -273,6 +274,24 @@ class Test(unittest.TestCase):
         messageConfig = msg.get('messageConfig')
         if 'messageConfig' in msg: del msg['messageConfig']
         result = self.cumulus_message_adapter.createNextEvent(msg, in_msg, messageConfig)
+        assert result == out_msg 
+
+    @patch.object(cumulus_message_adapter, '_message_adapter__getCurrentSfnTask', return_value="Example")
+    def test_context(self, getCurrentSfnTask_function):
+        """ test storing context metadata """
+        inp = open(os.path.join(self.test_folder, 'context.input.json'))
+        out = open(os.path.join(self.test_folder, 'context.output.json'))
+        ctx = open(os.path.join(self.context_folder, 'lambda-context.json'))
+        in_msg = json.loads(inp.read())
+        out_msg = json.loads(out.read())
+        context = json.loads(ctx.read())
+
+        rem = self.cumulus_message_adapter.loadAndUpdateRemoteEvent(in_msg, context)
+        msg = self.cumulus_message_adapter.loadNestedEvent(rem, context)
+        messageConfig = msg.get('messageConfig')
+        if 'messageConfig' in msg: del msg['messageConfig']
+        result = self.cumulus_message_adapter.createNextEvent(msg, in_msg, messageConfig)
+        print(json.dumps(result))
         assert result == out_msg 
     
     @patch.object(cumulus_message_adapter, '_message_adapter__getCurrentSfnTask', return_value="Example")

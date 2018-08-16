@@ -42,6 +42,7 @@ class Test(unittest.TestCase):
         (exitstatus, remoteEvent, errorstr) = self.executeCommand( # pylint: disable=unused-variable
             remoteEventCmd, json.dumps(allInput))
         assert exitstatus == 0
+        print(remoteEvent)
         fullEvent = json.loads(remoteEvent)
 
         allInput = {'event': fullEvent, 'context': context, 'schemas': schemas}
@@ -76,14 +77,6 @@ class Test(unittest.TestCase):
     def test_meta(self):
         """ test meta message """
         self.transformMessages('meta')
-
-    def test_context(self):
-        """ test storing taskmeta in message """
-        self.transformMessages('context', {
-            'function_name': 'fakeStep',
-            'function_version': 1,
-            'invoked_function_arn': 'arn:aws:lambda:us-east-1:123:function:fakeStep:1'
-        })
 
     def test_remote(self):
         """ test remote message """

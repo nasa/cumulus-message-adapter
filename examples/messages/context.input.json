@@ -3,7 +3,7 @@
     "Example": {
       "inlinestr": "prefix{meta.foo}suffix",
       "array": "{[$.meta.foo]}",
-      "object": "{{$.meta}}"
+      "object": "{{$.meta.bar}}"
     }
   },
   "cumulus_meta": {
@@ -14,6 +14,7 @@
   },
   "meta": {
     "foo": "bar",
+    "bar": { "foo" : 0 },
     "workflow_tasks": {}
   },
   "payload": {

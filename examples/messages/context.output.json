@@ -3,7 +3,7 @@
     "Example": {
       "inlinestr": "prefix{meta.foo}suffix",
       "array": "{[$.meta.foo]}",
-      "object": "{{$.meta}}"
+      "object": "{{$.meta.bar}}"
     }
   },
   "cumulus_meta": {
@@ -14,6 +14,7 @@
   },
   "meta": {
     "foo": "bar",
+    "bar": { "foo": 0 },
     "workflow_tasks": {
         "Example": {
             "name": "fakeStep",
@@ -23,6 +24,16 @@
     }
   },
   "payload": {
-    "anykey": "anyvalue"
-  }
+    "input": { "anykey": "anyvalue" },
+    "config": {
+      "inlinestr": "prefixbarsuffix",
+      "array": ["bar"],
+      "object": { "foo": 0 }
+    },
+    "cumulus_config": {
+      "state_machine": "arn:aws:states:us-east-1:1234:stateMachine:MySfn",
+      "execution_name": "MyExecution__id-1234"
+    }
+  },
+  "exception": "None"
 }
