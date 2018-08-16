@@ -99,7 +99,7 @@ class message_adapter:
             'loadRemoteEvent is deprecated and will be removed in a future version',
             DeprecationWarning
         )
-        return loadAndUpdateRemoteEvent(self, event, None)
+        return self.loadAndUpdateRemoteEvent(event, None)
 
     def loadAndUpdateRemoteEvent(self, event, context):
         """
