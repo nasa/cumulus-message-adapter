@@ -42,7 +42,6 @@ class Test(unittest.TestCase):
         (exitstatus, remoteEvent, errorstr) = self.executeCommand( # pylint: disable=unused-variable
             remoteEventCmd, json.dumps(allInput))
         assert exitstatus == 0
-        print(remoteEvent)
         fullEvent = json.loads(remoteEvent)
 
         allInput = {'event': fullEvent, 'context': context, 'schemas': schemas}

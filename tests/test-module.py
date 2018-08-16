@@ -291,7 +291,6 @@ class Test(unittest.TestCase):
         messageConfig = msg.get('messageConfig')
         if 'messageConfig' in msg: del msg['messageConfig']
         result = self.cumulus_message_adapter.createNextEvent(msg, in_msg, messageConfig)
-        print(json.dumps(result))
         assert result == out_msg 
     
     @patch.object(cumulus_message_adapter, '_message_adapter__getCurrentSfnTask', return_value="Example")
