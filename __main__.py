@@ -25,7 +25,9 @@ if __name__ == '__main__':
 
     try:
         context = allInput.get('context')
-        if (functionName == 'loadAndUpdateRemoteEvent'):
+        if (functionName == 'loadRemoteEvent'):
+            result = transformer.loadRemoteEvent(event)
+        elif (functionName == 'loadAndUpdateRemoteEvent'):
             result = transformer.loadAndUpdateRemoteEvent(event, context)
         elif (functionName == 'loadNestedEvent'):
             result = transformer.loadNestedEvent(event, context)

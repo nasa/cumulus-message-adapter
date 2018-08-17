@@ -254,7 +254,6 @@ class message_adapter:
         * @param {*} config A config object, containing paths
         * @returns {*} A config object with all JSONPaths resolved
         """
-
         try:
             unicode
         except NameError:
