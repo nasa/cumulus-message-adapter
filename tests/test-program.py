@@ -36,6 +36,14 @@ class Test(unittest.TestCase):
             'output': 'schemas/exmaples-messages.output.json',
             'config': 'schemas/examples-messages.config.json'
         }
+        # keep to test backwards compatibility
+        allInput = {'event': in_msg, 'schemas': schemas}
+        currentDirectory = os.getcwd()
+        remoteEventCmd = ['python', currentDirectory, 'loadRemoteEvent']
+        (exitstatus, remoteEvent, errorstr) = self.executeCommand( # pylint: disable=unused-variable
+            remoteEventCmd, json.dumps(allInput))
+        assert exitstatus == 0 
+
         allInput = {'event': in_msg, 'context': context, 'schemas': schemas}
         currentDirectory = os.getcwd()
         remoteEventCmd = ['python', currentDirectory, 'loadAndUpdateRemoteEvent']
