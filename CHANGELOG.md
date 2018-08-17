@@ -6,10 +6,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [v1.0.9] - 2018-08-17
+
+### Fixed
+- Fix invocation as subprocess.
+
 ## [v1.0.8] - 2018-08-16
 
 ### Fixed
-- Improve backwards compatibility and add tests
+- Improve backwards compatibility and add tests.
 
 ## [v1.0.7] - 2018-08-16
 
