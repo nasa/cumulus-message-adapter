@@ -107,7 +107,7 @@ class Test(unittest.TestCase):
 
     def test_remote(self):
         """ test remote message """
-        self.transformMessages('meta')
+        self.transformMessages('remote')
 
     def test_templates(self):
         """ test templates message """
