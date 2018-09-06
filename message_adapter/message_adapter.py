@@ -108,17 +108,17 @@ class message_adapter:
         * @param {*} event The input Lambda event in the Cumulus message protocol
         * @returns {*} the full event data
         """
-        if ('replace' in event):
+        if 'replace' in event:
             exception = None
-            if ('exception' in event):
+            if 'exception' in event:
                 exception = event['exception']
             _s3 = s3()
             data = _s3.Object(event['replace']['Bucket'], event['replace']['Key']).get()
-            if (data is not None):
+            if data is not None:
                 event = json.loads(data['Body'].read().decode('utf-8'))
-                if (exception is not None):
+                if exception is not None and exception is not 'None':
                     event['exception'] = exception
-        if (context and 'meta' in event and 'workflow_tasks' in event['meta']):
+        if context and 'meta' in event and 'workflow_tasks' in event['meta']:
             cumulus_meta = event['cumulus_meta']
             taskMeta = {}
             taskMeta['name'] = context.get('function_name', context.get('functionName'))
@@ -396,12 +396,17 @@ class message_adapter:
         * @param {*} event The response message
         * @returns {*} A response message, possibly referencing an S3 object for its contents
         """
-        jsonData = json.dumps(event)
-        roughDataSize = len(jsonData) if event is not None else 0
+        roughDataSize = len(json.dumps(event)) if event is not None else 0
 
         if (roughDataSize < self.MAX_NON_S3_PAYLOAD_SIZE):
             return event
 
+        exception = 'None'
+        if 'exception' in event:
+            exception = event['exception']
+            del event['exception']
+
+        jsonData = json.dumps(event)
         _s3 = s3()
         s3Bucket = event['cumulus_meta']['system_bucket']
         s3Key = ('/').join(['events', str(uuid.uuid4())])
@@ -415,7 +420,8 @@ class message_adapter:
 
         return {
             'cumulus_meta': event['cumulus_meta'],
-            'replace': s3Location
+            'replace': s3Location,
+            'exception': exception
         }
 
     def createNextEvent(self, handlerResponse, event, messageConfig):
@@ -429,7 +435,7 @@ class message_adapter:
         """
         self.__validate_json(handlerResponse, 'output')
         result = self.__assignOutputs(handlerResponse, event, messageConfig)
-        if ('exception' not in result):
+        if 'exception' not in result:
             result['exception'] = 'None'
         if 'replace' in result:
             del result['replace']

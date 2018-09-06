@@ -17,13 +17,19 @@ class Test(unittest.TestCase):
         """
         Place the remote message on S3 before test
         """
-        s3 = aws.s3()
+        self.s3 = aws.s3()
         bucket_name = in_msg['replace']['Bucket']
         key_name = in_msg['replace']['Key']
         data_filename = os.path.join(self.test_folder, key_name)
         with open(data_filename, 'r') as f: datasource = json.load(f)
-        s3.Bucket(bucket_name).create()
-        s3.Object(bucket_name, key_name).put(Body=json.dumps(datasource))
+        self.s3.Bucket(bucket_name).create()
+        self.s3.Object(bucket_name, key_name).put(Body=json.dumps(datasource))
+        return { 'bucket_name': bucket_name, 'key_name': key_name }
+    
+    def cleanUpRemoteMessage(self, bucket_name, key_name):
+        delete_objects_object = {'Objects': [{'Key': key_name}]}
+        self.s3.Bucket(bucket_name).delete_objects(Delete=delete_objects_object)
+        self.s3.Bucket(bucket_name).delete()
 
     def executeCommand(self, cmd, inputMessage):
         """
@@ -45,8 +51,9 @@ class Test(unittest.TestCase):
         """
         inp = open(os.path.join(self.test_folder, '{}.input.json'.format(testcase)))
         in_msg = json.loads(inp.read())
+        s3meta = None
         if ('replace' in in_msg):
-            self.placeRemoteMessage(in_msg)
+            s3meta = self.placeRemoteMessage(in_msg)
         schemas = {
             'input': 'schemas/exmaples-messages.output.json',
             'output': 'schemas/exmaples-messages.output.json',
@@ -88,6 +95,9 @@ class Test(unittest.TestCase):
         out = open(os.path.join(self.test_folder, '{}.output.json'.format(testcase)))
         out_msg = json.loads(out.read())
         assert json.loads(nextEvent) == out_msg
+
+        if s3meta is not None:
+            self.cleanUpRemoteMessage(s3meta['bucket_name'], s3meta['key_name'])
 
     def test_basic(self):
         """ test basic message """
