@@ -109,10 +109,15 @@ class message_adapter:
         * @returns {*} the full event data
         """
         if ('replace' in event):
+            exception = None
+            if ('exception' in event):
+                exception = event['exception']
             _s3 = s3()
             data = _s3.Object(event['replace']['Bucket'], event['replace']['Key']).get()
             if (data is not None):
                 event = json.loads(data['Body'].read().decode('utf-8'))
+                if (exception is not None):
+                    event['exception'] = exception
         if (context and 'meta' in event and 'workflow_tasks' in event['meta']):
             cumulus_meta = event['cumulus_meta']
             taskMeta = {}
@@ -424,7 +429,8 @@ class message_adapter:
         """
         self.__validate_json(handlerResponse, 'output')
         result = self.__assignOutputs(handlerResponse, event, messageConfig)
-        result['exception'] = 'None'
+        if ('exception' not in result):
+            result['exception'] = 'None'
         if 'replace' in result:
             del result['replace']
         return self.__storeRemoteResponse(result)

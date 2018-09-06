@@ -14,7 +14,7 @@ function loadJsonFromFile(fileName) {
 /**
  * Integration Test for loadRemoteEvent (backwards compatibility)
  */
-
+console.log('Running loadRemoteEvent integration test...\n')
 var child = cp.spawn('python', ['./cumulus-message-adapter.zip', 'loadRemoteEvent'], { env: env });
 
 child.stderr.pipe(process.stderr);
@@ -28,12 +28,13 @@ child.stdin.end();
 child.stdout.on('data', (data) => {
   const expectedResponse = remoteObject;
   assert.deepEqual(JSON.parse(data.toString()), expectedResponse);
-  console.log('loadRemoteEvent test passed');
+  console.log('\nloadRemoteEvent test passed\n');
 });
 
 /**
 * Integration Test for loadAndUpdateRemoteEvent
 */
+console.log('Running loadAndUpdateRemoteEvent integration test...\n')
 var child = cp.spawn('python', ['./cumulus-message-adapter.zip', 'loadAndUpdateRemoteEvent'], { env: env });
 
 child.stderr.pipe(process.stderr);
@@ -49,7 +50,7 @@ child.stdin.end();
 child.stdout.on('data', (data) => {
   const expectedResponse = eventObject;
   assert.deepEqual(JSON.parse(data.toString()), expectedResponse);
-  console.log('loadAndUpdateRemoteEvent test passed');
+  console.log('\nloadAndUpdateRemoteEvent test passed\n');
 });
 
 /**
@@ -62,6 +63,7 @@ child.stdout.on('data', (data) => {
 *
 * TODO(aimee) Mock the response from AWS Step Functions API.
 */
+console.log('Running loadNestedEvent integration test...\n')
 var child = cp.spawn('python', ['./cumulus-message-adapter.zip', 'loadNestedEvent'], { env: env });
 
 // example context object
@@ -73,17 +75,18 @@ child.stdin.end();
 
 child.on('close', (code) => {
   assert.equal(code, 1);
-  console.log('loadNestedEvent exit code test passed');
+  console.log('\nloadNestedEvent exit code test passed\n');
 });
 
 child.stderr.on('data', (data) => {
   assert.equal(data.toString(), "Unexpected error:<class \'botocore.exceptions.DataNotFoundError\'>. Unable to load data for: endpoints");
-  console.log('loadNestedEvent stderr message test passed');
+  console.log('\nloadNestedEvent stderr message test passed\n');
 });
 
 /*
 * Integration Test for createNextEvent 
-// */
+*/
+console.log('Running createNextEvent integration test...\n')
 var child = cp.spawn('python', ['./cumulus-message-adapter.zip', 'createNextEvent']);
 
 child.stderr.pipe(process.stderr);
@@ -137,5 +140,5 @@ child.stdout.on('data', (data) => {
     }
   }
   assert.deepEqual(JSON.parse(data.toString()), expectedResponse);
-  console.log('createNextEvent test passed');
+  console.log('\ncreateNextEvent test passed\n');
 });

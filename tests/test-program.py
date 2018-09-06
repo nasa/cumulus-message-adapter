@@ -6,10 +6,24 @@ import json
 import subprocess
 import unittest
 
+from message_adapter import aws
+
 class Test(unittest.TestCase):
     """ Test class """
     test_folder = os.path.join(os.getcwd(), 'examples/messages')
     os.environ["LAMBDA_TASK_ROOT"] = os.path.join(os.getcwd(), 'examples')
+
+    def placeRemoteMessage(self, in_msg):
+        """
+        Place the remote message on S3 before test
+        """
+        s3 = aws.s3()
+        bucket_name = in_msg['replace']['Bucket']
+        key_name = in_msg['replace']['Key']
+        data_filename = os.path.join(self.test_folder, key_name)
+        with open(data_filename, 'r') as f: datasource = json.load(f)
+        s3.Bucket(bucket_name).create()
+        s3.Object(bucket_name, key_name).put(Body=json.dumps(datasource))
 
     def executeCommand(self, cmd, inputMessage):
         """
@@ -31,6 +45,8 @@ class Test(unittest.TestCase):
         """
         inp = open(os.path.join(self.test_folder, '{}.input.json'.format(testcase)))
         in_msg = json.loads(inp.read())
+        if ('replace' in in_msg):
+            self.placeRemoteMessage(in_msg)
         schemas = {
             'input': 'schemas/exmaples-messages.output.json',
             'output': 'schemas/exmaples-messages.output.json',
@@ -76,6 +92,10 @@ class Test(unittest.TestCase):
     def test_basic(self):
         """ test basic message """
         self.transformMessages('basic')
+    
+    def test_exception(self):
+        """ test remote message with exception """
+        self.transformMessages('exception')
 
     def test_jsonpath(self):
         """ test jsonpath message """
