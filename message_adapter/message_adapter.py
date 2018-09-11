@@ -109,14 +109,14 @@ class message_adapter:
         * @returns {*} the full event data
         """
         if 'replace' in event:
-            exception = None
+            exception = 'None'
             if 'exception' in event:
                 exception = event['exception']
             _s3 = s3()
             data = _s3.Object(event['replace']['Bucket'], event['replace']['Key']).get()
             if data is not None:
                 event = json.loads(data['Body'].read().decode('utf-8'))
-                if exception is not None and exception is not 'None':
+                if exception is not 'None' and ('exception' not in event or event['exception'] == 'None'):
                     event['exception'] = exception
         if context and 'meta' in event and 'workflow_tasks' in event['meta']:
             cumulus_meta = event['cumulus_meta']
@@ -401,11 +401,6 @@ class message_adapter:
         if (roughDataSize < self.MAX_NON_S3_PAYLOAD_SIZE):
             return event
 
-        exception = 'None'
-        if 'exception' in event:
-            exception = event['exception']
-            del event['exception']
-
         jsonData = json.dumps(event)
         _s3 = s3()
         s3Bucket = event['cumulus_meta']['system_bucket']
@@ -420,8 +415,7 @@ class message_adapter:
 
         return {
             'cumulus_meta': event['cumulus_meta'],
-            'replace': s3Location,
-            'exception': exception
+            'replace': s3Location
         }
 
     def createNextEvent(self, handlerResponse, event, messageConfig):

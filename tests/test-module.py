@@ -181,7 +181,6 @@ class Test(unittest.TestCase):
                 'workflow': 'testing',
                 'system_bucket': self.bucket_name
             },
-            'exception': 'None',
             'replace': {'Bucket': self.bucket_name, 'Key': self.next_event_object_key_name}
         }
         remote_event = self.s3.Object(self.bucket_name, self.next_event_object_key_name).get()
@@ -192,6 +191,7 @@ class Test(unittest.TestCase):
                 'workflow': 'testing',
                 'system_bucket': self.bucket_name
             },
+            'exception': 'None',
             'payload': {'input': {'dataLocation': 's3://source.jpg'}}
         }
         assert remote_event_object == expected_remote_event_object
