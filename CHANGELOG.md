@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [v1.0.10] - 2018-09-12
+
+### Changed
+- Exceptions that occur are now stored in the remote message.
+
+### Fixed
+- Exceptions stored in the local message (e.g. by the client libraries) are carried through when the remote message is loaded.
+
 ## [v1.0.9] - 2018-08-17
 
 ### Fixed

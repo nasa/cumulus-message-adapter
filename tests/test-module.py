@@ -210,6 +210,31 @@ class Test(unittest.TestCase):
         result = self.cumulus_message_adapter.createNextEvent(msg, in_msg, messageConfig)
         assert result == out_msg
 
+    def test_exception(self):
+        """ test exception.input.json """
+        inp = open(os.path.join(self.test_folder, 'exception.input.json'))
+        out = open(os.path.join(self.test_folder, 'exception.output.json'))
+        in_msg = json.loads(inp.read())
+        out_msg = json.loads(out.read())
+
+        bucket_name = in_msg['replace']['Bucket']
+        key_name = in_msg['replace']['Key']
+        data_filename = os.path.join(self.test_folder, key_name)
+        with open(data_filename, 'r') as f: datasource = json.load(f)
+        self.s3.Bucket(bucket_name).create()
+        self.s3.Object(bucket_name, key_name).put(Body=json.dumps(datasource))
+
+        remoteEvent = self.cumulus_message_adapter.loadAndUpdateRemoteEvent(in_msg, {})
+        msg = self.cumulus_message_adapter.loadNestedEvent(remoteEvent, {})
+        messageConfig = msg.get('messageConfig')
+        if 'messageConfig' in msg: del msg['messageConfig']
+        result = self.cumulus_message_adapter.createNextEvent(msg, remoteEvent, messageConfig)
+        
+        delete_objects_object = {'Objects': [{'Key': key_name}]}
+        self.s3.Bucket(bucket_name).delete_objects(Delete=delete_objects_object)
+        self.s3.Bucket(bucket_name).delete()
+        assert result == out_msg 
+
     def test_jsonpath(self):
         """ test jsonpath.input.json """
         inp = open(os.path.join(self.test_folder, 'jsonpath.input.json'))
@@ -235,7 +260,7 @@ class Test(unittest.TestCase):
         if 'messageConfig' in msg: del msg['messageConfig']
         result = self.cumulus_message_adapter.createNextEvent(msg, in_msg, messageConfig)
         assert result == out_msg
-    
+
     def test_remote(self):
         """ test remote.input.json """
         inp = open(os.path.join(self.test_folder, 'remote.input.json'))

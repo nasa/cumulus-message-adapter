@@ -6,10 +6,30 @@ import json
 import subprocess
 import unittest
 
+from message_adapter import aws
+
 class Test(unittest.TestCase):
     """ Test class """
     test_folder = os.path.join(os.getcwd(), 'examples/messages')
     os.environ["LAMBDA_TASK_ROOT"] = os.path.join(os.getcwd(), 'examples')
+
+    def placeRemoteMessage(self, in_msg):
+        """
+        Place the remote message on S3 before test
+        """
+        self.s3 = aws.s3()
+        bucket_name = in_msg['replace']['Bucket']
+        key_name = in_msg['replace']['Key']
+        data_filename = os.path.join(self.test_folder, key_name)
+        with open(data_filename, 'r') as f: datasource = json.load(f)
+        self.s3.Bucket(bucket_name).create()
+        self.s3.Object(bucket_name, key_name).put(Body=json.dumps(datasource))
+        return { 'bucket_name': bucket_name, 'key_name': key_name }
+    
+    def cleanUpRemoteMessage(self, bucket_name, key_name):
+        delete_objects_object = {'Objects': [{'Key': key_name}]}
+        self.s3.Bucket(bucket_name).delete_objects(Delete=delete_objects_object)
+        self.s3.Bucket(bucket_name).delete()
 
     def executeCommand(self, cmd, inputMessage):
         """
@@ -31,6 +51,9 @@ class Test(unittest.TestCase):
         """
         inp = open(os.path.join(self.test_folder, '{}.input.json'.format(testcase)))
         in_msg = json.loads(inp.read())
+        s3meta = None
+        if ('replace' in in_msg):
+            s3meta = self.placeRemoteMessage(in_msg)
         schemas = {
             'input': 'schemas/exmaples-messages.output.json',
             'output': 'schemas/exmaples-messages.output.json',
@@ -73,9 +96,16 @@ class Test(unittest.TestCase):
         out_msg = json.loads(out.read())
         assert json.loads(nextEvent) == out_msg
 
+        if s3meta is not None:
+            self.cleanUpRemoteMessage(s3meta['bucket_name'], s3meta['key_name'])
+
     def test_basic(self):
         """ test basic message """
         self.transformMessages('basic')
+    
+    def test_exception(self):
+        """ test remote message with exception """
+        self.transformMessages('exception')
 
     def test_jsonpath(self):
         """ test jsonpath message """
@@ -87,7 +117,7 @@ class Test(unittest.TestCase):
 
     def test_remote(self):
         """ test remote message """
-        self.transformMessages('meta')
+        self.transformMessages('remote')
 
     def test_templates(self):
         """ test templates message """
