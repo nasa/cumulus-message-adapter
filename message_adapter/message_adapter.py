@@ -116,7 +116,7 @@ class message_adapter:
             data = _s3.Object(event['replace']['Bucket'], event['replace']['Key']).get()
             if data is not None:
                 event = json.loads(data['Body'].read().decode('utf-8'))
-                if exception is not 'None' and ('exception' not in event or event['exception'] == 'None'):
+                if exception is not 'None' and ('exception' not in event or event['exception'] in ['None', None]):
                     event['exception'] = exception
         if context and 'meta' in event and 'workflow_tasks' in event['meta']:
             cumulus_meta = event['cumulus_meta']
@@ -429,7 +429,7 @@ class message_adapter:
         """
         self.__validate_json(handlerResponse, 'output')
         result = self.__assignOutputs(handlerResponse, event, messageConfig)
-        if 'exception' not in result:
+        if 'exception' not in result or (not result['exception']):
             result['exception'] = 'None'
         if 'replace' in result:
             del result['replace']
