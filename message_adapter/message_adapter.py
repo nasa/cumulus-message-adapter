@@ -109,12 +109,12 @@ class message_adapter:
         * @returns {*} the full event data
         """
         if 'replace' in event:
-            exception = event.get('exception', 'None')
+            exception = event.get('exception', None)
             _s3 = s3()
             data = _s3.Object(event['replace']['Bucket'], event['replace']['Key']).get()
             if data is not None:
                 event = json.loads(data['Body'].read().decode('utf-8'))
-                if exception not in ['None', None] and event.get('exception') in ['None', None]:
+                if (exception and exception != 'None') and (not event.get('exception') or event.get('exception') == 'None'):
                     event['exception'] = exception
         if context and 'meta' in event and 'workflow_tasks' in event['meta']:
             cumulus_meta = event['cumulus_meta']
