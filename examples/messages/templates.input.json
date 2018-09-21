@@ -16,5 +16,6 @@
   },
   "payload": {
     "anykey": "anyvalue"
-  }
+  },
+  "exception": null
 }

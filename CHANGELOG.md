@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [v1.0.11] - 2018-09-18
+
+### Fixed
+- Fixed rare case where `"exception": null` obscured failures.
+
 ## [v1.0.10] - 2018-09-12
 
 ### Changed
