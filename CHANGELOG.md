@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [v1.0.12] - 2018-09-28
+
+### Fixed
+- Increase number of configured retries in case of sfn ClientError.[CUMULUS-920]
+
 ## [v1.0.11] - 2018-09-18
 
 ### Fixed

@@ -1,7 +1,7 @@
 """ Determines the correct AWS endpoint for AWS services """
 import os
 import boto3
-
+from botocore.config import Config
 
 def localhost_s3_url():
     if 'LOCALSTACK_HOST' in os.environ:
@@ -33,4 +33,5 @@ def stepFn():
     if ('CUMULUS_ENV' in os.environ) and (os.environ["CUMULUS_ENV"] == 'testing'):
         return boto3.client(service_name='stepfunctions', endpoint_url=localhost_s3_url(), region_name=region)
     else:
-        return boto3.client('stepfunctions', region_name=region)
+        config = Config(region_name=region, retries=dict(max_attempts=30))
+        return boto3.client('stepfunctions', config=config)
