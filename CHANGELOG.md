@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [v1.0.13] - 2018-11-08
 
 ### Added
-- Add `cumulus_context` property from `cumulus_meta[cumulus_context]` to task event message [CUMULUS-906]
+- Add `cumulus_context` attribute from `cumulus_meta[cumulus_context]` to property `cumulus_config` of task event message [CUMULUS-906]
 
 ## [v1.0.12] - 2018-09-28
 
