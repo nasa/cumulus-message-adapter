@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [v1.0.13] - 2018-11-08
+
+### Added
+- Add `cumulus_context` property from `cumulus_meta[cumulus_context]` to task event message [CUMULUS-906]
+
 ## [v1.0.12] - 2018-09-28
 
 ### Fixed
@@ -147,7 +152,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Initial release
 
-[Unreleased]: https://github.com/nasa/cumulus-message-adapter/compare/v1.0.5...HEAD
+[Unreleased]: https://github.com/nasa/cumulus-message-adapter/compare/v1.0.13...HEAD
+[v1.0.13]: https://github.com/nasa/cumulus-message-adapter/compare/v1.0.12...v1.0.13
 [v1.0.5]: https://github.com/nasa/cumulus-message-adapter/compare/v1.0.4...v1.0.5
 [v1.0.4]: https://github.com/nasa/cumulus-message-adapter/compare/v1.0.3...v1.0.4
 [v1.0.3]: https://github.com/nasa/cumulus-message-adapter/compare/v1.0.2...v1.0.3

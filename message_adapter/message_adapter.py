@@ -328,11 +328,14 @@ class message_adapter:
 
         # add cumulus_config property, only selective attributes from event.cumulus_meta are added
         attributes = ['state_machine', 'execution_name']
-        if ('cumulus_meta' in event
-                and all(attribute in event['cumulus_meta'] for attribute in attributes)):
-            response['cumulus_config'] = {}
-            for attribute in attributes:
-                response['cumulus_config'][attribute] = event['cumulus_meta'][attribute]
+        if 'cumulus_meta' in event:
+            if all(attribute in event['cumulus_meta'] for attribute in attributes):
+                response['cumulus_config'] = {}
+                for attribute in attributes:
+                    response['cumulus_config'][attribute] = event['cumulus_meta'][attribute]
+
+            if 'cumulus_context' in event['cumulus_meta']:
+                response['cumulus_context'] = event['cumulus_meta']['cumulus_context']
 
         return response
 
