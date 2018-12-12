@@ -163,10 +163,13 @@ class message_adapter:
         * @returns {*} The task's configuration
         """
         meta = event['cumulus_meta']
-        if 'invokedFunctionArn' in context:
-            arn = context['invokedFunctionArn']
+        if isinstance(context, dict):
+            if 'invokedFunctionArn' in context:
+                arn = context['invokedFunctionArn']
+            else:
+                arn = context.get('invoked_function_arn', context.get('activityArn'))
         else:
-            arn = context.get('invoked_function_arn', context.get('activityArn'))
+            arn = context.invoked_function_arn
         taskName = self.__getCurrentSfnTask(meta['state_machine'], meta['execution_name'], arn)
         return self.__getConfig(event, taskName) if taskName is not None else None
 
