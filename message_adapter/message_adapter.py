@@ -120,9 +120,14 @@ class message_adapter:
         if context and 'meta' in event and 'workflow_tasks' in event['meta']:
             cumulus_meta = event['cumulus_meta']
             taskMeta = {}
-            taskMeta['name'] = context.get('function_name', context.get('functionName'))
-            taskMeta['version'] = context.get('function_version', context.get('functionVersion'))
-            taskMeta['arn'] = context.get('invoked_function_arn', context.get('invokedFunctionArn', context.get('activityArn')))
+            if isinstance(context, dict):
+                taskMeta['name'] = context.get('functionName')
+                taskMeta['version'] = context.get('functionVersion')
+                taskMeta['arn'] = context.get('invokedFunctionArn', context.get('activityArn'))
+            else:
+                taskMeta['name'] = context.function_name
+                taskMeta['version'] = context.function_version
+                taskMeta['arn'] = context.invoked_function_arn
             taskName = self.__getCurrentSfnTask(cumulus_meta['state_machine'], cumulus_meta['execution_name'], taskMeta['arn'])
             event['meta']['workflow_tasks'][taskName] = taskMeta
         return event
