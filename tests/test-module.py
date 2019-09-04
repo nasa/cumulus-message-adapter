@@ -158,7 +158,6 @@ class Test(unittest.TestCase):
         }
         assert result == expected_result
 
-    @patch.object(cumulus_message_adapter, 'MAX_NON_S3_PAYLOAD_SIZE', 1)
     @patch('uuid.uuid4')
     def test_big_result_stored_remotely(self, uuid_mock):
         """
@@ -169,7 +168,13 @@ class Test(unittest.TestCase):
         event_with_ingest = {
             'cumulus_meta': {
                 'workflow': 'testing',
-                "system_bucket": self.bucket_name
+                'system_bucket': self.bucket_name
+            },
+            'ReplaceConfig': {
+                'Bucket': self.bucket_name,
+                'Path': '$',
+                'MaxSize': 1,
+                'TargetPath': '$'
             }
         }
 
@@ -181,7 +186,8 @@ class Test(unittest.TestCase):
                 'workflow': 'testing',
                 'system_bucket': self.bucket_name
             },
-            'replace': {'Bucket': self.bucket_name, 'Key': self.next_event_object_key_name}
+            'replace': {'Bucket': self.bucket_name, 'Key': self.next_event_object_key_name,
+                        'JsonKey': None, 'TargetPath': '$'}
         }
         remote_event = self.s3.Object(self.bucket_name, self.next_event_object_key_name).get()
         remote_event_object = json.loads(
@@ -194,8 +200,8 @@ class Test(unittest.TestCase):
             'exception': 'None',
             'payload': {'input': {'dataLocation': 's3://source.jpg'}}
         }
-        assert remote_event_object == expected_remote_event_object
-        assert create_next_event_result == expected_create_next_event_result
+        self.assertEqual(remote_event_object, expected_remote_event_object)
+        self.assertEqual(create_next_event_result, expected_create_next_event_result)
 
     def test_basic(self):
         """ test basic.input.json """

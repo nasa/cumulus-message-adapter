@@ -15,7 +15,6 @@ class message_adapter:
     transforms the cumulus message
     """
     # Maximum message payload size that will NOT be stored in S3. Anything bigger will be.
-    MAX_NON_S3_PAYLOAD_SIZE = 10000
 
     def __init__(self, schemas=None):
         self.schemas = schemas
@@ -119,7 +118,6 @@ class message_adapter:
             target_json_path = event['replace']['TargetPath']
             target_key = event['replace'].get('JsonKey', None)
             parsed_json_path = parse(target_json_path)
-
             if data is not None:
                 remote_event = json.loads(data['Body'].read().decode('utf-8'))
                 replacement_targets = parsed_json_path.find(event)
@@ -424,29 +422,41 @@ class message_adapter:
         """
 
         event = copy.deepcopy(incoming_event)
-        if not (event.get('ReplaceConfig')):
-            return event
-        replace_config = event['ReplaceConfig'];
 
+        replace_config = event.get('ReplaceConfig', None)
+        if not (replace_config):
+            return event
+
+        event.pop('ReplaceConfig')
+        cumulus_meta = event['cumulus_meta']
         parsed_json_path = parse(replace_config['Path'])
         replacement_data = parsed_json_path.find(event)
+
         if len(replacement_data) != 1:
             raise Exception (f'JSON path invalid for replace key') ## TODO: Make this better
+        replacement_data = replacement_data[0] #TODO: Make this better
+
+        estimatedDataSize = len(json.dumps(replacement_data.value))
+        if replace_config.get('MaxSize') and estimatedDataSize < replace_config['MaxSize']:
+            return event
 
         _s3 = s3()
         s3Bucket = event['cumulus_meta']['system_bucket']
         s3Key = ('/').join(['events', str(uuid.uuid4())])
+
         s3Params = {
             'Expires': datetime.utcnow() + timedelta(days=7),  # Expire in a week
-            'Body': replacement_data[0].value
+            'Body': json.dumps(replacement_data.value)
         }
-        replacement_data[0].value.update({})
+        import pdb; pdb.set_trace()
+        replacement_data.value.clear()
         remoteConfiguration = {'Bucket': s3Bucket, 'Key': s3Key,
-                               'JsonKey': replace_config['jsonKey'],
+                               'JsonKey': replace_config.get('JsonKey', None),
                                'TargetPath': replace_config['TargetPath']}
 
         _s3.Object(s3Bucket, s3Key).put(**s3Params)
 
+        event['cumulus_meta'] = event.get('cumulus_meta', cumulus_meta)
         event['replace'] = remoteConfiguration
         return event
 
