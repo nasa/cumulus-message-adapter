@@ -102,6 +102,14 @@ class message_adapter:
         )
         return self.loadAndUpdateRemoteEvent(event, None)
 
+    def __parseParameterConfiguration(self, event):
+        parsed_event = event
+        if event.get('cma'):
+            parsed_event = {**event['cma']['event'],
+                            **{k:v for (k,v) in event['cma'.items()] if k != 'event'}}
+        return parsed_event
+
+
     def loadAndUpdateRemoteEvent(self, incoming_event, context):
         """
         * Looks at a Cumulus message. If the message has part of its data stored remotely in
@@ -109,7 +117,7 @@ class message_adapter:
         * @param {*} event The input Lambda event in the Cumulus message protocol
         * @returns {*} the full event data
         """
-        event = copy.deepcopy(incoming_event)
+        event = self.__parseParameterConfiguration(copy.deepcopy(incoming_event))
         ## TODO: Consider multiple configuration/values/etc
         if 'replace' in event:
             local_exception = event.get('exception', None)
@@ -129,11 +137,9 @@ class message_adapter:
                     raise Exception(f'Remote event configuration target {target_json_path} invalid')
                 [x.value.update(update_dict) for x in replacement_targets]
                 event.pop('replace')
-
                 if (local_exception and local_exception != 'None') and (not event['exception'] or event['exception'] == 'None'):
                     event['exception'] = local_exception
 
-        # TODO: Seperate this out into seperate method?
         if context and 'meta' in event and 'workflow_tasks' in event['meta']:
             cumulus_meta = event['cumulus_meta']
             taskMeta = {}
@@ -420,42 +426,41 @@ class message_adapter:
         * @param {*} event The response message
         * @returns {*} A response message, possibly referencing an S3 object for its contents
         """
-
         event = copy.deepcopy(incoming_event)
-
         replace_config = event.get('ReplaceConfig', None)
         if not (replace_config):
             return event
+        ## Set default values if FullMessage flag set
+        if replace_config.get('FullMessage', False):
+            replace_config['Path'] = '$'
+            replace_config['MaxSize'] = replace_config.get('MaxSize', 10000)
+            replace_config['TargetPath'] = '$'
 
         event.pop('ReplaceConfig')
         cumulus_meta = event['cumulus_meta']
         parsed_json_path = parse(replace_config['Path'])
         replacement_data = parsed_json_path.find(event)
-
         if len(replacement_data) != 1:
-            raise Exception (f'JSON path invalid for replace key') ## TODO: Make this better
+            raise Exception (f'JSON path invalid: {parsed_json_path}') ## TODO: Make this better
         replacement_data = replacement_data[0] #TODO: Make this better
-
         estimatedDataSize = len(json.dumps(replacement_data.value))
+
         if replace_config.get('MaxSize') and estimatedDataSize < replace_config['MaxSize']:
             return event
 
         _s3 = s3()
         s3Bucket = event['cumulus_meta']['system_bucket']
         s3Key = ('/').join(['events', str(uuid.uuid4())])
-
         s3Params = {
             'Expires': datetime.utcnow() + timedelta(days=7),  # Expire in a week
             'Body': json.dumps(replacement_data.value)
         }
-        import pdb; pdb.set_trace()
+        _s3.Object(s3Bucket, s3Key).put(**s3Params)
+
         replacement_data.value.clear()
         remoteConfiguration = {'Bucket': s3Bucket, 'Key': s3Key,
                                'JsonKey': replace_config.get('JsonKey', None),
                                'TargetPath': replace_config['TargetPath']}
-
-        _s3.Object(s3Bucket, s3Key).put(**s3Params)
-
         event['cumulus_meta'] = event.get('cumulus_meta', cumulus_meta)
         event['replace'] = remoteConfiguration
         return event
@@ -472,7 +477,6 @@ class message_adapter:
         self.__validate_json(handlerResponse, 'output')
 
         result = self.__assignOutputs(handlerResponse, event, messageConfig)
-
         if not result.get('exception'):
             result['exception'] = 'None'
         if 'replace' in result:

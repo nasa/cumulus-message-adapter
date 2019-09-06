@@ -9,6 +9,7 @@ from jsonschema.exceptions import ValidationError
 
 from message_adapter import aws, message_adapter
 
+
 class Test(unittest.TestCase):
     """ Test class """
 
@@ -158,6 +159,52 @@ class Test(unittest.TestCase):
         }
         assert result == expected_result
 
+
+    @patch('uuid.uuid4')
+    def test_configured_big_result_stored_remotely(self, uuid_mock):
+        """
+        Test remote payload is stored in S3 and return value points
+        to remote location with 'replace' key/value and correct configuration
+        """
+        event_with_ingest = {
+            'cumulus_meta': {
+                'workflow': 'testing',
+                'system_bucket': self.bucket_name
+            },
+            'meta': 'some meta object',
+            'ReplaceConfig': {
+                'Path': '$.payload',
+                'MaxSize': 1,
+                'TargetPath': '$.payload',
+                'JsonKey': 'subpayloadkey'
+            },
+        }
+        expected_create_next_event_result = {
+            'cumulus_meta': {
+                'workflow': 'testing',
+                'system_bucket': self.bucket_name
+            },
+            'meta': 'some meta object',
+            'payload': {},
+            'exception': 'None',
+            'replace': {'Bucket': self.bucket_name, 'Key': self.next_event_object_key_name,
+                        'JsonKey': 'subpayloadkey', 'TargetPath': '$.payload'}
+        }
+        expected_remote_event_object = {
+            'input': {'dataLocation': 's3://source.jpg'}
+        }
+
+        uuid_mock.return_value = self.test_uuid
+        create_next_event_result = self.cumulus_message_adapter.createNextEvent(
+            self.nested_response, event_with_ingest, None)
+
+        remote_event = self.s3.Object(self.bucket_name, self.next_event_object_key_name).get()
+        remote_event_object = json.loads(
+            remote_event['Body'].read().decode('utf-8'))
+
+        self.assertEqual(remote_event_object, expected_remote_event_object)
+        self.assertEqual(create_next_event_result, expected_create_next_event_result)
+
     @patch('uuid.uuid4')
     def test_big_result_stored_remotely(self, uuid_mock):
         """
@@ -171,16 +218,10 @@ class Test(unittest.TestCase):
                 'system_bucket': self.bucket_name
             },
             'ReplaceConfig': {
-                'Bucket': self.bucket_name,
-                'Path': '$',
+                'FullMessage': 'true',
                 'MaxSize': 1,
-                'TargetPath': '$'
             }
         }
-
-        uuid_mock.return_value = self.test_uuid
-        create_next_event_result = self.cumulus_message_adapter.createNextEvent(
-            self.nested_response, event_with_ingest, None)
         expected_create_next_event_result = {
             'cumulus_meta': {
                 'workflow': 'testing',
@@ -189,9 +230,6 @@ class Test(unittest.TestCase):
             'replace': {'Bucket': self.bucket_name, 'Key': self.next_event_object_key_name,
                         'JsonKey': None, 'TargetPath': '$'}
         }
-        remote_event = self.s3.Object(self.bucket_name, self.next_event_object_key_name).get()
-        remote_event_object = json.loads(
-            remote_event['Body'].read().decode('utf-8'))
         expected_remote_event_object = {
             'cumulus_meta': {
                 'workflow': 'testing',
@@ -200,6 +238,15 @@ class Test(unittest.TestCase):
             'exception': 'None',
             'payload': {'input': {'dataLocation': 's3://source.jpg'}}
         }
+
+        uuid_mock.return_value = self.test_uuid
+        create_next_event_result = self.cumulus_message_adapter.createNextEvent(
+            self.nested_response, event_with_ingest, None)
+
+        remote_event = self.s3.Object(self.bucket_name, self.next_event_object_key_name).get()
+        remote_event_object = json.loads(
+            remote_event['Body'].read().decode('utf-8'))
+
         self.assertEqual(remote_event_object, expected_remote_event_object)
         self.assertEqual(create_next_event_result, expected_create_next_event_result)
 
@@ -290,8 +337,34 @@ class Test(unittest.TestCase):
         delete_objects_object = {'Objects': [{'Key': key_name}]}
         self.s3.Bucket(bucket_name).delete_objects(Delete=delete_objects_object)
         self.s3.Bucket(bucket_name).delete()
-
         assert result == out_msg
+
+    def test_configured_remote(self):
+        """ test remote.input.json """
+        inp = open(os.path.join(self.test_folder, 'configured_remote.input.json'))
+        out = open(os.path.join(self.test_folder, 'configured_remote.output.json'))
+        in_msg = json.loads(inp.read())
+        out_msg = json.loads(out.read())
+
+        bucket_name = in_msg['replace']['Bucket']
+        key_name = in_msg['replace']['Key']
+        data_filename = os.path.join(self.test_folder, key_name)
+        with open(data_filename, 'r') as f: datasource = json.load(f)
+        self.s3.Bucket(bucket_name).create()
+        self.s3.Object(bucket_name, key_name).put(Body=json.dumps(datasource))
+
+        remoteEvent = self.cumulus_message_adapter.loadAndUpdateRemoteEvent(in_msg, {})
+        msg = self.cumulus_message_adapter.loadNestedEvent(remoteEvent, {})
+        messageConfig = msg.get('messageConfig')
+        if 'messageConfig' in msg: del msg['messageConfig']
+        result = self.cumulus_message_adapter.createNextEvent(msg, remoteEvent, messageConfig)
+
+        delete_objects_object = {'Objects': [{'Key': key_name}]}
+        self.s3.Bucket(bucket_name).delete_objects(Delete=delete_objects_object)
+        self.s3.Bucket(bucket_name).delete()
+
+        self.assertEquals(result, out_msg)
+
 
     @patch.object(cumulus_message_adapter, '_message_adapter__getCurrentSfnTask', return_value="Example")
     def test_sfn(self, getCurrentSfnTask_function):
