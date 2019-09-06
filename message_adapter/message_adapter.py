@@ -7,7 +7,7 @@ import uuid
 from jsonpath_ng import parse
 from jsonschema import validate
 from collections import defaultdict
-import copy
+from copy import deepcopy
 from .aws import stepFn, s3
 
 class message_adapter:
@@ -106,7 +106,7 @@ class message_adapter:
         parsed_event = event
         if event.get('cma'):
             parsed_event = {**event['cma']['event'],
-                            **{k:v for (k,v) in event['cma'.items()] if k != 'event'}}
+                            **{k:v for (k,v) in event['cma'].items() if k != 'event'}}
         return parsed_event
 
 
@@ -117,7 +117,7 @@ class message_adapter:
         * @param {*} event The input Lambda event in the Cumulus message protocol
         * @returns {*} the full event data
         """
-        event = self.__parseParameterConfiguration(copy.deepcopy(incoming_event))
+        event = self.__parseParameterConfiguration(deepcopy(incoming_event))
         ## TODO: Consider multiple configuration/values/etc
         if 'replace' in event:
             local_exception = event.get('exception', None)
@@ -405,7 +405,7 @@ class message_adapter:
         * @param {*} messageConfig The cumulus_message configuration
         * @returns {*} The output message with the nested response applied
         """
-        result = copy.deepcopy(event)
+        result = deepcopy(event)
         if messageConfig is not None and 'outputs' in messageConfig:
             outputs = messageConfig['outputs']
             result['payload'] = {}
@@ -426,7 +426,7 @@ class message_adapter:
         * @param {*} event The response message
         * @returns {*} A response message, possibly referencing an S3 object for its contents
         """
-        event = copy.deepcopy(incoming_event)
+        event = deepcopy(incoming_event)
         replace_config = event.get('ReplaceConfig', None)
         if not (replace_config):
             return event

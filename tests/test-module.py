@@ -346,8 +346,8 @@ class Test(unittest.TestCase):
         in_msg = json.loads(inp.read())
         out_msg = json.loads(out.read())
 
-        bucket_name = in_msg['replace']['Bucket']
-        key_name = in_msg['replace']['Key']
+        bucket_name = in_msg['cma']['event']['replace']['Bucket']
+        key_name = in_msg['cma']['event']['replace']['Key']
         data_filename = os.path.join(self.test_folder, key_name)
         with open(data_filename, 'r') as f: datasource = json.load(f)
         self.s3.Bucket(bucket_name).create()
