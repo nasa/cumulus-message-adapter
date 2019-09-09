@@ -10,6 +10,8 @@ from collections import defaultdict
 from copy import deepcopy
 from .aws import stepFn, s3
 
+REMOTE_DEFAULT_MAX_SIZE = 10000
+
 class message_adapter:
     """
     transforms the cumulus message
@@ -424,22 +426,25 @@ class message_adapter:
         replace_config = event.get('ReplaceConfig', None)
         if not (replace_config):
             return event
-        ## Set default values if FullMessage flag set
+
+        ## Set default value if FullMessage flag set
         if replace_config.get('FullMessage', False):
             replace_config['Path'] = '$'
-            replace_config['MaxSize'] = replace_config.get('MaxSize', 10000)
-            replace_config['TargetPath'] = '$'
+
+        source_path = replace_config['Path']
+        target_path = replace_config.get('TargetPath', replace_config['Path'])
+        max_size = replace_config.get('MaxSize', REMOTE_DEFAULT_MAX_SIZE)
 
         event.pop('ReplaceConfig')
         cumulus_meta = event['cumulus_meta']
-        parsed_json_path = parse(replace_config['Path'])
+        parsed_json_path = parse(source_path)
         replacement_data = parsed_json_path.find(event)
         if len(replacement_data) != 1:
             raise Exception (f'JSON path invalid: {parsed_json_path}')
         replacement_data = replacement_data[0] 
-        estimatedDataSize = len(json.dumps(replacement_data.value))
+        estimated_data_size = len(json.dumps(replacement_data.value))
 
-        if replace_config.get('MaxSize') and estimatedDataSize < replace_config['MaxSize']:
+        if estimated_data_size < max_size:
             return event
 
         _s3 = s3()
@@ -453,7 +458,7 @@ class message_adapter:
 
         replacement_data.value.clear()
         remoteConfiguration = {'Bucket': s3Bucket, 'Key': s3Key,
-                               'TargetPath': replace_config['TargetPath']}
+                               'TargetPath': target_path}
         event['cumulus_meta'] = event.get('cumulus_meta', cumulus_meta)
         event['replace'] = remoteConfiguration
         return event
