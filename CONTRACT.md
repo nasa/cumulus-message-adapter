@@ -39,7 +39,65 @@ These functions should be run in the order outlined above. The output of `loadAn
 
 ## Cumulus Message schemas
 
-Cumulus Messages come in 2 flavors: The full **Cumulus Message** and the **Cumulus Remote Message**. Because of the potential size of a Cumulus message, mainly the `"payload"` field, if the message size is greater than 10000 bytes, the full message will be stored to S3 Bucket. The Cumulus Remote Message points to a full Cumulus Message stored in S3. 
+Cumulus Messages come in 2 flavors: The full **Cumulus Message** and the **Cumulus Remote Message**.
+
+ Because of the potential size of a Cumulus message, mainly the `"payload"` field, a task can be set via configuration to store a portion of it's payload on S3 with a message key `Remote Message` that defines how to retrieve it and an empty JSON object `{}` in it's place.   If the portion of the message targeted exceeds the configured MaxSize (defaults to 10000 bytes) it will be written to S3. 
+
+### Remote Message Configuration
+
+The CMA remote message functionality can be configured using parameters in several ways:
+
+**Please note** that `event.$: '$'` is *required* when using parameterized configuration in the CMA
+
+#### Partial Message
+
+Setting the Path/Target path in the ReplaceConfig Parameter (and optionally a non-default MaxSize)
+
+``` 
+    DiscoverGranules:
+      Parameters:
+        cma:
+          event.$: '$'
+          ReplaceConfig:
+            MaxSize: 1
+            Path: '$.payload'
+            TargetPath: '$.payload'
+```
+
+will result in any "payload" output larger than the MaxSize to be written to S3.  When the CMA picks up the `replace` key output in future steps, it will attempt to write it back to "payload". 
+
+Note that you can optionally target a different sub key in future steps, however as the target is a JSON path there must be an object to target in the output of that step.    Also note that the JSON path specified must target *one* node, otherwise the CMA will error, as it does not support multiple replacement targets.
+
+If TargetPath is omitted, it will default to the value for `Path`
+
+#### Full Message
+
+Setting the following parameters for a lambda:
+
+```
+DiscoverGranules:
+      Parameters:
+        cma:
+          event.$: '$'
+          ReplaceConfig:
+            FullMessage: true
+```
+
+will result in the CMA assuming the entire inbound message should be stored with the default max size. 
+
+This is analogous  to:
+
+``` 
+    DiscoverGranules:
+      Parameters:
+        cma:
+          event.$: '$'
+          ReplaceConfig:
+            MaxSize: 10000
+            Path: '$'
+            TargetPath: '$'
+```
+
 
 #### Cumulus Message example:
 
@@ -69,13 +127,14 @@ Cumulus Messages come in 2 flavors: The full **Cumulus Message** and the **Cumul
 
 #### Cumulus Remote Message example:
 
-The message may contain a reference to an S3 Bucket and Key, as follows:
+The message may contain a reference to an S3 Bucket, Key and TargetPath as follows:
 
 ```json
 {
   "replace": {
     "Bucket": "cumulus-bucket",
     "Key": "my-large-event.json"
+    "TargetPath": "$" 
   },
   "cumulus_meta": {}
 }
