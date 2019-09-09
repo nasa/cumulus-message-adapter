@@ -175,8 +175,7 @@ class Test(unittest.TestCase):
             'ReplaceConfig': {
                 'Path': '$.payload',
                 'MaxSize': 1,
-                'TargetPath': '$.payload',
-                'JsonKey': 'subpayloadkey'
+                'TargetPath': '$.payload'
             },
         }
         expected_create_next_event_result = {
@@ -188,7 +187,7 @@ class Test(unittest.TestCase):
             'payload': {},
             'exception': 'None',
             'replace': {'Bucket': self.bucket_name, 'Key': self.next_event_object_key_name,
-                        'JsonKey': 'subpayloadkey', 'TargetPath': '$.payload'}
+                        'TargetPath': '$.payload'}
         }
         expected_remote_event_object = {
             'input': {'dataLocation': 's3://source.jpg'}
@@ -228,7 +227,7 @@ class Test(unittest.TestCase):
                 'system_bucket': self.bucket_name
             },
             'replace': {'Bucket': self.bucket_name, 'Key': self.next_event_object_key_name,
-                        'JsonKey': None, 'TargetPath': '$'}
+                        'TargetPath': '$'}
         }
         expected_remote_event_object = {
             'cumulus_meta': {
@@ -362,7 +361,6 @@ class Test(unittest.TestCase):
         delete_objects_object = {'Objects': [{'Key': key_name}]}
         self.s3.Bucket(bucket_name).delete_objects(Delete=delete_objects_object)
         self.s3.Bucket(bucket_name).delete()
-
         self.assertEquals(result, out_msg)
 
 

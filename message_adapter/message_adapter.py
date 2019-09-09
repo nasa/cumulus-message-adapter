@@ -118,24 +118,18 @@ class message_adapter:
         * @returns {*} the full event data
         """
         event = self.__parseParameterConfiguration(deepcopy(incoming_event))
-        ## TODO: Consider multiple configuration/values/etc
         if 'replace' in event:
             local_exception = event.get('exception', None)
             _s3 = s3()
             data = _s3.Object(event['replace']['Bucket'], event['replace']['Key']).get()
             target_json_path = event['replace']['TargetPath']
-            target_key = event['replace'].get('JsonKey', None)
             parsed_json_path = parse(target_json_path)
             if data is not None:
                 remote_event = json.loads(data['Body'].read().decode('utf-8'))
                 replacement_targets = parsed_json_path.find(event)
-                update_dict = remote_event
-                if target_key:
-                    update_dict = {target_key: remote_event}
-                if not replacement_targets:
-                    ## TODO Custom exception
+                if not replacement_targets or len(replacement_targets) != 1:
                     raise Exception(f'Remote event configuration target {target_json_path} invalid')
-                [x.value.update(update_dict) for x in replacement_targets]
+                replacement_targets[0].value.update(remote_event)
                 event.pop('replace')
                 if (local_exception and local_exception != 'None') and (not event['exception'] or event['exception'] == 'None'):
                     event['exception'] = local_exception
@@ -441,8 +435,8 @@ class message_adapter:
         parsed_json_path = parse(replace_config['Path'])
         replacement_data = parsed_json_path.find(event)
         if len(replacement_data) != 1:
-            raise Exception (f'JSON path invalid: {parsed_json_path}') ## TODO: Make this better
-        replacement_data = replacement_data[0] #TODO: Make this better
+            raise Exception (f'JSON path invalid: {parsed_json_path}')
+        replacement_data = replacement_data[0] 
         estimatedDataSize = len(json.dumps(replacement_data.value))
 
         if replace_config.get('MaxSize') and estimatedDataSize < replace_config['MaxSize']:
@@ -459,7 +453,6 @@ class message_adapter:
 
         replacement_data.value.clear()
         remoteConfiguration = {'Bucket': s3Bucket, 'Key': s3Key,
-                               'JsonKey': replace_config.get('JsonKey', None),
                                'TargetPath': replace_config['TargetPath']}
         event['cumulus_meta'] = event.get('cumulus_meta', cumulus_meta)
         event['replace'] = remoteConfiguration

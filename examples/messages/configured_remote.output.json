@@ -14,14 +14,14 @@
   },
   "meta": {
     "foo": "bar",
-    "subvalue": {"someKey": "someData"}
+    "someKey": "someData"
   },
   "payload": {
     "input": { "anykey": "anyvalue" },
     "config": {
       "inlinestr": "prefixbarsuffix",
       "array": ["bar"],
-      "object": { "foo": "bar", "subvalue": {"someKey": "someData"} }
+      "object": { "foo": "bar", "someKey": "someData" }
     }
   },
   "exception": "None"
