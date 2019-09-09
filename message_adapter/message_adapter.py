@@ -107,8 +107,13 @@ class message_adapter:
     def __parseParameterConfiguration(self, event):
         parsed_event = event
         if event.get('cma'):
-            parsed_event = {**event['cma']['event'],
-                            **{k:v for (k,v) in event['cma'].items() if k != 'event'}}
+            updated_event = {k:v for (k,v) in event['cma'].items() if k != 'event'}
+            parsed_event = event['cma']['event']
+            parsed_event.update(updated_event)
+
+            ## Python 2 is terrible, we should use the following here: 
+            #parsed_event = {**event['cma']['event'],
+            #                **{k:v for (k,v) in event['cma'].items() if k != 'event'}}
         return parsed_event
 
 
@@ -130,7 +135,7 @@ class message_adapter:
                 remote_event = json.loads(data['Body'].read().decode('utf-8'))
                 replacement_targets = parsed_json_path.find(event)
                 if not replacement_targets or len(replacement_targets) != 1:
-                    raise Exception(f'Remote event configuration target {target_json_path} invalid')
+                    raise Exception('Remote event configuration target {} invalid'.format(target_json_path))
                 replacement_targets[0].value.update(remote_event)
                 event.pop('replace')
                 if (local_exception and local_exception != 'None') and (not event['exception'] or event['exception'] == 'None'):
@@ -440,7 +445,7 @@ class message_adapter:
         parsed_json_path = parse(source_path)
         replacement_data = parsed_json_path.find(event)
         if len(replacement_data) != 1:
-            raise Exception (f'JSON path invalid: {parsed_json_path}')
+            raise Exception ('JSON path invalid: {}'.format(parsed_json_path))
         replacement_data = replacement_data[0] 
         estimated_data_size = len(json.dumps(replacement_data.value))
 
