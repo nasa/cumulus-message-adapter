@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### BREAKING CHANGES
+### Added
+- Updated remote message behavior to be configured by step function parameters *only*, this removes the default remote message behavior.  [CUMULUS-1447]
+
 ## [v1.0.13] - 2018-11-08
 
 ### Added
