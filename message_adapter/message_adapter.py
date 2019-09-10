@@ -110,10 +110,6 @@ class message_adapter:
             updated_event = {k:v for (k,v) in event['cma'].items() if k != 'event'}
             parsed_event = event['cma']['event']
             parsed_event.update(updated_event)
-
-            ## Python 2 is terrible, we should use the following here: 
-            #parsed_event = {**event['cma']['event'],
-            #                **{k:v for (k,v) in event['cma'].items() if k != 'event'}}
         return parsed_event
 
 

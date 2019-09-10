@@ -16,6 +16,7 @@ class Test(unittest.TestCase):
     s3_object = {'input': ':blue_whale:'}
     bucket_name = 'testing-internal'
     key_name = 'blue_whale-event.json'
+    event_with_cma = {'cma': {'foo': 'bar', 'event': {'some': 'object'}}}
     event_with_replace = {'replace': {'Bucket': bucket_name, 'Key': key_name, 'TargetPath': '$'}}
     event_without_replace = {'input': ':baby_whale:'}
     test_uuid = 'aad93279-95d4-4ada-8c43-aa5823f8bbbc'
@@ -49,11 +50,17 @@ class Test(unittest.TestCase):
         """ Test remote s3 event is returned when 'replace' key is present """
         result = self.cumulus_message_adapter.loadRemoteEvent(self.event_with_replace)
         assert result == self.s3_object
-
+        
     def test_returns_event(self):
         """ Test event argument is returned when 'replace' key is not present """
         result = self.cumulus_message_adapter.loadRemoteEvent(self.event_without_replace)
         assert result == self.event_without_replace
+
+    def test_loadAndUpdateRemoteEvent_handles_cma_parameter(self): 
+        """ Test incoming event with 'cma' parameter is assembled into CMA message """
+        result = self.cumulus_message_adapter.loadAndUpdateRemoteEvent(self.event_with_cma, None)
+        expected = { 'foo': 'bar', 'some': 'object'}
+        self.assertEqual(expected, result)
 
     # loadNestedEvent tests
     def test_returns_loadNestedEvent_local(self):
