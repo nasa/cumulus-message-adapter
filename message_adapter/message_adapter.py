@@ -10,13 +10,11 @@ from collections import defaultdict
 from copy import deepcopy
 from .aws import stepFn, s3
 
-REMOTE_DEFAULT_MAX_SIZE = 10000
-
 class message_adapter:
     """
     transforms the cumulus message
     """
-    # Maximum message payload size that will NOT be stored in S3. Anything bigger will be.
+    REMOTE_DEFAULT_MAX_SIZE = 10000
 
     def __init__(self, schemas=None):
         self.schemas = schemas
@@ -434,7 +432,7 @@ class message_adapter:
 
         source_path = replace_config['Path']
         target_path = replace_config.get('TargetPath', replace_config['Path'])
-        max_size = replace_config.get('MaxSize', REMOTE_DEFAULT_MAX_SIZE)
+        max_size = replace_config.get('MaxSize', self.REMOTE_DEFAULT_MAX_SIZE)
 
         event.pop('ReplaceConfig')
         cumulus_meta = event['cumulus_meta']
