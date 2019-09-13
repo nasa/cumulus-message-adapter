@@ -24,7 +24,6 @@
         "Bucket": "pq-test",
         "Key": "configured_input.json",
         "TargetPath": "$.meta",
-        "JsonKey": "subvalue"
       }
     }
   }
