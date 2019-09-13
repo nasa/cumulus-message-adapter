@@ -47,7 +47,7 @@ Cumulus Messages come in 2 flavors: The full **Cumulus Message** and the **Cumul
 
 The CMA remote message functionality can be configured using parameters in several ways:
 
-**Please note** that `event.$: '$'` is *required* when using parameterized configuration in the CMA
+**Please note** that the parameter `event.$: '$'` is *required* when using Step Function parameters to configure the CMA.
 
 #### Partial Message
 
