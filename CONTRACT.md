@@ -74,7 +74,7 @@ If `TargetPath` is omitted, it will default to the value for `Path`.
 
 Setting the following parameters for a lambda:
 
-```
+```json
 DiscoverGranules:
       Parameters:
         cma:
@@ -87,7 +87,7 @@ will result in the CMA assuming the entire inbound message should be stored to S
 
 This is effectively the same as doing:
 
-``` 
+```json
     DiscoverGranules:
       Parameters:
         cma:
