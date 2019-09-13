@@ -64,11 +64,11 @@ Setting the `Path`/`Target` path in the `ReplaceConfig` parameter (and optionall
             TargetPath: '$.payload'
 ```
 
-will result in any "payload" output larger than the MaxSize to be written to S3.  When the CMA picks up the `replace` key output in future steps, it will attempt to write it back to "payload". 
+will result in any `payload` output larger than the `MaxSize` to be written to S3.  The CMA will then mark that the key has been replaced via a `replace` key on the event. When the CMA picks up the `replace` key in future steps, it will attempt to retrieve the output from S3 and write it back to `payload`. 
 
 Note that you can optionally target a different sub key in future steps, however as the target is a JSON path there must be an object to target in the output of that step.    Also note that the JSON path specified must target *one* node, otherwise the CMA will error, as it does not support multiple replacement targets.
 
-If TargetPath is omitted, it will default to the value for `Path`
+If `TargetPath` is omitted, it will default to the value for `Path`.
 
 #### Full Message
 
@@ -83,9 +83,9 @@ DiscoverGranules:
             FullMessage: true
 ```
 
-will result in the CMA assuming the entire inbound message should be stored with the default max size. 
+will result in the CMA assuming the entire inbound message should be stored to S3 if it exceeds the default max size. 
 
-This is analogous  to:
+This is effectively the same as doing:
 
 ``` 
     DiscoverGranules:
