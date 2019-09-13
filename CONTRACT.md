@@ -53,7 +53,7 @@ The CMA remote message functionality can be configured using parameters in sever
 
 Setting the Path/Target path in the ReplaceConfig Parameter (and optionally a non-default MaxSize)
 
-``` 
+```yaml 
     DiscoverGranules:
       Parameters:
         cma:
