@@ -83,7 +83,7 @@ DiscoverGranules:
             FullMessage: true
 ```
 
-will result in the CMA assuming the entire inbound message should be stored with the default max size. 
+will result in the CMA assuming the entire inbound message should be stored to S3 if it exceeds the default max size. 
 
 This is analogous  to:
 
