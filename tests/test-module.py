@@ -212,6 +212,56 @@ class Test(unittest.TestCase):
         self.assertEqual(create_next_event_result, expected_create_next_event_result)
 
     @patch('uuid.uuid4')
+    def test_configured_big_result_with_non_dict_target_stored_remotely(self, uuid_mock):
+        """
+        Test ReplaceConfig/associated logic handles a JSON path that targets a key
+        with a non-dict value
+        """
+        event_with_ingest = {
+            'cumulus_meta': {
+                'workflow': 'testing',
+                'system_bucket': self.bucket_name
+            },
+            'meta': { 
+                'another_key': {
+                'some_meta_key': 'some_meta_object'
+            }},
+            'ReplaceConfig': {
+                'Path': '$.meta.another_key.some_meta_key',
+                'MaxSize': 1,
+                'TargetPath': '$.meta.another_key.some_meta_key'
+            }
+        }
+
+        expected_create_next_event_result = {
+            'cumulus_meta': {
+                'workflow': 'testing',
+                'system_bucket': self.bucket_name
+            },
+            'meta': {
+                'another_key': {
+                    'some_meta_key': ''
+                }
+            },
+            'payload': self.nested_response,
+            'exception': 'None',
+            'replace': {'Bucket': self.bucket_name, 'Key': self.next_event_object_key_name,
+                        'TargetPath': '$.meta.another_key.some_meta_key'}
+        }
+        expected_remote_event_object = 'some_meta_object'
+
+        uuid_mock.return_value = self.test_uuid
+        create_next_event_result = self.cumulus_message_adapter.createNextEvent(
+            self.nested_response, event_with_ingest, None)
+
+        remote_event = self.s3.Object(self.bucket_name, self.next_event_object_key_name).get()
+        remote_event_object = json.loads(
+            remote_event['Body'].read().decode('utf-8'))
+
+        self.assertEqual(remote_event_object, expected_remote_event_object)
+        self.assertEqual(create_next_event_result, expected_create_next_event_result)
+
+    @patch('uuid.uuid4')
     def test_big_result_stored_remotely(self, uuid_mock):
         """
         Test remote event is stored in S3 and return value points

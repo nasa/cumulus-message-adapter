@@ -205,8 +205,7 @@ class message_adapter:
         schemas = self.schemas
         root_dir = os.environ.get("LAMBDA_TASK_ROOT", '')
         has_schema = schemas and schemas.get(schema_type)
-        rel_filepath = schemas.get(
-            schema_type) if has_schema else 'schemas/{}.json'.format(schema_type)
+        rel_filepath = schemas.get(schema_type) if has_schema else 'schemas/{}.json'.format(schema_type)
         filepath = os.path.join(root_dir, rel_filepath)
         return filepath if os.path.exists(filepath) else None
 
@@ -457,7 +456,11 @@ class message_adapter:
         }
         _s3.Object(s3Bucket, s3Key).put(**s3Params)
 
-        replacement_data.value.clear()
+        try: 
+            replacement_data.value.clear()
+        except AttributeError: 
+            parsed_json_path.update(event, '')
+
         remoteConfiguration = {'Bucket': s3Bucket, 'Key': s3Key,
                                'TargetPath': target_path}
         event['cumulus_meta'] = event.get('cumulus_meta', cumulus_meta)
