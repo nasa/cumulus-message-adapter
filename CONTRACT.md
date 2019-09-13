@@ -54,14 +54,14 @@ The CMA remote message functionality can be configured using parameters in sever
 Setting the `Path`/`Target` path in the `ReplaceConfig` parameter (and optionally a non-default `MaxSize`)
 
 ```yaml 
-    DiscoverGranules:
-      Parameters:
-        cma:
-          event.$: '$'
-          ReplaceConfig:
-            MaxSize: 1
-            Path: '$.payload'
-            TargetPath: '$.payload'
+DiscoverGranules:
+  Parameters:
+    cma:
+      event.$: '$'
+      ReplaceConfig:
+        MaxSize: 1
+        Path: '$.payload'
+        TargetPath: '$.payload'
 ```
 
 will result in any `payload` output larger than the `MaxSize` to be written to S3.  The CMA will then mark that the key has been replaced via a `replace` key on the event. When the CMA picks up the `replace` key in future steps, it will attempt to retrieve the output from S3 and write it back to `payload`. 
@@ -74,28 +74,28 @@ If `TargetPath` is omitted, it will default to the value for `Path`.
 
 Setting the following parameters for a lambda:
 
-```json
+```yaml
 DiscoverGranules:
-      Parameters:
-        cma:
-          event.$: '$'
-          ReplaceConfig:
-            FullMessage: true
+  Parameters:
+    cma:
+      event.$: '$'
+      ReplaceConfig:
+        FullMessage: true
 ```
 
 will result in the CMA assuming the entire inbound message should be stored to S3 if it exceeds the default max size. 
 
 This is effectively the same as doing:
 
-```json
-    DiscoverGranules:
-      Parameters:
-        cma:
-          event.$: '$'
-          ReplaceConfig:
-            MaxSize: 10000
-            Path: '$'
-            TargetPath: '$'
+```yaml
+DiscoverGranules:
+  Parameters:
+    cma:
+      event.$: '$'
+      ReplaceConfig:
+        MaxSize: 10000
+        Path: '$'
+        TargetPath: '$'
 ```
 
 
