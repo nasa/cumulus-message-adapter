@@ -131,7 +131,11 @@ class message_adapter:
                 replacement_targets = parsed_json_path.find(event)
                 if not replacement_targets or len(replacement_targets) != 1:
                     raise Exception('Remote event configuration target {} invalid'.format(target_json_path))
-                replacement_targets[0].value.update(remote_event)
+                try: 
+                    replacement_targets[0].value.update(remote_event)
+                except AttributeError: 
+                    parsed_json_path.update(event, remote_event)
+
                 event.pop('replace')
                 if (local_exception and local_exception != 'None') and (not event['exception'] or event['exception'] == 'None'):
                     event['exception'] = local_exception
