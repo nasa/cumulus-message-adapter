@@ -41,17 +41,17 @@ These functions should be run in the order outlined above. The output of `loadAn
 
 Cumulus Messages come in 2 flavors: The full **Cumulus Message** and the **Cumulus Remote Message**.
 
- Because of the potential size of a Cumulus message, mainly the `"payload"` field, a task can be set via configuration to store a portion of it's payload on S3 with a message key `Remote Message` that defines how to retrieve it and an empty JSON object `{}` in it's place.   If the portion of the message targeted exceeds the configured MaxSize (defaults to 10000 bytes) it will be written to S3. 
+ Because of the potential size of a Cumulus message, mainly the `"payload"` field, a task can be set via configuration to store a portion of its payload on S3 with a message key `Remote Message` that defines how to retrieve it and an empty JSON object `{}` in its place.   If the portion of the message targeted exceeds the configured `MaxSize` (defaults to 10000 bytes) it will be written to S3. 
 
 ### Remote Message Configuration
 
 The CMA remote message functionality can be configured using parameters in several ways:
 
-**Please note** that `event.$: '$'` is *required* when using parameterized configuration in the CMA
+**Please note** that the parameter `event.$: '$'` is *required* when using Step Function parameters to configure the CMA.
 
 #### Partial Message
 
-Setting the Path/Target path in the ReplaceConfig Parameter (and optionally a non-default MaxSize)
+Setting the `Path`/`Target` path in the `ReplaceConfig` parameter (and optionally a non-default `MaxSize`)
 
 ```yaml 
     DiscoverGranules:
