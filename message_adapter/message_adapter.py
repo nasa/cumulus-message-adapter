@@ -430,12 +430,13 @@ class message_adapter:
         if replace_config.get('FullMessage', False):
             replace_config['Path'] = '$'
 
+
         source_path = replace_config['Path']
         target_path = replace_config.get('TargetPath', replace_config['Path'])
         max_size = replace_config.get('MaxSize', self.REMOTE_DEFAULT_MAX_SIZE)
 
         event.pop('ReplaceConfig')
-        cumulus_meta = event['cumulus_meta']
+        cumulus_meta = deepcopy(event['cumulus_meta'])
         parsed_json_path = parse(source_path)
         replacement_data = parsed_json_path.find(event)
         if len(replacement_data) != 1:
