@@ -23,7 +23,7 @@
       "replace": {
         "Bucket": "pq-test",
         "Key": "configured_input.json",
-        "TargetPath": "$.meta",
+        "TargetPath": "$.meta"
       }
     }
   }
