@@ -10,6 +10,7 @@ from collections import defaultdict
 from copy import deepcopy
 from .aws import stepFn, s3
 
+
 class message_adapter:
     """
     transforms the cumulus message
@@ -110,7 +111,6 @@ class message_adapter:
             parsed_event.update(updated_event)
         return parsed_event
 
-
     def loadAndUpdateRemoteEvent(self, incoming_event, context):
         """
         * Looks at a Cumulus message. If the message has part of its data stored remotely in
@@ -122,7 +122,8 @@ class message_adapter:
         if 'replace' in event:
             local_exception = event.get('exception', None)
             _s3 = s3()
-            data = _s3.Object(event['replace']['Bucket'], event['replace']['Key']).get()
+            data = _s3.Object(event['replace']['Bucket'],
+                              event['replace']['Key']).get()
             target_json_path = event['replace']['TargetPath']
             parsed_json_path = parse(target_json_path)
             if data is not None:
@@ -204,7 +205,8 @@ class message_adapter:
         schemas = self.schemas
         root_dir = os.environ.get("LAMBDA_TASK_ROOT", '')
         has_schema = schemas and schemas.get(schema_type)
-        rel_filepath = schemas.get(schema_type) if has_schema else 'schemas/{}.json'.format(schema_type)
+        rel_filepath = schemas.get(
+            schema_type) if has_schema else 'schemas/{}.json'.format(schema_type)
         filepath = os.path.join(root_dir, rel_filepath)
         return filepath if os.path.exists(filepath) else None
 
@@ -385,10 +387,10 @@ class message_adapter:
                 dictPath += "['" + path + "']"
                 if keyNotFound or path not in currentItem:
                     keyNotFound = True
-                    exec ("message" + dictPath + " = {}")
+                    exec("message" + dictPath + " = {}")
                 currentItem = eval("message" + dictPath)
 
-            exec ("message" + dictPath + " = value")
+            exec("message" + dictPath + " = value")
         return message
 
     def __assignOutputs(self, handlerResponse, event, messageConfig):
@@ -426,10 +428,9 @@ class message_adapter:
         if not (replace_config):
             return event
 
-        ## Set default value if FullMessage flag set
+        # Set default value if FullMessage flag set
         if replace_config.get('FullMessage', False):
             replace_config['Path'] = '$'
-
 
         source_path = replace_config['Path']
         target_path = replace_config.get('TargetPath', replace_config['Path'])
@@ -440,8 +441,8 @@ class message_adapter:
         parsed_json_path = parse(source_path)
         replacement_data = parsed_json_path.find(event)
         if len(replacement_data) != 1:
-            raise Exception ('JSON path invalid: {}'.format(parsed_json_path))
-        replacement_data = replacement_data[0] 
+            raise Exception('JSON path invalid: {}'.format(parsed_json_path))
+        replacement_data = replacement_data[0]
         estimated_data_size = len(json.dumps(replacement_data.value))
 
         if estimated_data_size < max_size:
