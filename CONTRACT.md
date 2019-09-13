@@ -51,7 +51,7 @@ The CMA remote message functionality can be configured using parameters in sever
 
 #### Partial Message
 
-Setting the Path/Target path in the ReplaceConfig Parameter (and optionally a non-default MaxSize)
+Setting the `Path`/`Target` path in the `ReplaceConfig` parameter (and optionally a non-default `MaxSize`)
 
 ``` 
     DiscoverGranules:
