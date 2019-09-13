@@ -66,7 +66,7 @@ DiscoverGranules:
 
 will result in any `payload` output larger than the `MaxSize` to be written to S3.  The CMA will then mark that the key has been replaced via a `replace` key on the event. When the CMA picks up the `replace` key in future steps, it will attempt to retrieve the output from S3 and write it back to `payload`. 
 
-Note that you can optionally target a different sub key in future steps, however as the target is a JSON path there must be an object to target in the output of that step.    Also note that the JSON path specified must target *one* node, otherwise the CMA will error, as it does not support multiple replacement targets.
+Note that you can optionally use a different `TargetPath` than `Path`, however as the target is a JSON path there must be a key to target for replacement in the output of that step.    Also note that the JSON path specified must target *one* node, otherwise the CMA will error, as it does not support multiple replacement targets.
 
 If `TargetPath` is omitted, it will default to the value for `Path`.
 
@@ -133,7 +133,7 @@ The message may contain a reference to an S3 Bucket, Key and TargetPath as follo
 {
   "replace": {
     "Bucket": "cumulus-bucket",
-    "Key": "my-large-event.json"
+    "Key": "my-large-event.json",
     "TargetPath": "$" 
   },
   "cumulus_meta": {}
