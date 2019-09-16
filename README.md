@@ -6,8 +6,19 @@
 
 Read more about how the `cumulus-message-adapter` works in the [CONTRACT.md](./CONTRACT.md).
 
+
 ## Releases
 
+### Release Versions
+Please note the following convention for release versions: 
+
+X.Y.Z: where: 
+
+* X is an organizational release that signifies the completion of a core set of functionality
+* Y is a major version release that may include incompatible API changes and/or other breaking changes
+* Z is a minor version that includes bugfixes and backwards compatible improvements
+
+### Continuous Integration
 [CircleCI](https://circleci.com/gh/nasa/cumulus-message-adapter) manages releases and release assets.
 
 Whenever CircleCI passes on the master branch of cumulus-message-adapter and `message_adapter/version.py` has been updated with a version that doesn't match an existing tag, CircleCI will:

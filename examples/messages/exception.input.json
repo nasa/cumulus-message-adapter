@@ -7,7 +7,8 @@
   },
   "replace": {
     "Bucket": "pq-test",
-    "Key": "templates.input.json"
+    "Key": "templates.input.json",
+    "TargetPath": "$"
   },
   "exception": {
     "message": "Workflow failed"

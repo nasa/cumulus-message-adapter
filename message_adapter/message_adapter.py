@@ -2,18 +2,22 @@ import os
 import json
 import re
 import warnings
+import sys 
+
 from datetime import datetime, timedelta
 import uuid
 from jsonpath_ng import parse
 from jsonschema import validate
+from collections import defaultdict
+from copy import deepcopy
 from .aws import stepFn, s3
+
 
 class message_adapter:
     """
     transforms the cumulus message
     """
-    # Maximum message payload size that will NOT be stored in S3. Anything bigger will be.
-    MAX_NON_S3_PAYLOAD_SIZE = 10000
+    REMOTE_DEFAULT_MAX_SIZE = 0
 
     def __init__(self, schemas=None):
         self.schemas = schemas
@@ -101,22 +105,43 @@ class message_adapter:
         )
         return self.loadAndUpdateRemoteEvent(event, None)
 
-    def loadAndUpdateRemoteEvent(self, event, context):
+    def __parseParameterConfiguration(self, event):
+        parsed_event = event
+        if event.get('cma'):
+            updated_event = {k:v for (k,v) in event['cma'].items() if k != 'event'}
+            parsed_event = event['cma']['event']
+            parsed_event.update(updated_event)
+        return parsed_event
+
+    def loadAndUpdateRemoteEvent(self, incoming_event, context):
         """
         * Looks at a Cumulus message. If the message has part of its data stored remotely in
         * S3, fetches that data, otherwise it returns the full message, both cases updated with task metadata
         * @param {*} event The input Lambda event in the Cumulus message protocol
         * @returns {*} the full event data
         """
+        event = self.__parseParameterConfiguration(deepcopy(incoming_event))
         if 'replace' in event:
             local_exception = event.get('exception', None)
             _s3 = s3()
-            data = _s3.Object(event['replace']['Bucket'], event['replace']['Key']).get()
+            data = _s3.Object(event['replace']['Bucket'],
+                              event['replace']['Key']).get()
+            target_json_path = event['replace']['TargetPath']
+            parsed_json_path = parse(target_json_path)
             if data is not None:
-                event = json.loads(data['Body'].read().decode('utf-8'))
-                remote_exception = event.get('exception', None)
-                if (local_exception and local_exception != 'None') and (not remote_exception or remote_exception == 'None'):
+                remote_event = json.loads(data['Body'].read().decode('utf-8'))
+                replacement_targets = parsed_json_path.find(event)
+                if not replacement_targets or len(replacement_targets) != 1:
+                    raise Exception('Remote event configuration target {} invalid'.format(target_json_path))
+                try: 
+                    replacement_targets[0].value.update(remote_event)
+                except AttributeError: 
+                    parsed_json_path.update(event, remote_event)
+
+                event.pop('replace')
+                if (local_exception and local_exception != 'None') and (not event['exception'] or event['exception'] == 'None'):
                     event['exception'] = local_exception
+
         if context and 'meta' in event and 'workflow_tasks' in event['meta']:
             cumulus_meta = event['cumulus_meta']
             taskMeta = {}
@@ -324,7 +349,7 @@ class message_adapter:
         if finalConfig is not None:
             response['config'] = finalConfig
         if 'cumulus_message' in config:
-            response['messageConfig'] = config['cumulus_message']
+            response['messageConfig'] = config[ 'cumulus_message']
 
         # add cumulus_config property, only selective attributes from event.cumulus_meta are added
         if 'cumulus_meta' in event:
@@ -367,10 +392,10 @@ class message_adapter:
                 dictPath += "['" + path + "']"
                 if keyNotFound or path not in currentItem:
                     keyNotFound = True
-                    exec ("message" + dictPath + " = {}")
+                    exec("message" + dictPath + " = {}")
                 currentItem = eval("message" + dictPath)
 
-            exec ("message" + dictPath + " = value")
+            exec("message" + dictPath + " = value")
         return message
 
     def __assignOutputs(self, handlerResponse, event, messageConfig):
@@ -382,7 +407,7 @@ class message_adapter:
         * @param {*} messageConfig The cumulus_message configuration
         * @returns {*} The output message with the nested response applied
         """
-        result = event.copy()
+        result = deepcopy(event)
         if messageConfig is not None and 'outputs' in messageConfig:
             outputs = messageConfig['outputs']
             result['payload'] = {}
@@ -397,33 +422,59 @@ class message_adapter:
 
         return result
 
-    def __storeRemoteResponse(self, event):
+    def __storeRemoteResponse(self, incoming_event):
         """
         * Stores part of a response message in S3 if it is too big to send to StepFunctions
         * @param {*} event The response message
         * @returns {*} A response message, possibly referencing an S3 object for its contents
         """
-        roughDataSize = len(json.dumps(event)) if event is not None else 0
-
-        if (roughDataSize < self.MAX_NON_S3_PAYLOAD_SIZE):
+        event = deepcopy(incoming_event)
+        replace_config = event.get('ReplaceConfig', None)
+        if not (replace_config):
             return event
 
-        jsonData = json.dumps(event)
+        # Set default value if FullMessage flag set
+        if replace_config.get('FullMessage', False):
+            replace_config['Path'] = '$'
+
+        source_path = replace_config['Path']
+        target_path = replace_config.get('TargetPath', replace_config['Path'])
+        max_size = replace_config.get('MaxSize', self.REMOTE_DEFAULT_MAX_SIZE)
+
+        event.pop('ReplaceConfig')
+        cumulus_meta = deepcopy(event['cumulus_meta'])
+        parsed_json_path = parse(source_path)
+        replacement_data = parsed_json_path.find(event)
+        if len(replacement_data) != 1:
+            raise Exception('JSON path invalid: {}'.format(parsed_json_path))
+        replacement_data = replacement_data[0]
+
+        estimated_data_size = len(json.dumps(replacement_data.value))
+        if sys.version_info.major > 3:
+            estimated_data_size = len(json.dumps(replacement_data.value).encode(('utf-8')))
+
+        if estimated_data_size < max_size:
+            return event
+
         _s3 = s3()
         s3Bucket = event['cumulus_meta']['system_bucket']
         s3Key = ('/').join(['events', str(uuid.uuid4())])
         s3Params = {
             'Expires': datetime.utcnow() + timedelta(days=7),  # Expire in a week
-            'Body': jsonData if event is not None else '{}'
+            'Body': json.dumps(replacement_data.value)
         }
-        s3Location = {'Bucket': s3Bucket, 'Key': s3Key}
-
         _s3.Object(s3Bucket, s3Key).put(**s3Params)
 
-        return {
-            'cumulus_meta': event['cumulus_meta'],
-            'replace': s3Location
-        }
+        try: 
+            replacement_data.value.clear()
+        except AttributeError: 
+            parsed_json_path.update(event, '')
+
+        remoteConfiguration = {'Bucket': s3Bucket, 'Key': s3Key,
+                               'TargetPath': target_path}
+        event['cumulus_meta'] = event.get('cumulus_meta', cumulus_meta)
+        event['replace'] = remoteConfiguration
+        return event
 
     def createNextEvent(self, handlerResponse, event, messageConfig):
         """
@@ -435,6 +486,7 @@ class message_adapter:
         * @returns {*} the output message to be returned
         """
         self.__validate_json(handlerResponse, 'output')
+
         result = self.__assignOutputs(handlerResponse, event, messageConfig)
         if not result.get('exception'):
             result['exception'] = 'None'
