@@ -17,7 +17,7 @@ class message_adapter:
     """
     transforms the cumulus message
     """
-    REMOTE_DEFAULT_MAX_SIZE = 10000
+    REMOTE_DEFAULT_MAX_SIZE = 0
 
     def __init__(self, schemas=None):
         self.schemas = schemas
