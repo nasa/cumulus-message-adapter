@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [v1.1.0] - 2019-09-16
+
 ### BREAKING CHANGES
 ### Added
 - Updated remote message behavior to be manually configured by step function parameters *only*, this removes the default automatic remote message behavior.  [CUMULUS-1447]
@@ -156,7 +158,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Initial release
 
-[Unreleased]: https://github.com/nasa/cumulus-message-adapter/compare/v1.0.13...HEAD
+[Unreleased]: https://github.com/nasa/cumulus-message-adapter/compare/v1.1.0...HEAD
+[v1.1.0]: https://github.com/nasa/cumulus-message-adapter/compare/v1.0.13...HEAD
 [v1.0.13]: https://github.com/nasa/cumulus-message-adapter/compare/v1.0.12...v1.0.13
 [v1.0.5]: https://github.com/nasa/cumulus-message-adapter/compare/v1.0.4...v1.0.5
 [v1.0.4]: https://github.com/nasa/cumulus-message-adapter/compare/v1.0.3...v1.0.4
