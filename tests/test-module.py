@@ -50,7 +50,7 @@ class Test(unittest.TestCase):
         """ Test remote s3 event is returned when 'replace' key is present """
         result = self.cumulus_message_adapter.loadRemoteEvent(self.event_with_replace)
         assert result == self.s3_object
-        
+
     def test_returns_event(self):
         """ Test event argument is returned when 'replace' key is not present """
         result = self.cumulus_message_adapter.loadRemoteEvent(self.event_without_replace)

@@ -2,6 +2,8 @@ import os
 import json
 import re
 import warnings
+import sys 
+
 from datetime import datetime, timedelta
 import uuid
 from jsonpath_ng import parse
@@ -347,7 +349,7 @@ class message_adapter:
         if finalConfig is not None:
             response['config'] = finalConfig
         if 'cumulus_message' in config:
-            response['messageConfig'] = config['cumulus_message']
+            response['messageConfig'] = config[ 'cumulus_message']
 
         # add cumulus_config property, only selective attributes from event.cumulus_meta are added
         if 'cumulus_meta' in event:
@@ -446,7 +448,10 @@ class message_adapter:
         if len(replacement_data) != 1:
             raise Exception('JSON path invalid: {}'.format(parsed_json_path))
         replacement_data = replacement_data[0]
+
         estimated_data_size = len(json.dumps(replacement_data.value))
+        if sys.version_info.major > 3:
+            estimated_data_size = len(json.dumps(replacement_data.value).encode(('utf-8')))
 
         if estimated_data_size < max_size:
             return event
