@@ -100,6 +100,42 @@ class Test(unittest.TestCase):
         result = self.cumulus_message_adapter.loadNestedEvent(nested_event_local, {})
         assert result == nested_event_local_return
 
+    # loadNestedEvent task_config tests
+    def test_returns_loadNestedEvent_local_with_task_config(self):
+        """
+        Test returns 'config', 'input' and 'messageConfig' in expected format from task_config
+        - 'input' in return value is from 'payload' in first argument object
+        - 'config' in return value is the task ($.task_config) configuration
+           with 'cumulus_message' excluded
+        - 'messageConfig' in return value is the cumulus_message.input of the task configuration
+        """
+
+        nested_event_local = {
+            "task_config": {
+                "bar": "baz",
+                "cumulus_message": {
+                    "input": "{{$.payload.input}}",
+                    "outputs": [{"source": "{{$.input.anykey}}",
+                                "destination": "{{$.payload.out}}"}]
+                }
+            },
+            "cumulus_meta": {"task": "Example", "message_source": "local", "id": "id-1234"},
+            "meta": {"foo": "bar"},
+            "payload": {"input": {"anykey": "anyvalue"}}
+        }
+
+        nested_event_local_return = {
+            'input': {'anykey': 'anyvalue'},
+            'config': {'bar': 'baz'},
+            'messageConfig': {
+                'input': '{{$.payload.input}}',
+                'outputs': [{'source': '{{$.input.anykey}}',
+                            'destination': '{{$.payload.out}}'}]}
+        }
+
+        result = self.cumulus_message_adapter.loadNestedEvent(nested_event_local, {})
+        assert result == nested_event_local_return
+
     # assignOutputs tests
     def test_result_payload_without_config(self):
         """ Test nestedResponse is returned when no config argument is passed """

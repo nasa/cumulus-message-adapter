@@ -197,6 +197,8 @@ class message_adapter:
         * @param {*} context The context object passed to AWS Lambda or containing an activityArn
         * @returns {*} The task's configuration
         """
+        if ('task_config' in event):
+            return event['task_config']
         source = event['cumulus_meta']['message_source']
         if (source is None):
             raise LookupError('cumulus_meta requires a message_source')
