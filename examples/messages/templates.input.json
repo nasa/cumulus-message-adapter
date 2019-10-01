@@ -1,13 +1,10 @@
 {
-  "workflow_config": {
-    "Example": {
+  "task_config": {
       "inlinestr": "prefix{meta.foo}suffix",
       "array": "{[$.meta.foo]}",
       "object": "{{$.meta}}"
-    }
   },
   "cumulus_meta": {
-    "task": "Example",
     "message_source": "local",
     "id": "id-1234"
   },

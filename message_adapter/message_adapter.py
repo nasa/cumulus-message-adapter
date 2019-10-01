@@ -167,15 +167,7 @@ class message_adapter:
             config = event['workflow_config'][taskName]
         return config
 
-    def __loadLocalConfig(self, event):
-        """
-        * For local testing, returns the config for event.cumulus_meta.task
-        * @param {*} event An event in the Cumulus message format with remote parts resolved
-        * @returns {*} The task's configuration
-        """
-        return self.__getConfig(event, event['cumulus_meta']['task'])
-
-    def __loadStepFunctionConfig(self, event, context):
+    def __loadStepFunctionTaskName(self, event, context):
         """
         * For StepFunctions, returns the configuration corresponding to the current execution
         * @param {*} event An event in the Cumulus message format with remote parts resolved
@@ -187,8 +179,7 @@ class message_adapter:
             arn = context['invokedFunctionArn']
         else:
             arn = context.get('invoked_function_arn', context.get('activityArn'))
-        taskName = self.__getCurrentSfnTask(meta['state_machine'], meta['execution_name'], arn)
-        return self.__getConfig(event, taskName) if taskName is not None else None
+        return self.__getCurrentSfnTask(meta['state_machine'], meta['execution_name'], arn)
 
     def __loadConfig(self, event, context):
         """
@@ -197,15 +188,19 @@ class message_adapter:
         * @param {*} context The context object passed to AWS Lambda or containing an activityArn
         * @returns {*} The task's configuration
         """
+        if ('task_config' in event):
+            return event['task_config']
+        # Maintained for backwards compatibility
         source = event['cumulus_meta']['message_source']
         if (source is None):
             raise LookupError('cumulus_meta requires a message_source')
-        if (source == 'local'):
-            return self.__loadLocalConfig(event)
-        if (source == 'sfn'):
-            return self.__loadStepFunctionConfig(event, context)
-
-        raise LookupError('Unknown event source: ' + source)
+        elif (source == 'local'):
+            taskName = event['cumulus_meta']['task']
+        elif (source == 'sfn'):
+            taskName = self.__loadStepFunctionTaskName(event, context)
+        else:
+            raise LookupError('Unknown event source: ' + source)
+        return self.__getConfig(event, taskName) if taskName is not None else None
 
     def __get_jsonschema(self, schema_type):
         schemas = self.schemas
