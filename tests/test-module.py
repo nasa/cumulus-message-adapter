@@ -103,7 +103,7 @@ class Test(unittest.TestCase):
     # loadNestedEvent task_config tests
     def test_returns_loadNestedEvent_local_with_task_config(self):
         """
-        Test returns 'config', 'input' and 'messageConfig' in expected format from task_config
+        Test returns 'config', 'input' and 'messageConfig' in expected format from task_config with no taskName
         - 'input' in return value is from 'payload' in first argument object
         - 'config' in return value is the task ($.task_config) configuration
            with 'cumulus_message' excluded
@@ -119,7 +119,7 @@ class Test(unittest.TestCase):
                                 "destination": "{{$.payload.out}}"}]
                 }
             },
-            "cumulus_meta": {"task": "Example", "message_source": "local", "id": "id-1234"},
+            "cumulus_meta": {"message_source": "local", "id": "id-1234"},
             "meta": {"foo": "bar"},
             "payload": {"input": {"anykey": "anyvalue"}}
         }
