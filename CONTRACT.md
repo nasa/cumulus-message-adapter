@@ -98,17 +98,14 @@ DiscoverGranules:
         TargetPath: '$'
 ```
 
-
 #### Cumulus Message example:
 
 ```json
 {
-  "workflow_config": {
-    "Example": {
-      "inlinestr": "prefix{meta.foo}suffix",
-      "array": "{[$.meta.foo]}",
-      "object": "{{$.meta}}"
-    }
+  "task_config": {
+    "inlinestr": "prefix{meta.foo}suffix",
+    "array": "{[$.meta.foo]}",
+    "object": "{{$.meta}}"
   },
   "cumulus_meta": {
     "message_source": "sfn",
@@ -140,6 +137,22 @@ The message may contain a reference to an S3 Bucket, Key and TargetPath as follo
 }
 ```
 
+### Task Configuration
+
+Task configuration (corresponding to `task_config` shown above) is used to construct the `config` object sent to the business function.
+
+Task configuration can be defined by specifying Parameters on the Lambda Function, e.g.:
+
+```yaml
+DiscoverGranules:
+  Parameters:
+    cma:
+      event.$: '$'
+      task_config:
+        foo: '{{$.meta.foo}}'
+        bar: 'fixedValue'
+```
+
 ## `loadAndUpdateRemoteEvent` input and output
 
 ### `loadAndUpdateRemoteEvent` input
@@ -166,7 +179,7 @@ loadAndUpdateRemote output is a full Cumulus Message as a json blob.
 
 `loadNestedEvent` requests metadata from the AWS Step Function API and uses that metadata to self-identify by determining which task in the workflow is "in-progress". This is a roundabout way of the lambda asking `whoami` and will be removed once AWS updates the lambda context object.
 
-The task name found associated with the running task is used to look up the task-specific configuration and construct the values of `config` and `messageConfig` fields sent to the business function. For example, if the current execution is associated with task named `'Task1'`, then the `config` object sent to the business function is the value of `workflow_config['Task1']` and the `messageConfig` object sent to the business function is the value of `workflow_config['Task1']['cumulus_message']`. These configurations are used to dispatch values to other parts of the Cumulus Message, via URL templates, which are required by the business function or `createNextEvent`.
+The task name found associated with the running task is used to look up the task-specific configuration and construct the values of `config` and `messageConfig` fields sent to the business function. For example, when the `task_config` Parameter is supplied, then the `config` object sent to the business function is the value of `task_config` and the `messageConfig` object sent to the business function is the value of `task_config['cumulus_message']`. These configurations are used to dispatch values to other parts of the Cumulus Message, via URL templates, which are required by the business function or `createNextEvent`.
 
 An example of the `<schemas_json>` that should be passed to `loadNestedEvent`:
 
@@ -218,7 +231,7 @@ In case there is a task execution error - such as an AWS client error - the erro
 
 ```json
 {
-  "workflow_config": {},
+  "task_config": {},
   "cumulus_meta": {},
   "meta": {
     "foo": "bar"
