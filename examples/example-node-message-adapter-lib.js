@@ -98,7 +98,7 @@ const exampleResponseObject = JSON.parse(loadJsonFromFile('examples/responses/me
 const eventWithMetaObject = JSON.parse(loadJsonFromFile('examples/messages/meta.input.json'));
 
 // example messageConfigObject
-const messageConfig = eventWithMetaObject.workflow_config['Example'].cumulus_message;
+const messageConfig = eventWithMetaObject.task_config.cumulus_message;
 
 child.stdin.write(JSON.stringify({
   'handler_response': exampleResponseObject,
@@ -111,7 +111,7 @@ child.stdout.on('data', (data) => {
   const expectedResponse = {
     "cumulus_meta": {
       "message_source": "local",
-      "task": "Example",
+      
       "id": "id-1234"
     },
     "meta": {
@@ -124,18 +124,16 @@ child.stdout.on('data', (data) => {
         "anykey": "innerValue"
       }
     },
-    "workflow_config": {
-      "Example": {
-        "bar": "{meta.foo}",
-        "cumulus_message": {
-          "outputs": [{
-            "source": "{{$}}",
-            "destination": "{{$.payload}}"
-          }, {
-            "source": "{{$.input.anykey}}",
-            "destination": "{{$.meta.baz}}"
-          }]
-        }
+    "task_config": {
+      "bar": "{meta.foo}",
+      "cumulus_message": {
+        "outputs": [{
+          "source": "{{$}}",
+          "destination": "{{$.payload}}"
+        }, {
+          "source": "{{$.input.anykey}}",
+          "destination": "{{$.meta.baz}}"
+        }]
       }
     }
   }

@@ -1,11 +1,9 @@
 {
-  "workflow_config": {
-    "Example": {
-      "inlinestr": "prefix{meta.foo}suffix{meta.foo2}",
-      "inlineignore": "prefix{random}should{meta.foo}",
-      "array": "{[$.meta.foo]}",
-      "object": "{{$.meta}}"
-    }
+  "task_config": {
+    "inlinestr": "prefix{meta.foo}suffix{meta.foo2}",
+    "inlineignore": "prefix{random}should{meta.foo}",
+    "array": "{[$.meta.foo]}",
+    "object": "{{$.meta}}"
   },
   "cumulus_meta": {
     "message_source": "sfn",

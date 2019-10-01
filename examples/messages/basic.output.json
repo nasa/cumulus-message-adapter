@@ -1,11 +1,8 @@
 {
-  "workflow_config": {
-    "Example": {
-      "bar": "baz"
-    }
+  "task_config": {
+    "bar": "baz"
   },
   "cumulus_meta": {
-    "task": "Example",
     "message_source": "local",
     "id": "id-1234"
   },

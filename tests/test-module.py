@@ -65,7 +65,7 @@ class Test(unittest.TestCase):
     # loadNestedEvent tests
     def test_returns_loadNestedEvent_local(self):
         """
-        Test returns 'config', 'input' and 'messageConfig' in expected format
+        Test returns 'config', 'input' and 'messageConfig' in expected format (workflow_config backwards compatible)
         - 'input' in return value is from 'payload' in first argument object
         - 'config' in return value is the task ($.cumulus_meta.task) configuration
            with 'cumulus_message' excluded
@@ -594,7 +594,7 @@ class Test(unittest.TestCase):
         schemas = { 'config': 'config.json' }
         adapter = message_adapter.message_adapter(schemas)
         in_msg = json.loads(inp.read())
-        in_msg["workflow_config"]["Example"]["boolean_option"] = '{{$.meta.boolean_option}}'
+        in_msg["task_config"]["boolean_option"] = '{{$.meta.boolean_option}}'
         in_msg["meta"]["boolean_option"] = "notgoingtowork"
         try:
             adapter.loadNestedEvent(in_msg, {})
