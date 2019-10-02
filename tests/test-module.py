@@ -76,7 +76,7 @@ class Test(unittest.TestCase):
 
 
     def test_loadAndUpdateRemoteEvent_does_not_overwrite_configuration(self):
-        """ Test incoming even with configuration is not overwritten by key in remote event """
+        """ Test incoming event with configuration is not overwritten by key in remote event """
         result = self.cumulus_message_adapter.loadAndUpdateRemoteEvent(self.config_event_with_replace, None)
         expected = {'task_config': self.config_event_with_replace['cma']['task_config'],
                     'input': u':blue_whale:',
