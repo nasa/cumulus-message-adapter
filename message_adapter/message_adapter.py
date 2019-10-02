@@ -243,16 +243,16 @@ class message_adapter:
         * @param {*} str A string containing a JSONPath template to resolve
         * @returns {*} The resolved object
         """
-        valueRegex = '^{.*}$'
+        valueRegex = '^{[^\[\]].*}$'
         arrayRegex = '^{\[.*\]}$'
         templateRegex = '{[^}]+}'
 
         if (re.search(valueRegex, str)):
-            matchData = parse(str[1:(len(str)-1)]).find(event)
+            matchData = parse(str.lstrip('{').rstrip('}')).find(event)
             return matchData[0].value if len(matchData) > 0 else None
 
         elif (re.search(arrayRegex, str)):
-            matchData = parse(str[2:(len(str)-2)]).find(event)
+            matchData = parse(str.lstrip('{').rstrip('}').lstrip('[').rstrip(']')).find(event)
             return [item.value for item in matchData] if len(matchData) > 0 else []
 
         elif (re.search(templateRegex, str)):
@@ -409,7 +409,7 @@ class message_adapter:
             for output in outputs:
                 sourcePath = output['source']
                 destPath = output['destination']
-                destJsonPath = destPath[2:(len(destPath)-2)]
+                destJsonPath = destPath.lstrip('{').rstrip('}')
                 value = self.__resolvePathStr(handlerResponse, sourcePath)
                 self.__assignJsonPathValue(result, destJsonPath, value)
         else:
