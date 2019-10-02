@@ -4,7 +4,7 @@
       "task_config": {
         "inlinestr": "prefix{meta.foo}suffix",
         "array": "{[$.meta.foo]}",
-        "object": "{{$.meta}}"
+        "object": "{$.meta}"
       },
       "cumulus_meta": {
         "message_source": "local",

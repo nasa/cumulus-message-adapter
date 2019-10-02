@@ -25,7 +25,7 @@ class Test(unittest.TestCase):
         self.s3.Bucket(bucket_name).create()
         self.s3.Object(bucket_name, key_name).put(Body=json.dumps(datasource))
         return { 'bucket_name': bucket_name, 'key_name': key_name }
-    
+
     def cleanUpRemoteMessage(self, bucket_name, key_name):
         delete_objects_object = {'Objects': [{'Key': key_name}]}
         self.s3.Bucket(bucket_name).delete_objects(Delete=delete_objects_object)
@@ -59,13 +59,6 @@ class Test(unittest.TestCase):
             'output': 'schemas/exmaples-messages.output.json',
             'config': 'schemas/examples-messages.config.json'
         }
-        # keep to test backwards compatibility
-        allInput = {'event': in_msg, 'schemas': schemas}
-        currentDirectory = os.getcwd()
-        remoteEventCmd = ['python', currentDirectory, 'loadRemoteEvent']
-        (exitstatus, remoteEvent, errorstr) = self.executeCommand( # pylint: disable=unused-variable
-            remoteEventCmd, json.dumps(allInput))
-        assert exitstatus == 0 
 
         allInput = {'event': in_msg, 'context': context, 'schemas': schemas}
         currentDirectory = os.getcwd()
@@ -102,7 +95,7 @@ class Test(unittest.TestCase):
     def test_basic(self):
         """ test basic message """
         self.transformMessages('basic')
-    
+
     def test_exception(self):
         """ test remote message with exception """
         self.transformMessages('exception')

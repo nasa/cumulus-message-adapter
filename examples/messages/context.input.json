@@ -2,7 +2,7 @@
   "task_config": {
     "inlinestr": "prefix{meta.foo}suffix",
     "array": "{[$.meta.foo]}",
-    "object": "{{$.meta.bar}}"
+    "object": "{$.meta.bar}"
   },
   "cumulus_meta": {
     "message_source": "sfn",

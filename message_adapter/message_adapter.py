@@ -2,7 +2,7 @@ import os
 import json
 import re
 import warnings
-import sys 
+import sys
 
 from datetime import datetime, timedelta
 import uuid
@@ -18,6 +18,7 @@ class message_adapter:
     transforms the cumulus message
     """
     REMOTE_DEFAULT_MAX_SIZE = 0
+    CMA_CONFIG_KEYS = ['ReplaceConfig', 'task_config']
 
     def __init__(self, schemas=None):
         self.schemas = schemas
@@ -93,18 +94,6 @@ class message_adapter:
     #  Input message interpretation  #
     ##################################
 
-    # Events stored externally
-
-    def loadRemoteEvent(self, event):
-        """
-        Maintained for backwards compatibility
-        """
-        warnings.warn(
-            'loadRemoteEvent is deprecated and will be removed in a future version',
-            DeprecationWarning
-        )
-        return self.loadAndUpdateRemoteEvent(event, None)
-
     def __parseParameterConfiguration(self, event):
         parsed_event = event
         if event.get('cma'):
@@ -113,14 +102,8 @@ class message_adapter:
             parsed_event.update(updated_event)
         return parsed_event
 
-    def loadAndUpdateRemoteEvent(self, incoming_event, context):
-        """
-        * Looks at a Cumulus message. If the message has part of its data stored remotely in
-        * S3, fetches that data, otherwise it returns the full message, both cases updated with task metadata
-        * @param {*} event The input Lambda event in the Cumulus message protocol
-        * @returns {*} the full event data
-        """
-        event = self.__parseParameterConfiguration(deepcopy(incoming_event))
+
+    def __loadRemoteEvent(self, event):
         if 'replace' in event:
             local_exception = event.get('exception', None)
             _s3 = s3()
@@ -133,14 +116,34 @@ class message_adapter:
                 replacement_targets = parsed_json_path.find(event)
                 if not replacement_targets or len(replacement_targets) != 1:
                     raise Exception('Remote event configuration target {} invalid'.format(target_json_path))
-                try: 
+                try:
                     replacement_targets[0].value.update(remote_event)
-                except AttributeError: 
+                except AttributeError:
                     parsed_json_path.update(event, remote_event)
 
                 event.pop('replace')
                 if (local_exception and local_exception != 'None') and (not event['exception'] or event['exception'] == 'None'):
                     event['exception'] = local_exception
+        return event
+
+    def loadAndUpdateRemoteEvent(self, incoming_event, context):
+        """
+        * Looks at a Cumulus message. If the message has part of its data stored remotely in
+        * S3, fetches that data, otherwise it returns the full message, both cases updated with task metadata.
+        * If event uses parameterized configuration, converts message into a
+        * Cumulus message and ensures that incoming parameter keys are not overridden
+        * @param {*} event The input Lambda event in the Cumulus message protocol
+        * @returns {*} the full event data
+        """
+        event = deepcopy(incoming_event)
+
+        if incoming_event.get('cma'):
+            cmaEvent = deepcopy(incoming_event)
+            event = self.__loadRemoteEvent(event['cma'].get('event'))
+            cmaEvent['cma']['event'].update(event)
+            event = self.__parseParameterConfiguration(cmaEvent)
+        else:
+            event = self.__loadRemoteEvent(event)
 
         if context and 'meta' in event and 'workflow_tasks' in event['meta']:
             cumulus_meta = event['cumulus_meta']
@@ -243,16 +246,16 @@ class message_adapter:
         * @param {*} str A string containing a JSONPath template to resolve
         * @returns {*} The resolved object
         """
-        valueRegex = '^{{.*}}$'
+        valueRegex = '^{[^\[\]].*}$'
         arrayRegex = '^{\[.*\]}$'
         templateRegex = '{[^}]+}'
 
         if (re.search(valueRegex, str)):
-            matchData = parse(str[2:(len(str)-2)]).find(event)
+            matchData = parse(str.lstrip('{').rstrip('}')).find(event)
             return matchData[0].value if len(matchData) > 0 else None
 
         elif (re.search(arrayRegex, str)):
-            matchData = parse(str[2:(len(str)-2)]).find(event)
+            matchData = parse(str.lstrip('{').rstrip('}').lstrip('[').rstrip(']')).find(event)
             return [item.value for item in matchData] if len(matchData) > 0 else []
 
         elif (re.search(templateRegex, str)):
@@ -409,7 +412,7 @@ class message_adapter:
             for output in outputs:
                 sourcePath = output['source']
                 destPath = output['destination']
-                destJsonPath = destPath[2:(len(destPath)-2)]
+                destJsonPath = destPath.lstrip('{').rstrip('}')
                 value = self.__resolvePathStr(handlerResponse, sourcePath)
                 self.__assignJsonPathValue(result, destJsonPath, value)
         else:
@@ -436,7 +439,8 @@ class message_adapter:
         target_path = replace_config.get('TargetPath', replace_config['Path'])
         max_size = replace_config.get('MaxSize', self.REMOTE_DEFAULT_MAX_SIZE)
 
-        event.pop('ReplaceConfig')
+        [event.pop(key) for key in self.CMA_CONFIG_KEYS if event.get(key)]
+
         cumulus_meta = deepcopy(event['cumulus_meta'])
         parsed_json_path = parse(source_path)
         replacement_data = parsed_json_path.find(event)
@@ -460,9 +464,9 @@ class message_adapter:
         }
         _s3.Object(s3Bucket, s3Key).put(**s3Params)
 
-        try: 
+        try:
             replacement_data.value.clear()
-        except AttributeError: 
+        except AttributeError:
             parsed_json_path.update(event, '')
 
         remoteConfiguration = {'Bucket': s3Bucket, 'Key': s3Key,

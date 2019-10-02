@@ -2,11 +2,11 @@
   "task_config": {
     "bar": "baz",
     "cumulus_message": {
-      "input": "{{$.payload.input}}",
+      "input": "{$.payload.input}",
       "outputs": [
         {
-          "source": "{{$.input.anykey}}",
-          "destination": "{{$.payload.out}}"
+          "source": "{$.input.anykey}",
+          "destination": "{$.payload.out}"
         }
       ]
     }

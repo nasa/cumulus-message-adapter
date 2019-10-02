@@ -4,12 +4,12 @@
     "cumulus_message": {
       "outputs": [
         {
-          "source": "{{$}}",
-          "destination": "{{$.payload}}"
+          "source": "{$}",
+          "destination": "{$.payload}"
         },
         {
-          "source": "{{$.input.anykey}}",
-          "destination": "{{$.meta.baz}}"
+          "source": "{$.input.anykey}",
+          "destination": "{$.meta.baz}"
         }
       ]
     }

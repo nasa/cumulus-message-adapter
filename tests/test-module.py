@@ -14,10 +14,20 @@ class Test(unittest.TestCase):
     """ Test class """
 
     s3_object = {'input': ':blue_whale:'}
+    config_s3_object = {'task_config' : 'bad value', 'input': ':blue_whale:'}
     bucket_name = 'testing-internal'
     key_name = 'blue_whale-event.json'
+    config_key_name = 'cma_config_blue_whale-event.json'
     event_with_cma = {'cma': {'foo': 'bar', 'event': {'some': 'object'}}}
     event_with_replace = {'replace': {'Bucket': bucket_name, 'Key': key_name, 'TargetPath': '$'}}
+    config_event_with_replace = {'cma':
+                                    {
+                                         'task_config': 'foo_bar',
+                                         'event': {
+                                             'replace': {'Bucket': bucket_name, 'Key': config_key_name, 'TargetPath': '$'}
+                                         }
+                                    }
+                                }
     event_without_replace = {'input': ':baby_whale:'}
     test_uuid = 'aad93279-95d4-4ada-8c43-aa5823f8bbbc'
     next_event_object_key_name = "events/{0}".format(test_uuid)
@@ -37,29 +47,40 @@ class Test(unittest.TestCase):
 
         self.s3.Bucket(self.bucket_name).create()
         self.s3.Object(self.bucket_name, self.key_name).put(Body=json.dumps(self.s3_object))
+        self.s3.Object(self.bucket_name, self.config_key_name).put(Body=json.dumps(self.config_s3_object))
+
 
     def tearDown(self):
         delete_objects_object = {
-            'Objects': [{'Key': self.key_name}, {'Key': self.next_event_object_key_name}]
+            'Objects': [{'Key': self.key_name}, {'Key': self.next_event_object_key_name},
+                        {'Key': self.config_key_name}]
         }
         self.s3.Bucket(self.bucket_name).delete_objects(Delete=delete_objects_object)
         self.s3.Bucket(self.bucket_name).delete()
-
     # loadAndUpdateRemoteEvent tests
     def test_returns_remote_s3_object(self):
         """ Test remote s3 event is returned when 'replace' key is present """
-        result = self.cumulus_message_adapter.loadRemoteEvent(self.event_with_replace)
+        result = self.cumulus_message_adapter.loadAndUpdateRemoteEvent(self.event_with_replace, None)
         assert result == self.s3_object
 
     def test_returns_event(self):
         """ Test event argument is returned when 'replace' key is not present """
-        result = self.cumulus_message_adapter.loadRemoteEvent(self.event_without_replace)
+        result = self.cumulus_message_adapter.loadAndUpdateRemoteEvent(self.event_without_replace, None)
         assert result == self.event_without_replace
 
-    def test_loadAndUpdateRemoteEvent_handles_cma_parameter(self): 
+    def test_loadAndUpdateRemoteEvent_handles_cma_parameter(self):
         """ Test incoming event with 'cma' parameter is assembled into CMA message """
         result = self.cumulus_message_adapter.loadAndUpdateRemoteEvent(self.event_with_cma, None)
         expected = { 'foo': 'bar', 'some': 'object'}
+        self.assertEqual(expected, result)
+
+
+    def test_loadAndUpdateRemoteEvent_does_not_overwrite_configuration(self):
+        """ Test incoming event with configuration is not overwritten by key in remote event """
+        result = self.cumulus_message_adapter.loadAndUpdateRemoteEvent(self.config_event_with_replace, None)
+        expected = {'task_config': self.config_event_with_replace['cma']['task_config'],
+                    'input': u':blue_whale:',
+                    'replace': self.config_event_with_replace['cma']['event']['replace']}
         self.assertEqual(expected, result)
 
     # loadNestedEvent tests
@@ -77,9 +98,9 @@ class Test(unittest.TestCase):
                 "Example": {
                     "bar": "baz",
                     "cumulus_message": {
-                        "input": "{{$.payload.input}}",
-                        "outputs": [{"source": "{{$.input.anykey}}",
-                                    "destination": "{{$.payload.out}}"}]
+                        "input": "{$.payload.input}",
+                        "outputs": [{"source": "{$.input.anykey}",
+                                    "destination": "{$.payload.out}"}]
                     }
                 }
             },
@@ -92,9 +113,9 @@ class Test(unittest.TestCase):
             'input': {'anykey': 'anyvalue'},
             'config': {'bar': 'baz'},
             'messageConfig': {
-                'input': '{{$.payload.input}}',
-                'outputs': [{'source': '{{$.input.anykey}}',
-                            'destination': '{{$.payload.out}}'}]}
+                'input': '{$.payload.input}',
+                'outputs': [{'source': '{$.input.anykey}',
+                            'destination': '{$.payload.out}'}]}
         }
 
         result = self.cumulus_message_adapter.loadNestedEvent(nested_event_local, {})
@@ -114,9 +135,9 @@ class Test(unittest.TestCase):
             "task_config": {
                 "bar": "baz",
                 "cumulus_message": {
-                    "input": "{{$.payload.input}}",
-                    "outputs": [{"source": "{{$.input.anykey}}",
-                                "destination": "{{$.payload.out}}"}]
+                    "input": "{$.payload.input}",
+                    "outputs": [{"source": "{$.input.anykey}",
+                                "destination": "{$.payload.out}"}]
                 }
             },
             "cumulus_meta": {"message_source": "local", "id": "id-1234"},
@@ -128,9 +149,9 @@ class Test(unittest.TestCase):
             'input': {'anykey': 'anyvalue'},
             'config': {'bar': 'baz'},
             'messageConfig': {
-                'input': '{{$.payload.input}}',
-                'outputs': [{'source': '{{$.input.anykey}}',
-                            'destination': '{{$.payload.out}}'}]}
+                'input': '{$.payload.input}',
+                'outputs': [{'source': '{$.input.anykey}',
+                            'destination': '{$.payload.out}'}]}
         }
 
         result = self.cumulus_message_adapter.loadNestedEvent(nested_event_local, {})
@@ -155,8 +176,8 @@ class Test(unittest.TestCase):
         # messageConfig objects
         message_config_with_simple_outputs = {
             'outputs': [{
-                'source': '{{$.input.dataLocation}}',
-                'destination': '{{$.payload}}'
+                'source': '{$.input.dataLocation}',
+                'destination': '{$.payload}'
             }]
         }
 
@@ -171,8 +192,8 @@ class Test(unittest.TestCase):
         """
         message_config_with_nested_outputs = {
             'outputs': [{
-                'source': '{{$.input.dataLocation}}',
-                'destination': '{{$.payload.dataLocation}}'
+                'source': '{$.input.dataLocation}',
+                'destination': '{$.payload.dataLocation}'
             }]
         }
 
@@ -258,7 +279,7 @@ class Test(unittest.TestCase):
                 'workflow': 'testing',
                 'system_bucket': self.bucket_name
             },
-            'meta': { 
+            'meta': {
                 'another_key': {
                 'some_meta_key': 'some_meta_object'
             }},
@@ -594,7 +615,7 @@ class Test(unittest.TestCase):
         schemas = { 'config': 'config.json' }
         adapter = message_adapter.message_adapter(schemas)
         in_msg = json.loads(inp.read())
-        in_msg["task_config"]["boolean_option"] = '{{$.meta.boolean_option}}'
+        in_msg["task_config"]["boolean_option"] = '{$.meta.boolean_option}'
         in_msg["meta"]["boolean_option"] = "notgoingtowork"
         try:
             adapter.loadNestedEvent(in_msg, {})
