@@ -5,6 +5,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Removed
+
+- Removed deprecated function `loadRemoteEvent` and updated tests.
+
+### Fixed
+
+- Fixed issue where remote message stored configuration values would overwrite the config params in the step reading the remote message [CUMULUS-1447]
 
 ## [v1.1.0] - 2019-09-16
 
