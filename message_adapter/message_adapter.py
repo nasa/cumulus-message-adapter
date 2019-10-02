@@ -18,6 +18,7 @@ class message_adapter:
     transforms the cumulus message
     """
     REMOTE_DEFAULT_MAX_SIZE = 0
+    CMA_CONFIG_KEYS = ['ReplaceConfig', 'task_config']
 
     def __init__(self, schemas=None):
         self.schemas = schemas
@@ -137,8 +138,6 @@ class message_adapter:
                     event['exception'] = local_exception
         return event
 
-
-
     def loadAndUpdateRemoteEvent(self, incoming_event, context):
         """
         * Looks at a Cumulus message. If the message has part of its data stored remotely in
@@ -150,8 +149,8 @@ class message_adapter:
         event = deepcopy(incoming_event)
 
         if incoming_event.get('cma'):
-            event = self.__loadRemoteEvent(event['cma'].get('event'))
             cmaEvent = deepcopy(incoming_event)
+            event = self.__loadRemoteEvent(event['cma'].get('event'))
             cmaEvent['cma']['event'].update(event)
             event = self.__parseParameterConfiguration(cmaEvent)
         else:
@@ -451,7 +450,8 @@ class message_adapter:
         target_path = replace_config.get('TargetPath', replace_config['Path'])
         max_size = replace_config.get('MaxSize', self.REMOTE_DEFAULT_MAX_SIZE)
 
-        event.pop('ReplaceConfig')
+        [event.pop(key) for key in self.CMA_CONFIG_KEYS if event.get(key)]
+
         cumulus_meta = deepcopy(event['cumulus_meta'])
         parsed_json_path = parse(source_path)
         replacement_data = parsed_json_path.find(event)
