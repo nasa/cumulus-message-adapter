@@ -60,12 +60,12 @@ class Test(unittest.TestCase):
     # loadAndUpdateRemoteEvent tests
     def test_returns_remote_s3_object(self):
         """ Test remote s3 event is returned when 'replace' key is present """
-        result = self.cumulus_message_adapter.loadRemoteEvent(self.event_with_replace)
+        result = self.cumulus_message_adapter.loadAndUpdateRemoteEvent(self.event_with_replace, None)
         assert result == self.s3_object
 
     def test_returns_event(self):
         """ Test event argument is returned when 'replace' key is not present """
-        result = self.cumulus_message_adapter.loadRemoteEvent(self.event_without_replace)
+        result = self.cumulus_message_adapter.loadAndUpdateRemoteEvent(self.event_without_replace, None)
         assert result == self.event_without_replace
 
     def test_loadAndUpdateRemoteEvent_handles_cma_parameter(self):

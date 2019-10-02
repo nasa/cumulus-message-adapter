@@ -94,18 +94,6 @@ class message_adapter:
     #  Input message interpretation  #
     ##################################
 
-    # Events stored externally
-
-    def loadRemoteEvent(self, event):
-        """
-        Maintained for backwards compatibility
-        """
-        warnings.warn(
-            'loadRemoteEvent is deprecated and will be removed in a future version',
-            DeprecationWarning
-        )
-        return self.loadAndUpdateRemoteEvent(event, None)
-
     def __parseParameterConfiguration(self, event):
         parsed_event = event
         if event.get('cma'):
