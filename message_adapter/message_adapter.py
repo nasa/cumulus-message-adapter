@@ -129,11 +129,12 @@ class message_adapter:
     def loadAndUpdateRemoteEvent(self, incoming_event, context):
         """
         * Looks at a Cumulus message. If the message has part of its data stored remotely in
-        * S3, fetches that data, otherwise it returns the full message, both cases updated with task metadata
+        * S3, fetches that data, otherwise it returns the full message, both cases updated with task metadata.
+        * If event uses parameterized configuration, converts message into a
+        * Cumulus message and ensures that incoming parameter keys are not overridden
         * @param {*} event The input Lambda event in the Cumulus message protocol
         * @returns {*} the full event data
         """
-        # event = self.__parseParameterConfiguration(deepcopy(incoming_event))
         event = deepcopy(incoming_event)
 
         if incoming_event.get('cma'):
