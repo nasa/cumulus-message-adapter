@@ -2,7 +2,7 @@ import os
 import json
 import re
 import warnings
-import sys 
+import sys
 
 from datetime import datetime, timedelta
 import uuid
@@ -113,14 +113,8 @@ class message_adapter:
             parsed_event.update(updated_event)
         return parsed_event
 
-    def loadAndUpdateRemoteEvent(self, incoming_event, context):
-        """
-        * Looks at a Cumulus message. If the message has part of its data stored remotely in
-        * S3, fetches that data, otherwise it returns the full message, both cases updated with task metadata
-        * @param {*} event The input Lambda event in the Cumulus message protocol
-        * @returns {*} the full event data
-        """
-        event = self.__parseParameterConfiguration(deepcopy(incoming_event))
+
+    def __loadRemoteEvent(self, event):
         if 'replace' in event:
             local_exception = event.get('exception', None)
             _s3 = s3()
@@ -133,14 +127,35 @@ class message_adapter:
                 replacement_targets = parsed_json_path.find(event)
                 if not replacement_targets or len(replacement_targets) != 1:
                     raise Exception('Remote event configuration target {} invalid'.format(target_json_path))
-                try: 
+                try:
                     replacement_targets[0].value.update(remote_event)
-                except AttributeError: 
+                except AttributeError:
                     parsed_json_path.update(event, remote_event)
 
                 event.pop('replace')
                 if (local_exception and local_exception != 'None') and (not event['exception'] or event['exception'] == 'None'):
                     event['exception'] = local_exception
+        return event
+
+
+
+    def loadAndUpdateRemoteEvent(self, incoming_event, context):
+        """
+        * Looks at a Cumulus message. If the message has part of its data stored remotely in
+        * S3, fetches that data, otherwise it returns the full message, both cases updated with task metadata
+        * @param {*} event The input Lambda event in the Cumulus message protocol
+        * @returns {*} the full event data
+        """
+        # event = self.__parseParameterConfiguration(deepcopy(incoming_event))
+        event = deepcopy(incoming_event)
+
+        if incoming_event.get('cma'):
+            event = self.__loadRemoteEvent(event['cma'].get('event'))
+            cmaEvent = deepcopy(incoming_event)
+            cmaEvent['cma']['event'].update(event)
+            event = self.__parseParameterConfiguration(cmaEvent)
+        else:
+            event = self.__loadRemoteEvent(event)
 
         if context and 'meta' in event and 'workflow_tasks' in event['meta']:
             cumulus_meta = event['cumulus_meta']
@@ -460,9 +475,9 @@ class message_adapter:
         }
         _s3.Object(s3Bucket, s3Key).put(**s3Params)
 
-        try: 
+        try:
             replacement_data.value.clear()
-        except AttributeError: 
+        except AttributeError:
             parsed_json_path.update(event, '')
 
         remoteConfiguration = {'Bucket': s3Bucket, 'Key': s3Key,
