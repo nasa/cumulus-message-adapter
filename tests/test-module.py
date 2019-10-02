@@ -77,9 +77,9 @@ class Test(unittest.TestCase):
                 "Example": {
                     "bar": "baz",
                     "cumulus_message": {
-                        "input": "{{$.payload.input}}",
-                        "outputs": [{"source": "{{$.input.anykey}}",
-                                    "destination": "{{$.payload.out}}"}]
+                        "input": "{$.payload.input}",
+                        "outputs": [{"source": "{$.input.anykey}",
+                                    "destination": "{$.payload.out}"}]
                     }
                 }
             },
@@ -92,9 +92,9 @@ class Test(unittest.TestCase):
             'input': {'anykey': 'anyvalue'},
             'config': {'bar': 'baz'},
             'messageConfig': {
-                'input': '{{$.payload.input}}',
-                'outputs': [{'source': '{{$.input.anykey}}',
-                            'destination': '{{$.payload.out}}'}]}
+                'input': '{$.payload.input}',
+                'outputs': [{'source': '{$.input.anykey}',
+                            'destination': '{$.payload.out}'}]}
         }
 
         result = self.cumulus_message_adapter.loadNestedEvent(nested_event_local, {})
@@ -114,9 +114,9 @@ class Test(unittest.TestCase):
             "task_config": {
                 "bar": "baz",
                 "cumulus_message": {
-                    "input": "{{$.payload.input}}",
-                    "outputs": [{"source": "{{$.input.anykey}}",
-                                "destination": "{{$.payload.out}}"}]
+                    "input": "{$.payload.input}",
+                    "outputs": [{"source": "{$.input.anykey}",
+                                "destination": "{$.payload.out}"}]
                 }
             },
             "cumulus_meta": {"message_source": "local", "id": "id-1234"},
@@ -128,9 +128,9 @@ class Test(unittest.TestCase):
             'input': {'anykey': 'anyvalue'},
             'config': {'bar': 'baz'},
             'messageConfig': {
-                'input': '{{$.payload.input}}',
-                'outputs': [{'source': '{{$.input.anykey}}',
-                            'destination': '{{$.payload.out}}'}]}
+                'input': '{$.payload.input}',
+                'outputs': [{'source': '{$.input.anykey}',
+                            'destination': '{$.payload.out}'}]}
         }
 
         result = self.cumulus_message_adapter.loadNestedEvent(nested_event_local, {})
@@ -155,8 +155,8 @@ class Test(unittest.TestCase):
         # messageConfig objects
         message_config_with_simple_outputs = {
             'outputs': [{
-                'source': '{{$.input.dataLocation}}',
-                'destination': '{{$.payload}}'
+                'source': '{$.input.dataLocation}',
+                'destination': '{$.payload}'
             }]
         }
 
@@ -171,8 +171,8 @@ class Test(unittest.TestCase):
         """
         message_config_with_nested_outputs = {
             'outputs': [{
-                'source': '{{$.input.dataLocation}}',
-                'destination': '{{$.payload.dataLocation}}'
+                'source': '{$.input.dataLocation}',
+                'destination': '{$.payload.dataLocation}'
             }]
         }
 
@@ -594,7 +594,7 @@ class Test(unittest.TestCase):
         schemas = { 'config': 'config.json' }
         adapter = message_adapter.message_adapter(schemas)
         in_msg = json.loads(inp.read())
-        in_msg["task_config"]["boolean_option"] = '{{$.meta.boolean_option}}'
+        in_msg["task_config"]["boolean_option"] = '{$.meta.boolean_option}'
         in_msg["meta"]["boolean_option"] = "notgoingtowork"
         try:
             adapter.loadNestedEvent(in_msg, {})
