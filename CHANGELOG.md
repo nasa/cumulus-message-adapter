@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed issue where remote message stored configuration values would overwrite the config params in the step reading the remote message [CUMULUS-1447]
+
 ## [v1.1.0] - 2019-09-16
 
 ### BREAKING CHANGES
