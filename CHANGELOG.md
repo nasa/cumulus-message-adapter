@@ -4,7 +4,7 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [v1.1.1] - 2019-10-03
 ### Removed
 
 - Removed deprecated function `loadRemoteEvent` and updated tests.
@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fixed issue where remote message stored configuration values would overwrite the config params in the step reading the remote message [CUMULUS-1447]
 
 ## [v1.1.0] - 2019-09-16
+
+*Note*:this release was pulled from pypi/releases on github.   Please utilize v1.1.1
 
 ### BREAKING CHANGES
 ### Added
