@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
-- Updated release process to utilize [pyinstaller](https://www.pyinstaller.org/)[CUMULUS-1447] to create a pre-package python+CMA release binary, added as the executable `cma` to the release package.
+- Updated release process to utilize [pyinstaller](https://www.pyinstaller.org/)[CUMULUS-1447] to create a pre-package python+CMA release binary compatible with AWS Linux 2, added as the executable `cma` to the release package.
 
 
 ## [v1.1.1] - 2019-10-03
