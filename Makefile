@@ -1,5 +1,6 @@
 clean:
 	rm -rf dist
+	rm -rf dist_package
 	rm -f cumulus-message-adapter.zip
 
 dist:
@@ -15,7 +16,7 @@ requirements: dist requirements.txt
 
 packaged_runtime: requirements
 	pip install pyinstaller
-	pyinstaller --distpath dist_package --clean -F -n cma __main__.py
+	pyinstaller --distpath dist_package --clean -F --onefile -n cma __main__.py
 
 cumulus-message-adapter.zip: requirements packaged_runtime
 	cp __main__.py ./dist/
