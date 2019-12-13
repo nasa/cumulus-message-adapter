@@ -121,6 +121,8 @@ jobs:
                   $GIT_API_URL/$GIT_PATH/releases \
                   --data $CREATE_RELEASE_REQUEST_BODY | jq .
               echo "Building ${ZIPFILENAME}"
+              sudo pip install pyinstaller
+              sudo pip install -r requirements.txt
               make clean
               make $ZIPFILENAME
               if [ -f $ZIPFILENAME ]; then
