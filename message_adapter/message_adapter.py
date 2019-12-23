@@ -392,7 +392,6 @@ class message_adapter:
                     # Set current item to newly created dict
                     currentItem = newPathDict
                 else:
-                    print(parse(path).find(currentItem)[0].value)
                     currentItem = parse(path).find(currentItem)[0].value
         parse(jspath).update(message, value)
         return message
