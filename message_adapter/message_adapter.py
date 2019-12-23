@@ -3,7 +3,6 @@ import json
 import re
 import sys
 
-from collections import defaultdict
 from copy import deepcopy
 from datetime import datetime, timedelta
 import uuid
