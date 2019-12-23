@@ -227,7 +227,7 @@ class message_adapter:
                 raise e
 
     # Config templating
-    def __resolvePathStr(self, event, str):
+    def __resolvePathStr(self, event, jsonPathString):
         """
         * Given a Cumulus message (AWS Lambda event) and a string containing a JSONPath
         * template to interpret, returns the result of interpreting that template.
@@ -243,30 +243,30 @@ class message_adapter:
         * It's likely we'll need some sort of bracket-escaping at some point down the line
         *
         * @param {*} event The Cumulus message
-        * @param {*} str A string containing a JSONPath template to resolve
+        * @param {*} jsonPathString A string containing a JSONPath template to resolve
         * @returns {*} The resolved object
         """
         valueRegex = r"^{[^\[\]].*}$"
         arrayRegex = r"^{\[.*\]}$"
         templateRegex = '{[^}]+}'
 
-        if re.search(valueRegex, str):
-            matchData = parse(str.lstrip('{').rstrip('}')).find(event)
+        if re.search(valueRegex, jsonPathString):
+            matchData = parse(jsonPathString.lstrip('{').rstrip('}')).find(event)
             return matchData[0].value if matchData else None
 
-        elif re.search(arrayRegex, str):
-            matchData = parse(str.lstrip('{').rstrip('}').lstrip('[').rstrip(']')).find(event)
+        elif re.search(arrayRegex, jsonPathString):
+            matchData = parse(jsonPathString.lstrip('{').rstrip('}').lstrip('[').rstrip(']')).find(event)
             return [item.value for item in matchData] if matchData else []
 
-        elif re.search(templateRegex, str):
-            matches = re.findall(templateRegex, str)
+        elif re.search(templateRegex, jsonPathString):
+            matches = re.findall(templateRegex, jsonPathString)
             for match in matches:
                 matchData = parse(match.lstrip('{').rstrip('}')).find(event)
                 if matchData:
-                    str = str.replace(match, matchData[0].value)
-            return str
+                    jsonPathString = jsonPathString.replace(match, matchData[0].value)
+            return jsonPathString
 
-        return str
+        return jsonPathString
 
     def __resolveConfigObject(self, event, config):
         """
