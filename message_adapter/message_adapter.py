@@ -1,17 +1,15 @@
 import os
 import json
 import re
-import warnings
 import sys
 
+from collections import defaultdict
+from copy import deepcopy
 from datetime import datetime, timedelta
 import uuid
 from jsonpath_ng import parse
 from jsonschema import validate
-from collections import defaultdict
-from copy import deepcopy
 from .aws import stepFn, s3
-
 
 class message_adapter:
     """
@@ -255,7 +253,8 @@ class message_adapter:
             return matchData[0].value if matchData else None
 
         elif re.search(arrayRegex, jsonPathString):
-            matchData = parse(jsonPathString.lstrip('{').rstrip('}').lstrip('[').rstrip(']')).find(event)
+            parsedJsonPath = jsonPathString.lstrip('{').rstrip('}').lstrip('[').rstrip(']');
+            matchData = parse(parsedJsonPath).find(event)
             return [item.value for item in matchData] if matchData else []
 
         elif re.search(templateRegex, jsonPathString):
