@@ -268,8 +268,6 @@ class message_adapter:
 
         return str
 
-        raise LookupError('Could not resolve path ' + str)
-
     def __resolveConfigObject(self, event, config):
         """
         * Recursive helper for resolveConfigTemplates
