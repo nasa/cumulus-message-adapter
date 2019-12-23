@@ -246,23 +246,23 @@ class message_adapter:
         * @param {*} str A string containing a JSONPath template to resolve
         * @returns {*} The resolved object
         """
-        valueRegex = '^{[^\[\]].*}$'
-        arrayRegex = '^{\[.*\]}$'
+        valueRegex = r"^{[^\[\]].*}$"
+        arrayRegex = r"^{\[.*\]}$"
         templateRegex = '{[^}]+}'
 
-        if (re.search(valueRegex, str)):
+        if re.search(valueRegex, str):
             matchData = parse(str.lstrip('{').rstrip('}')).find(event)
-            return matchData[0].value if len(matchData) > 0 else None
+            return matchData[0].value if matchData else None
 
-        elif (re.search(arrayRegex, str)):
+        elif re.search(arrayRegex, str):
             matchData = parse(str.lstrip('{').rstrip('}').lstrip('[').rstrip(']')).find(event)
-            return [item.value for item in matchData] if len(matchData) > 0 else []
+            return [item.value for item in matchData] if matchData else []
 
-        elif (re.search(templateRegex, str)):
+        elif re.search(templateRegex, str):
             matches = re.findall(templateRegex, str)
             for match in matches:
                 matchData = parse(match.lstrip('{').rstrip('}')).find(event)
-                if len(matchData) > 0:
+                if matchData:
                     str = str.replace(match, matchData[0].value)
             return str
 
@@ -347,7 +347,7 @@ class message_adapter:
         if finalConfig is not None:
             response['config'] = finalConfig
         if 'cumulus_message' in config:
-            response['messageConfig'] = config[ 'cumulus_message']
+            response['messageConfig'] = config['cumulus_message']
 
         # add cumulus_config property, only selective attributes from event.cumulus_meta are added
         if 'cumulus_meta' in event:
