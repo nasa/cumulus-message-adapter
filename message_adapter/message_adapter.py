@@ -379,21 +379,22 @@ class message_adapter:
         * @param {*} message The message to be update
         * @return {*} updated message
         """
-        if len(parse(jspath).find(message)) > 0:
-            parse(jspath).update(message, value)
-        else:
+        if not parse(jspath).find(message):
             paths = jspath.lstrip('$.').split('.')
             currentItem = message
-            dictPath = str()
             keyNotFound = False
             for path in paths:
-                dictPath += "['" + path + "']"
                 if keyNotFound or path not in currentItem:
                     keyNotFound = True
-                    exec("message" + dictPath + " = {}")
-                currentItem = eval("message" + dictPath)
-
-            exec("message" + dictPath + " = value")
+                    newPathDict = {}
+                    # Add missing key to existing dic
+                    currentItem[path] = newPathDict
+                    # Set current item to newly created dict
+                    currentItem = newPathDict
+                else:
+                    print(parse(path).find(currentItem)[0].value)
+                    currentItem = parse(path).find(currentItem)[0].value
+        parse(jspath).update(message, value)
         return message
 
     def __assignOutputs(self, handlerResponse, event, messageConfig):
@@ -457,7 +458,7 @@ class message_adapter:
 
         _s3 = s3()
         s3Bucket = event['cumulus_meta']['system_bucket']
-        s3Key = ('/').join(['events', str(uuid.uuid4())])
+        s3Key = ('/').join(['events', jsonpath(uuid.uuid4())])
         s3Params = {
             'Expires': datetime.utcnow() + timedelta(days=7),  # Expire in a week
             'Body': json.dumps(replacement_data.value)
