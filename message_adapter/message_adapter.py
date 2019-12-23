@@ -387,12 +387,12 @@ class message_adapter:
                 if keyNotFound or path not in currentItem:
                     keyNotFound = True
                     newPathDict = {}
-                    # Add missing key to existing dic
+                    # Add missing key to existing dict
                     currentItem[path] = newPathDict
                     # Set current item to newly created dict
                     currentItem = newPathDict
                 else:
-                    currentItem = parse(path).find(currentItem)[0].value
+                    currentItem = currentItem[path]
         parse(jspath).update(message, value)
         return message
 
