@@ -1,17 +1,14 @@
 import os
 import json
 import re
-import warnings
 import sys
 
+from copy import deepcopy
 from datetime import datetime, timedelta
 import uuid
 from jsonpath_ng import parse
 from jsonschema import validate
-from collections import defaultdict
-from copy import deepcopy
 from .aws import stepFn, s3
-
 
 class message_adapter:
     """
@@ -227,7 +224,7 @@ class message_adapter:
                 raise e
 
     # Config templating
-    def __resolvePathStr(self, event, str):
+    def __resolvePathStr(self, event, jsonPathString):
         """
         * Given a Cumulus message (AWS Lambda event) and a string containing a JSONPath
         * template to interpret, returns the result of interpreting that template.
@@ -243,32 +240,31 @@ class message_adapter:
         * It's likely we'll need some sort of bracket-escaping at some point down the line
         *
         * @param {*} event The Cumulus message
-        * @param {*} str A string containing a JSONPath template to resolve
+        * @param {*} jsonPathString A string containing a JSONPath template to resolve
         * @returns {*} The resolved object
         """
-        valueRegex = '^{[^\[\]].*}$'
-        arrayRegex = '^{\[.*\]}$'
+        valueRegex = r"^{[^\[\]].*}$"
+        arrayRegex = r"^{\[.*\]}$"
         templateRegex = '{[^}]+}'
 
-        if (re.search(valueRegex, str)):
-            matchData = parse(str.lstrip('{').rstrip('}')).find(event)
-            return matchData[0].value if len(matchData) > 0 else None
+        if re.search(valueRegex, jsonPathString):
+            matchData = parse(jsonPathString.lstrip('{').rstrip('}')).find(event)
+            return matchData[0].value if matchData else None
 
-        elif (re.search(arrayRegex, str)):
-            matchData = parse(str.lstrip('{').rstrip('}').lstrip('[').rstrip(']')).find(event)
-            return [item.value for item in matchData] if len(matchData) > 0 else []
+        elif re.search(arrayRegex, jsonPathString):
+            parsedJsonPath = jsonPathString.lstrip('{').rstrip('}').lstrip('[').rstrip(']');
+            matchData = parse(parsedJsonPath).find(event)
+            return [item.value for item in matchData] if matchData else []
 
-        elif (re.search(templateRegex, str)):
-            matches = re.findall(templateRegex, str)
+        elif re.search(templateRegex, jsonPathString):
+            matches = re.findall(templateRegex, jsonPathString)
             for match in matches:
                 matchData = parse(match.lstrip('{').rstrip('}')).find(event)
-                if len(matchData) > 0:
-                    str = str.replace(match, matchData[0].value)
-            return str
+                if matchData:
+                    jsonPathString = jsonPathString.replace(match, matchData[0].value)
+            return jsonPathString
 
-        return str
-
-        raise LookupError('Could not resolve path ' + str)
+        return jsonPathString
 
     def __resolveConfigObject(self, event, config):
         """
@@ -347,7 +343,7 @@ class message_adapter:
         if finalConfig is not None:
             response['config'] = finalConfig
         if 'cumulus_message' in config:
-            response['messageConfig'] = config[ 'cumulus_message']
+            response['messageConfig'] = config['cumulus_message']
 
         # add cumulus_config property, only selective attributes from event.cumulus_meta are added
         if 'cumulus_meta' in event:
@@ -379,21 +375,21 @@ class message_adapter:
         * @param {*} message The message to be update
         * @return {*} updated message
         """
-        if len(parse(jspath).find(message)) > 0:
-            parse(jspath).update(message, value)
-        else:
+        if not parse(jspath).find(message):
             paths = jspath.lstrip('$.').split('.')
             currentItem = message
-            dictPath = str()
             keyNotFound = False
             for path in paths:
-                dictPath += "['" + path + "']"
                 if keyNotFound or path not in currentItem:
                     keyNotFound = True
-                    exec("message" + dictPath + " = {}")
-                currentItem = eval("message" + dictPath)
-
-            exec("message" + dictPath + " = value")
+                    newPathDict = {}
+                    # Add missing key to existing dict
+                    currentItem[path] = newPathDict
+                    # Set current item to newly created dict
+                    currentItem = newPathDict
+                else:
+                    currentItem = currentItem[path]
+        parse(jspath).update(message, value)
         return message
 
     def __assignOutputs(self, handlerResponse, event, messageConfig):
