@@ -6,19 +6,20 @@
 
 Read more about how the `cumulus-message-adapter` works in the [CONTRACT.md](./CONTRACT.md).
 
-
 ## Releases
 
 ### Release Versions
-Please note the following convention for release versions: 
 
-X.Y.Z: where: 
+Please note the following convention for release versions:
+
+X.Y.Z: where:
 
 * X is an organizational release that signifies the completion of a core set of functionality
 * Y is a major version release that may include incompatible API changes and/or other breaking changes
 * Z is a minor version that includes bugfixes and backwards compatible improvements
 
 ### Continuous Integration
+
 [CircleCI](https://circleci.com/gh/nasa/cumulus-message-adapter) manages releases and release assets.
 
 Whenever CircleCI passes on the master branch of cumulus-message-adapter and `message_adapter/version.py` has been updated with a version that doesn't match an existing tag, CircleCI will:
@@ -33,8 +34,10 @@ These steps are fully detailed in the [`.circleci/config.yml`](./.circleci/confi
 
 ### Dependency Installation
 
-    $ pip install -r requirements-dev.txt
-    $ pip install -r requirements.txt
+```shell
+pip install -r requirements-dev.txt
+pip install -r requirements.txt
+```
 
 ### Running Tests
 
@@ -42,38 +45,38 @@ Running tests requires [localstack](https://github.com/localstack/localstack).
 
 Tests only require localstack running S3, which can be initiated with the following command:
 
-```
-$ SERVICES=s3 localstack start
+```shell
+SERVICES=s3 localstack start
 ```
 
 And then you can check tests pass with the following nosetests command:
 
-```
-$ CUMULUS_ENV=testing nosetests -v -s
+```shell
+CUMULUS_ENV=testing nosetests -v -s
 ```
 
 ### Linting
 
-     $ pylint message_adapter
+```shell
+pylint message_adapter
+```
 
 ### Contributing
 
 If changes are made to the codebase, you can create the cumulus-message-adapter zip archive for testing libraries that require it:
 
-```bash
-$ make clean
-$ make cumulus-message-adapter.zip
+```shell
+make clean
+make cumulus-message-adapter.zip
 ```
 
 Then you can run some integration tests:
 
-```bash
-./examples/example-node-message-adapter-lib.js 
+```shell
+./examples/example-node-message-adapter-lib.js
 ```
-
 
 ### Troubleshooting
 
 * Error: "DistutilsOptionError: must supply either home or prefix/exec-prefix — not both" when running `make cumulus-message-adapter.zip`
   * [Solution](https://stackoverflow.com/a/24357384)
-

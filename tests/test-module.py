@@ -201,6 +201,31 @@ class Test(unittest.TestCase):
             self.nested_response, {}, message_config_with_nested_outputs)
         assert result['payload'] == {'dataLocation': 's3://source.jpg'}
 
+    def test_result_payload_with_nested_sibling_config_outputs(self):
+        """
+        Test nested payload value is updated when messageConfig contains
+        outputs templates where sibling nodes exist
+        """
+        message_config_with_nested_outputs = {
+            'outputs': [{
+                'source': '{$.input.dataLocation}',
+                'destination': '{$.test.dataLocation}'
+            }]
+        }
+
+        event = {
+            'test': {
+                'key': 'value'
+            }
+        }
+
+        result = self.cumulus_message_adapter._message_adapter__assignOutputs( # pylint: disable=no-member
+            self.nested_response, event, message_config_with_nested_outputs)
+        assert result['test'] == {
+            'dataLocation': 's3://source.jpg',
+            'key': 'value'
+        }
+
     # createNextEvent tests
     def test_with_replace(self):
         """
