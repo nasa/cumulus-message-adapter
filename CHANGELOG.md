@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Removed unsafe use of `exec` and `eval` in `message_adapter.__assignJsonPathValue`
 
-## [v1.1.2]
+## [v1.1.2] - 2019-12-13
 
 ### Added
 
