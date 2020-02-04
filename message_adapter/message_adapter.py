@@ -123,7 +123,7 @@ class message_adapter:
                     event['exception'] = local_exception
         return event
 
-    def loadAndUpdateRemoteEvent(self, incoming_event, context):
+    def load_and_update_remote_event(self, incoming_event, context):
         """
         * Looks at a Cumulus message. If the message has part of its data stored remotely in
         * S3, fetches that data, otherwise it returns the full message, both cases updated with task metadata.
@@ -252,7 +252,7 @@ class message_adapter:
             return matchData[0].value if matchData else None
 
         elif re.search(arrayRegex, jsonPathString):
-            parsedJsonPath = jsonPathString.lstrip('{').rstrip('}').lstrip('[').rstrip(']');
+            parsedJsonPath = jsonPathString.lstrip('{').rstrip('}').lstrip('[').rstrip(']')
             matchData = parse(parsedJsonPath).find(event)
             return [item.value for item in matchData] if matchData else []
 
@@ -327,7 +327,7 @@ class message_adapter:
             return self.__resolvePathStr(event, inputPath)
         return event.get('payload')
 
-    def loadNestedEvent(self, event, context):
+    def load_nested_event(self, event, context):
         """
         * Interprets an incoming event as a Cumulus workflow message
         *
@@ -471,7 +471,7 @@ class message_adapter:
         event['replace'] = remoteConfiguration
         return event
 
-    def createNextEvent(self, handlerResponse, event, messageConfig):
+    def create_next_event(self, handlerResponse, event, messageConfig):
         """
         * Creates the output message returned by a task
         *
