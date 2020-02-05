@@ -154,7 +154,6 @@ jobs:
             python setup.py sdist
             twine upload --skip-existing --username "${PYPI_USER}" --password "${PYPI_PASS}" dist/*
 
-
 workflows:
   version: 2
   build_test_publish:
