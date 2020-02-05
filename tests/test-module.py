@@ -34,7 +34,7 @@ class Test(unittest.TestCase):
     test_uuid = 'aad93279-95d4-4ada-8c43-aa5823f8bbbc'
     next_event_object_key_name = "events/{0}".format(test_uuid)
     s3 = aws.s3()
-    cumulus_message_adapter = message_adapter.message_adapter()
+    cumulus_message_adapter = message_adapter.MessageAdapter()
     test_folder = os.path.join(os.getcwd(), 'examples/messages')
     context_folder = os.path.join(os.getcwd(), 'examples/contexts')
     schemas_folder = os.path.join(os.getcwd(), 'examples/schemas')
@@ -166,17 +166,17 @@ class Test(unittest.TestCase):
         result = self.cumulus_message_adapter.load_nested_event(nested_event_local, {})
         assert result == nested_event_local_return
 
-    # assignOutputs tests
+    # assign_outputs tests
     def test_result_payload_without_config(self):
         """ Test nestedResponse is returned when no config argument is passed """
-        result = self.cumulus_message_adapter._message_adapter__assignOutputs(
+        result = self.cumulus_message_adapter._MessageAdapter__assign_outputs(
             self.nested_response, {}, None)
         assert result['payload'] == self.nested_response
 
     def test_result_payload_without_config_outputs(self):
         """ Test nestedResponse is returned when config has no outputs key/value """
         message_config_without_outputs = {}
-        result = self.cumulus_message_adapter._message_adapter__assignOutputs(
+        result = self.cumulus_message_adapter._MessageAdapter__assign_outputs(
             self.nested_response, {}, message_config_without_outputs)
         assert result['payload'] == self.nested_response
 
@@ -190,7 +190,7 @@ class Test(unittest.TestCase):
             }]
         }
 
-        result = self.cumulus_message_adapter._message_adapter__assignOutputs(
+        result = self.cumulus_message_adapter._MessageAdapter__assign_outputs(
             self.nested_response, {}, message_config_with_simple_outputs)
         assert result['payload'] == 's3://source.jpg'
 
@@ -206,7 +206,7 @@ class Test(unittest.TestCase):
             }]
         }
 
-        result = self.cumulus_message_adapter._message_adapter__assignOutputs(
+        result = self.cumulus_message_adapter._MessageAdapter__assign_outputs(
             self.nested_response, {}, message_config_with_nested_outputs)
         assert result['payload'] == {'dataLocation': 's3://source.jpg'}
 
@@ -228,7 +228,7 @@ class Test(unittest.TestCase):
             }
         }
 
-        result = self.cumulus_message_adapter._message_adapter__assignOutputs(
+        result = self.cumulus_message_adapter._MessageAdapter__assign_outputs(
             self.nested_response, event, message_config_with_nested_outputs)
         assert result['test'] == {
             'dataLocation': 's3://source.jpg',
@@ -425,7 +425,7 @@ class Test(unittest.TestCase):
         self.s3.Bucket(bucket_name).create()
         self.s3.Object(bucket_name, key_name).put(Body=json.dumps(datasource))
 
-        remote_event= self.cumulus_message_adapter.load_and_update_remote_event(in_msg, {})
+        remote_event = self.cumulus_message_adapter.load_and_update_remote_event(in_msg, {})
         msg = self.cumulus_message_adapter.load_nested_event(remote_event, {})
         message_config = msg.get('messageConfig')
         if 'messageConfig' in msg:
@@ -546,10 +546,10 @@ class Test(unittest.TestCase):
         self.s3.Bucket(bucket_name).delete()
         self.assertEqual(result, out_msg)
 
-    @patch.object(cumulus_message_adapter, '_message_adapter__getCurrentSfnTask')
-    def test_sfn(self, getCurrentSfnTask_function):
+    @patch.object(cumulus_message_adapter, '_MessageAdapter__get_current_sfn_task')
+    def test_sfn(self, get_current_sfn_task_function):
         """ test sfn.input.json """
-        getCurrentSfnTask_function.return_value = "Example"
+        get_current_sfn_task_function.return_value = "Example"
         inp = open(os.path.join(self.test_folder, 'sfn.input.json'))
         out = open(os.path.join(self.test_folder, 'sfn.output.json'))
         in_msg = json.loads(inp.read())
@@ -562,10 +562,10 @@ class Test(unittest.TestCase):
         result = self.cumulus_message_adapter.create_next_event(msg, in_msg, message_config)
         assert result == out_msg
 
-    @patch.object(cumulus_message_adapter, '_message_adapter__getCurrentSfnTask')
-    def test_context(self, getCurrentSfnTask_function):
+    @patch.object(cumulus_message_adapter, '_MessageAdapter__get_current_sfn_task')
+    def test_context(self, get_current_sfn_task_function):
         """ test storing context metadata """
-        getCurrentSfnTask_function.return_value = "Example"
+        get_current_sfn_task_function.return_value = "Example"
         inp = open(os.path.join(self.test_folder, 'context.input.json'))
         out = open(os.path.join(self.test_folder, 'context.output.json'))
         ctx = open(os.path.join(self.context_folder, 'lambda-context.json'))
@@ -581,10 +581,10 @@ class Test(unittest.TestCase):
         result = self.cumulus_message_adapter.create_next_event(msg, in_msg, message_config)
         assert result == out_msg
 
-    @patch.object(cumulus_message_adapter, '_message_adapter__getCurrentSfnTask')
-    def test_inline_template(self, getCurrentSfnTask_function):
+    @patch.object(cumulus_message_adapter, '_MessageAdapter__get_current_sfn_task')
+    def test_inline_template(self, get_current_sfn_task_function):
         """ test inline_template.input.json """
-        getCurrentSfnTask_function.return_value = "Example"
+        get_current_sfn_task_function.return_value = "Example"
         inp = open(os.path.join(self.test_folder, 'inline_template.input.json'))
         out = open(os.path.join(self.test_folder, 'inline_template.output.json'))
         in_msg = json.loads(inp.read())
@@ -611,10 +611,10 @@ class Test(unittest.TestCase):
         result = self.cumulus_message_adapter.create_next_event(msg, in_msg, message_config)
         assert result == out_msg
 
-    @patch.object(cumulus_message_adapter, '_message_adapter__getCurrentSfnTask')
-    def test_cumulus_context(self, getCurrentSfnTask_function):
+    @patch.object(cumulus_message_adapter, '_MessageAdapter__get_current_sfn_task')
+    def test_cumulus_context(self, get_current_sfn_task_function):
         """ test storing cumulus_context metadata """
-        getCurrentSfnTask_function.return_value = "Example"
+        get_current_sfn_task_function.return_value = "Example"
         inp = open(os.path.join(self.test_folder, 'cumulus_context.input.json'))
         out = open(os.path.join(self.test_folder, 'cumulus_context.output.json'))
         in_msg = json.loads(inp.read())
@@ -631,7 +631,7 @@ class Test(unittest.TestCase):
         """ test a working input schema """
         inp = open(os.path.join(self.test_folder, 'templates.input.json'))
         schemas = {'input': 'input.json'}
-        adapter = message_adapter.message_adapter(schemas)
+        adapter = message_adapter.MessageAdapter(schemas)
         in_msg = json.loads(inp.read())
         in_msg["payload"] = {"hello": "world"}
         msg = adapter.load_nested_event(in_msg, {})
@@ -641,7 +641,7 @@ class Test(unittest.TestCase):
         """ test a failing input schema """
         inp = open(os.path.join(self.test_folder, 'templates.input.json'))
         schemas = {'input': 'input.json'}
-        adapter = message_adapter.message_adapter(schemas)
+        adapter = message_adapter.MessageAdapter(schemas)
         in_msg = json.loads(inp.read())
         in_msg["payload"] = {"hello": 1}
         try:
@@ -653,7 +653,7 @@ class Test(unittest.TestCase):
         """ test a working config schema """
         inp = open(os.path.join(self.test_folder, 'templates.input.json'))
         schemas = {'config': 'config.json'}
-        adapter = message_adapter.message_adapter(schemas)
+        adapter = message_adapter.MessageAdapter(schemas)
         in_msg = json.loads(inp.read())
         msg = adapter.load_nested_event(in_msg, {})
         assert msg["config"]["inlinestr"] == 'prefixbarsuffix'
@@ -662,7 +662,7 @@ class Test(unittest.TestCase):
         """ test a failing input schema """
         inp = open(os.path.join(self.test_folder, 'templates.input.json'))
         schemas = {'config': 'config.json'}
-        adapter = message_adapter.message_adapter(schemas)
+        adapter = message_adapter.MessageAdapter(schemas)
         in_msg = json.loads(inp.read())
         in_msg["task_config"]["boolean_option"] = '{$.meta.boolean_option}'
         in_msg["meta"]["boolean_option"] = "notgoingtowork"
@@ -675,7 +675,7 @@ class Test(unittest.TestCase):
         """ test a working output schema """
         inp = open(os.path.join(self.test_folder, 'templates.input.json'))
         schemas = {'output': 'output.json'}
-        adapter = message_adapter.message_adapter(schemas)
+        adapter = message_adapter.MessageAdapter(schemas)
         in_msg = json.loads(inp.read())
         msg = adapter.load_nested_event(in_msg, {})
         message_config = msg.get('messageConfig')
@@ -687,7 +687,7 @@ class Test(unittest.TestCase):
         """ test a working output schema """
         inp = open(os.path.join(self.test_folder, 'templates.input.json'))
         schemas = {'output': 'output.json'}
-        adapter = message_adapter.message_adapter(schemas)
+        adapter = message_adapter.MessageAdapter(schemas)
         in_msg = json.loads(inp.read())
         msg = adapter.load_nested_event(in_msg, {})
         messageConfig = msg.get('messageConfig')

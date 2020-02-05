@@ -4,12 +4,11 @@ https://packaging.python.org/en/latest/distributing.html
 https://github.com/pypa/sampleproject
 """
 
+import imp
+
+from os import path
 # Always prefer setuptools over distutils
 from setuptools import setup, find_packages
-# To use a consistent encoding
-from codecs import open
-from os import path
-import imp
 
 here = path.abspath(path.dirname(__file__))
 
@@ -39,7 +38,8 @@ setup(
     # This is a one-line description or tagline of what your project does. This
     # corresponds to the "Summary" metadata field:
     # https://packaging.python.org/specifications/core-metadata/#summary
-    description='A command-line interface for preparing and outputting Cumulus Messages for Cumulus Tasks',  # Required
+    description=('A command-line interface for preparing and outputting '
+                 'Cumulus Messages for Cumulus Tasks'),  # Required
     long_description=long_description,  # Optional
     url='https://github.com/nasa/cumulus-message-adapter',  # Optional
     author='Cumulus Authors',  # Optional

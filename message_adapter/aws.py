@@ -3,12 +3,14 @@ import os
 import boto3
 from botocore.config import Config
 
+
 def localhost_s3_url():
+    """ Returns configured LOCALSTACK_HOST url or default for localstack s3 """
     if 'LOCALSTACK_HOST' in os.environ:
-        localhost_s3_url = 'http://%s:4572' % os.environ['LOCALSTACK_HOST']
+        s3_url = 'http://%s:4572' % os.environ['LOCALSTACK_HOST']
     else:
-        localhost_s3_url = 'http://localhost:4572'
-    return localhost_s3_url
+        s3_url = 'http://localhost:4572'
+    return s3_url
 
 
 def s3():
@@ -26,12 +28,13 @@ def s3():
     return boto3.resource('s3')
 
 
-# Localstack doesn't support step functions. This is an interim solution so we
-# don't make requests to the AWS API in testing.
 def stepFn():
+    """Localstack doesn't support step functions. This method is an interim solution so we
+       don't make requests to the AWS API in testing."""
     region = os.getenv('AWS_DEFAULT_REGION', 'us-east-1')
     if ('CUMULUS_ENV' in os.environ) and (os.environ["CUMULUS_ENV"] == 'testing'):
-        return boto3.client(service_name='stepfunctions', endpoint_url=localhost_s3_url(), region_name=region)
+        return boto3.client(service_name='stepfunctions',
+                            endpoint_url=localhost_s3_url(), region_name=region)
     else:
         config = Config(region_name=region, retries=dict(max_attempts=30))
         return boto3.client('stepfunctions', config=config)

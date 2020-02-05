@@ -3,7 +3,7 @@
 import json
 import sys
 
-from message_adapter import message_adapter
+from message_adapter.message_adapter import MessageAdapter
 
 if __name__ == '__main__':
     functionName = sys.argv[1]
@@ -12,17 +12,17 @@ if __name__ == '__main__':
         schemas = allInput['schemas']
     else:
         schemas = None
-    transformer = message_adapter.message_adapter(schemas)
+    transformer = MessageAdapter(schemas)
     exitCode = 1
     event = allInput['event']
 
     try:
         context = allInput.get('context')
-        if (functionName == 'loadAndUpdateRemoteEvent'):
+        if functionName == 'loadAndUpdateRemoteEvent':
             result = transformer.load_and_update_remote_event(event, context)
-        elif (functionName == 'loadNestedEvent'):
+        elif functionName == 'loadNestedEvent':
             result = transformer.load_nested_event(event, context)
-        elif (functionName == 'createNextEvent'):
+        elif functionName == 'createNextEvent':
             handlerResponse = allInput['handler_response']
             if 'message_config' in allInput:
                 messageConfig = allInput['message_config']
