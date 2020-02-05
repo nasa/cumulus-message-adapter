@@ -170,6 +170,6 @@ workflows:
       - publish_pypi:
         requires:
           - publish_github
-          filters:
-            branches:
-              only: master
+        filters:
+          branches:
+            only: master
