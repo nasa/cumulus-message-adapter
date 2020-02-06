@@ -29,7 +29,7 @@ class MessageAdapter:
     def __parse_parameter_configuration(event):
         parsed_event = event
         if event.get('cma'):
-            updated_event = {k: v for (k, v) in event['cma'].items() if k != 'event'}
+            updated_event = {k: v for (k,v) in event['cma'].items() if k != 'event'}
             parsed_event = event['cma']['event']
             parsed_event.update(updated_event)
         return parsed_event
