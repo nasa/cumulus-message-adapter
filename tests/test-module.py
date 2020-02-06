@@ -462,7 +462,6 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
         if 'messageConfig' in msg:
             del msg['messageConfig']
         result = self.cumulus_message_adapter.create_next_event(msg, in_msg, message_config)
-        import pdb; pdb.set_trace()
         assert result == out_msg
 
     def test_remote(self):

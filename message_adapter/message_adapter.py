@@ -1,17 +1,14 @@
 import os
 import json
-import sys
 
 from copy import deepcopy
-from datetime import datetime, timedelta
-import uuid
-from jsonpath_ng import parse
 from jsonschema import validate
-from .aws import get_current_sfn_task, s3
+from .aws import get_current_sfn_task
 
 from .util import assign_json_path_value
 from .cumulus_message import (resolve_config_templates, resolve_input,
-                              resolve_path_str, load_config, load_remote_event)
+                              resolve_path_str, load_config, load_remote_event,
+                              store_remote_response)
 
 
 class MessageAdapter:
@@ -129,7 +126,6 @@ class MessageAdapter:
 
         return response
 
-
     @staticmethod
     def __assign_outputs(handler_response, event, message_config):
         """
@@ -155,70 +151,6 @@ class MessageAdapter:
 
         return result
 
-    def __parse_remote_config_from_event(self, replace_config):
-        source_path = replace_config['Path']
-        target_path = replace_config.get('TargetPath', replace_config['Path'])
-        max_size = replace_config.get('MaxSize', self.REMOTE_DEFAULT_MAX_SIZE)
-        parsed_json_path = parse(source_path)
-
-        return {
-            'target_path': target_path,
-            'max_size': max_size,
-            'parsed_json_path': parsed_json_path,
-        }
-
-    def __store_remote_response(self, incoming_event):
-        """
-        * Stores part of a response message in S3 if it is too big to send to StepFunctions
-        * @param {*} event The response message
-        * @returns {*} A response message, possibly referencing an S3 object for its contents
-        """
-        event = deepcopy(incoming_event)
-        replace_config = event.get('ReplaceConfig', None)
-        if not replace_config:
-            return event
-        # Set default value if FullMessage flag set
-        if replace_config.get('FullMessage', False):
-            replace_config['Path'] = '$'
-
-        replace_config_values = self.__parse_remote_config_from_event(replace_config)
-
-        for key in self.CMA_CONFIG_KEYS:
-            if event.get(key):
-                del event[key]
-        cumulus_meta = deepcopy(event['cumulus_meta'])
-        replacement_data = replace_config_values['parsed_json_path'].find(event)
-        if len(replacement_data) != 1:
-            raise Exception(f'JSON path invalid: {replace_config_values["parsed_json_path"]}')
-        replacement_data = replacement_data[0]
-
-        estimated_data_size = len(json.dumps(replacement_data.value))
-        if sys.version_info.major > 3:
-            estimated_data_size = len(json.dumps(replacement_data.value).encode(('utf-8')))
-
-        if estimated_data_size < replace_config_values['max_size']:
-            return event
-
-        _s3 = s3()
-        s3_bucket = event['cumulus_meta']['system_bucket']
-        s3_key = ('/').join(['events', str(uuid.uuid4())])
-        s3_params = {
-            'Expires': datetime.utcnow() + timedelta(days=7),  # Expire in a week
-            'Body': json.dumps(replacement_data.value)
-        }
-        _s3.Object(s3_bucket, s3_key).put(**s3_params)
-
-        try:
-            replacement_data.value.clear()
-        except AttributeError:
-            replace_config_values['parsed_json_path'].update(event, '')
-
-        remote_configuration = {'Bucket': s3_bucket, 'Key': s3_key,
-                                'TargetPath': replace_config_values['target_path']}
-        event['cumulus_meta'] = event.get('cumulus_meta', cumulus_meta)
-        event['replace'] = remote_configuration
-        return event
-
     def create_next_event(self, handler_response, event, message_config):
         """
         * Creates the output message returned by a task
@@ -235,4 +167,4 @@ class MessageAdapter:
             result['exception'] = 'None'
         if 'replace' in result:
             del result['replace']
-        return self.__store_remote_response(result)
+        return store_remote_response(result, self.REMOTE_DEFAULT_MAX_SIZE, self.CMA_CONFIG_KEYS)
