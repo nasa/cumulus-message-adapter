@@ -291,7 +291,6 @@ class MessageAdapter:
             return self.__resolve_path_str(event, config)
 
         if isinstance(config, list):
-            # TODO: Pylint disabled due to missing testing
             for i in range(0, len(config)):  # pylint: disable=consider-using-enumerate
                 config[i] = self.__resolve_config_object(event, config[i])
             return config
