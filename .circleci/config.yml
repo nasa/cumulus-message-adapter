@@ -71,7 +71,7 @@ jobs:
             pylint __main__.py -E
             CUMULUS_ENV=testing nosetests -v -s
 
-  build_python36:
+  build_python38:
     <<: *container_python38
     steps:
       - checkout
