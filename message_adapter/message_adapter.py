@@ -1,6 +1,5 @@
 import os
 import json
-import re
 import sys
 
 from copy import deepcopy
@@ -8,299 +7,11 @@ from datetime import datetime, timedelta
 import uuid
 from jsonpath_ng import parse
 from jsonschema import validate
-from .aws import stepFn, s3
+from .aws import get_current_sfn_task, s3
 
-
-def _assign_json_path_value(message, jspath, value):
-    """
-    * Assign (update or insert) a value to message based on jsonpath.
-    * Create the keys if jspath doesn't already exist in the message. In this case, we
-    * support 'simple' jsonpath like $.path1.path2.path3....
-    * @param {*} message The message to be update
-    * @return {*} updated message
-    """
-    if not parse(jspath).find(message):
-        paths = jspath.lstrip('$.').split('.')
-        current_item = message
-        key_not_found = False
-        for path in paths:
-            if key_not_found or path not in current_item:
-                key_not_found = True
-                new_path_dict = {}
-                # Add missing key to existing dict
-                current_item[path] = new_path_dict
-                # Set current item to newly created dict
-                current_item = new_path_dict
-            else:
-                current_item = current_item[path]
-    parse(jspath).update(message, value)
-    return message
-
-
-def _resolve_config_object(event, config):
-    """
-    * Recursive helper for resolveConfigTemplates
-    *
-    * Given a config object containing possible JSONPath-templated values, resolves
-    * all the values in the object using JSONPaths into the provided event.
-    *
-    * @param {*} event The event that paths resolve against
-    * @param {*} config A config object, containing paths
-    * @returns {*} A config object with all JSONPaths resolved
-    """
-
-    if isinstance(config, str):
-        return _resolve_path_str(event, config)
-
-    if isinstance(config, list):
-        for i in range(0, len(config)):  # pylint: disable=consider-using-enumerate
-            config[i] = _resolve_config_object(event, config[i])
-        return config
-
-    if (config is not None and isinstance(config, dict)):
-        result = {}
-        for key in config.keys():
-            result[key] = _resolve_config_object(event, config[key])
-        return result
-
-    return config
-
-
-def _resolve_config_templates(event, config):
-    """
-    * Given a config object containing possible JSONPath-templated values, resolves
-    * all the values in the object using JSONPaths into the provided event.
-    *
-    * @param {*} event The event that paths resolve against
-    * @param {*} config A config object, containing paths
-    * @returns {*} A config object with all JSONPaths resolved
-    """
-    task_config = config.copy()
-    if 'cumulus_message' in task_config:
-        del task_config['cumulus_message']
-    return _resolve_config_object(event, task_config)
-
-
-# Payload determination
-def _resolve_input(event, config):
-    """
-    * Given a Cumulus message and its config, returns the input object to send to the
-    * task, as defined under config.cumulus_message
-    * @param {*} event The Cumulus message
-    * @param {*} config The config object
-    * @returns {*} The object to place on the input key of the task's event
-    """
-    if ('cumulus_message' in config and 'input' in config['cumulus_message']):
-        input_path = config['cumulus_message']['input']
-        return _resolve_path_str(event, input_path)
-    return event.get('payload')
-
-
-# Config templating
-def _resolve_path_str(event, json_path_string):
-    """
-    * Given a Cumulus message (AWS Lambda event) and a string containing a JSONPath
-    * template to interpret, returns the result of interpreting that template.
-    *
-    * Templating comes in three flavors:
-    *   1. Single curly-braces within a string ("some{$.path}value"). The JSONPaths
-    *      are replaced by the first value they match, coerced to string
-    *   2. A string surrounded by double curly-braces ("{{$.path}}").  The function
-    *      returns the first object matched by the JSONPath
-    *   3. A string surrounded by curly and square braces ("{[$.path]}"). The function
-    *      returns an array of all object matching the JSONPath
-    *
-    * It's likely we'll need some sort of bracket-escaping at some point down the line
-    *
-    * @param {*} event The Cumulus message
-    * @param {*} json_path_string A string containing a JSONPath template to resolve
-    * @returns {*} The resolved object
-    """
-    value_regex = r"^{[^\[\]].*}$"
-    array_regex = r"^{\[.*\]}$"
-    template_regex = '{[^}]+}'
-
-    if re.search(value_regex, json_path_string):
-        match_data = parse(json_path_string.lstrip('{').rstrip('}')).find(event)
-        return match_data[0].value if match_data else None
-
-    if re.search(array_regex, json_path_string):
-        parsed_json_path = json_path_string.lstrip('{').rstrip('}').lstrip('[').rstrip(']')
-        match_data = parse(parsed_json_path).find(event)
-        return [item.value for item in match_data] if match_data else []
-
-    if re.search(template_regex, json_path_string):
-        matches = re.findall(template_regex, json_path_string)
-        for match in matches:
-            match_data = parse(match.lstrip('{').rstrip('}')).find(event)
-            if match_data:
-                json_path_string = json_path_string.replace(match, match_data[0].value)
-        return json_path_string
-
-    return json_path_string
-
-
-# Loading task configuration from workload template
-def _load_step_function_task_name(event, context):
-    """
-    * For StepFunctions, returns the configuration corresponding to the current execution
-    * @param {*} event An event in the Cumulus message format with remote parts resolved
-    * @param {*} context The context object passed to AWS Lambda or containing an activityArn
-    * @returns {*} The task's configuration
-    """
-    meta = event['cumulus_meta']
-    if 'invokedFunctionArn' in context:
-        arn = context['invokedFunctionArn']
-    else:
-        arn = context.get('invoked_function_arn', context.get('activityArn'))
-    return _get_current_sfn_task(meta['state_machine'], meta['execution_name'], arn)
-
-
-def _load_remote_event(event):
-    if 'replace' in event:
-        local_exception = event.get('exception', None)
-        _s3 = s3()
-        data = _s3.Object(event['replace']['Bucket'],
-                          event['replace']['Key']).get()
-        target_json_path = event['replace']['TargetPath']
-        parsed_json_path = parse(target_json_path)
-        if data is not None:
-            remote_event = json.loads(data['Body'].read().decode('utf-8'))
-            replacement_targets = parsed_json_path.find(event)
-            if not replacement_targets or len(replacement_targets) != 1:
-                raise Exception(f'Remote event configuration target {target_json_path} invalid')
-            try:
-                replacement_targets[0].value.update(remote_event)
-            except AttributeError:
-                parsed_json_path.update(event, remote_event)
-
-            event.pop('replace')
-            exception_bool = (local_exception and local_exception != 'None')
-            if exception_bool and (not event['exception'] or event['exception'] == 'None'):
-                event['exception'] = local_exception
-    return event
-
-
-def _get_sfn_execution_arn_by_name(state_machine_arn, execution_name):
-    """
-    * Given a state machine arn and execution name, returns the execution's ARN
-    * @param {string} state_machine_arn The ARN of the state machine containing the execution
-    * @param {string} execution_name The name of the execution
-    * @returns {string} The execution's ARN
-    """
-    return (':').join([state_machine_arn.replace(':stateMachine:', ':execution:'),
-                       execution_name])
-
-
-def _get_task_name_from_execution_history(execution_history, arn):
-    """
-    * Given an execution history object returned by the StepFunctions API and an optional
-    * Activity or Lambda ARN returns the most recent task name started for the given ARN,
-    * or if no ARN is supplied, the most recent task started.
-    *
-    * IMPORTANT! If no ARN is supplied, this message assumes that the most recently started
-    * execution is the desired execution. This WILL BREAK parallel executions, so always supply
-    * this if possible.
-    *
-    * @param {dict} executionHistory The execution history returned by getExecutionHistory,
-    * assumed to be sorted so most recent executions come last
-    * @param {string} arn An ARN to an Activity or Lambda to find. See "IMPORTANT!"
-    * @throws If no matching task is found
-    * @returns {string} The matching task name
-    """
-    events_by_id = {}
-
-    # Create a lookup table for finding events by their id
-    for event in execution_history['events']:
-        events_by_id[event['id']] = event
-
-    for step in execution_history['events']:
-        # Find the ARN in thie history (the API is awful here).  When found, return its
-        # previousEventId's (TaskStateEntered) name
-        lambda_of_type_and_matching_arn = (
-            (step['type'] == 'LambdaFunctionScheduled' and
-             step['lambdaFunctionScheduledEventDetails']['resource'] == arn) or
-            (step['type'] == 'ActivityScheduled' and
-             step['activityScheduledEventDetails']['resource'] == arn))
-
-        if (arn is not None and lambda_of_type_and_matching_arn and
-                'stateEnteredEventDetails' in events_by_id[step['previousEventId']]):
-            return events_by_id[step['previousEventId']]['stateEnteredEventDetails']['name']
-
-        if step['type'] == 'TaskStateEntered':
-            return step['stateEnteredEventDetails']['name']
-
-    raise LookupError('No task found for ' + arn)
-
-
-def _get_current_sfn_task(state_machine_arn, execution_name, arn):
-    """
-    * Given a state machine ARN, an execution name, and an optional Activity or Lambda ARN
-    * returns the most recent task name started for the given ARN in that execution,
-    * or if no ARN is supplied, the most recent task started.
-    *
-    * IMPORTANT! If no ARN is supplied, this message assumes that the most recently started
-    * execution is the desired execution. This WILL BREAK parallel executions, so always supply
-    * this if possible.
-    *
-    * @param {string} state_machine_arn The ARN of the state machine containing the execution
-    * @param {string} execution_name The name of the step function execution to look up
-    * @param {string} arn An ARN to an Activity or Lambda to find. See "IMPORTANT!"
-    * @returns {string} The name of the task being run
-    """
-    sfn = stepFn()
-    execution_arn = _get_sfn_execution_arn_by_name(state_machine_arn, execution_name)
-    execution_history = sfn.get_execution_history(
-        executionArn=execution_arn,
-        maxResults=40,
-        reverseOrder=True
-    )
-    return _get_task_name_from_execution_history(execution_history, arn)
-
-
-def _parse_parameter_configuration(event):
-    parsed_event = event
-    if event.get('cma'):
-        updated_event = {k: v for (k, v) in event['cma'].items() if k != 'event'}
-        parsed_event = event['cma']['event']
-        parsed_event.update(updated_event)
-    return parsed_event
-
-
-def _get_config(event, task_name):
-    """
-    * Returns the configuration for the task with the given name, or an empty object if no
-    * such task is configured.
-    * @param {*} event An event in the Cumulus message format with remote parts resolved
-    * @param {*} task_name The name of the Cumulus task
-    * @returns {*} The configuration object
-    """
-    config = {}
-    if ('workflow_config' in event and task_name in event['workflow_config']):
-        config = event['workflow_config'][task_name]
-    return config
-
-
-def _load_config(event, context):
-    """
-    * Given a Cumulus message and context, returns the config object for the task
-    * @param {*} event An event in the Cumulus message format with remote parts resolved
-    * @param {*} context The context object passed to AWS Lambda or containing an activityArn
-    * @returns {*} The task's configuration
-    """
-    if 'task_config' in event:
-        return event['task_config']
-    # Maintained for backwards compatibility
-    source = event['cumulus_meta']['message_source']
-    if source is None:
-        raise LookupError('cumulus_meta requires a message_source')
-    if source == 'local':
-        task_name = event['cumulus_meta']['task']
-    elif source == 'sfn':
-        task_name = _load_step_function_task_name(event, context)
-    else:
-        raise LookupError('Unknown event source: ' + source)
-    return _get_config(event, task_name) if task_name is not None else None
+from .util import assign_json_path_value
+from .cumulus_message import (resolve_config_templates, resolve_input,
+                              resolve_path_str, load_config, load_remote_event)
 
 
 class MessageAdapter:
@@ -318,7 +29,15 @@ class MessageAdapter:
     ##################################
 
     @staticmethod
-    def load_and_update_remote_event(incoming_event, context):
+    def __parse_parameter_configuration(event):
+        parsed_event = event
+        if event.get('cma'):
+            updated_event = {k: v for (k, v) in event['cma'].items() if k != 'event'}
+            parsed_event = event['cma']['event']
+            parsed_event.update(updated_event)
+        return parsed_event
+
+    def load_and_update_remote_event(self, incoming_event, context):
         """
         * Looks at a Cumulus message. If the message has part of its data stored remotely in
         * S3, fetches that data, otherwise it returns the full message, both cases updated with
@@ -332,11 +51,11 @@ class MessageAdapter:
 
         if incoming_event.get('cma'):
             cma_event = deepcopy(incoming_event)
-            event = _load_remote_event(event['cma'].get('event'))
+            event = load_remote_event(event['cma'].get('event'))
             cma_event['cma']['event'].update(event)
-            event = _parse_parameter_configuration(cma_event)
+            event = self.__parse_parameter_configuration(cma_event)
         else:
-            event = _load_remote_event(event)
+            event = load_remote_event(event)
 
         if context and 'meta' in event and 'workflow_tasks' in event['meta']:
             cumulus_meta = event['cumulus_meta']
@@ -346,9 +65,9 @@ class MessageAdapter:
             task_meta['arn'] = context.get('invoked_function_arn',
                                            context.get('invokedFunctionArn',
                                                        context.get('activityArn')))
-            task_name = _get_current_sfn_task(cumulus_meta['state_machine'],
-                                              cumulus_meta['execution_name'],
-                                              task_meta['arn'])
+            task_name = get_current_sfn_task(cumulus_meta['state_machine'],
+                                             cumulus_meta['execution_name'],
+                                             task_meta['arn'])
             event['meta']['workflow_tasks'][task_name] = task_meta
         return event
 
@@ -380,9 +99,9 @@ class MessageAdapter:
         * @param {*} event The input message sent to the Lambda
         * @returns {*} message that is ready to pass to an inner task
         """
-        config = _load_config(event, context)
-        final_config = _resolve_config_templates(event, config)
-        final_payload = _resolve_input(event, config)
+        config = load_config(event, context)
+        final_config = resolve_config_templates(event, config)
+        final_payload = resolve_input(event, config)
         response = {'input': final_payload}
         self.__validate_json(final_payload, 'input')
         self.__validate_json(final_config, 'config')
@@ -410,9 +129,7 @@ class MessageAdapter:
 
         return response
 
-    #############################
-    # Output message creation   #
-    #############################
+
     @staticmethod
     def __assign_outputs(handler_response, event, message_config):
         """
@@ -431,8 +148,8 @@ class MessageAdapter:
                 source_path = output['source']
                 dest_path = output['destination']
                 dest_json_path = dest_path.lstrip('{').rstrip('}')
-                value = _resolve_path_str(handler_response, source_path)
-                _assign_json_path_value(result, dest_json_path, value)
+                value = resolve_path_str(handler_response, source_path)
+                result = assign_json_path_value(result, dest_json_path, value)
         else:
             result['payload'] = handler_response
 
