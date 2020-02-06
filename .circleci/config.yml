@@ -161,15 +161,15 @@ workflows:
       - build_python36
       - build_python38
       - publish_github:
-        requires:
-          - build_python38
-          - build_python36
-        filters:
-          branches:
-            only: master
+          requires:
+            - build_python38
+            - build_python36
+          filters:
+            branches:
+              only: master
       - publish_pypi:
-        requires:
-          - publish_github
-        filters:
-          branches:
-            only: master
+          requires:
+            - publish_github
+          filters:
+            branches:
+              only: master
