@@ -80,8 +80,8 @@ jobs:
           name: install dependencies
           command: |
             pip install --user virtualenv
-            ~/.local/bin/virtualenv ~/venv36
-            . ~/venv36/bin/activate
+            ~/.local/bin/virtualenv ~/venv38
+            . ~/venv38/bin/activate
             pip install -r requirements.txt
             pip install -r requirements-dev.txt
             pip install .
@@ -91,7 +91,7 @@ jobs:
           environment:
             LOCALSTACK_HOST: localstack
           command: |
-            . ~/venv36/bin/activate
+            . ~/venv38/bin/activate
             pylint __main__.py -E
             CUMULUS_ENV=testing nosetests -v -s
 
