@@ -59,7 +59,7 @@ class Test(unittest.TestCase):
         if context is None:
             context = {}
 
-        inp = open(os.path.join(self.test_folder, '{}.input.json'.format(testcase)))
+        inp = open(os.path.join(self.test_folder, f'{testcase}.input.json'))
         in_msg = json.loads(inp.read())
         s3meta = None
         if 'replace' in in_msg:
@@ -95,7 +95,7 @@ class Test(unittest.TestCase):
             create_next_event, json.dumps(all_input))
         assert exitstatus == 0
 
-        out = open(os.path.join(self.test_folder, '{}.output.json'.format(testcase)))
+        out = open(os.path.join(self.test_folder, f'{testcase}.output.json'))
         out_msg = json.loads(out.read())
         assert json.loads(next_event) == out_msg
 

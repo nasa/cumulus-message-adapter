@@ -32,7 +32,7 @@ class Test(unittest.TestCase):
     }
     event_without_replace = {'input': ':baby_whale:'}
     test_uuid = 'aad93279-95d4-4ada-8c43-aa5823f8bbbc'
-    next_event_object_key_name = "events/{0}".format(test_uuid)
+    next_event_object_key_name = f'events/{test_uuid}'
     s3 = aws.s3()
     cumulus_message_adapter = message_adapter.MessageAdapter()
     test_folder = os.path.join(os.getcwd(), 'examples/messages')

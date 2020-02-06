@@ -229,7 +229,7 @@ class MessageAdapter:
             try:
                 validate(document, schema)
             except Exception as exception:
-                exception.message = '{} schema: {}'.format(schema_type, str(exception))
+                exception.message = f'{schema_type} schema: {str(exception)}'
                 raise exception
 
     # Config templating
@@ -449,7 +449,7 @@ class MessageAdapter:
         parsed_json_path = parse(source_path)
         replacement_data = parsed_json_path.find(event)
         if len(replacement_data) != 1:
-            raise Exception('JSON path invalid: {}'.format(parsed_json_path))
+            raise Exception(f'JSON path invalid: {parsed_json_path}')
         replacement_data = replacement_data[0]
 
         estimated_data_size = len(json.dumps(replacement_data.value))
