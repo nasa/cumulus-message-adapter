@@ -35,6 +35,6 @@ def stepFn():
     if ('CUMULUS_ENV' in os.environ) and (os.environ["CUMULUS_ENV"] == 'testing'):
         return boto3.client(service_name='stepfunctions',
                             endpoint_url=localhost_s3_url(), region_name=region)
-    else:
-        config = Config(region_name=region, retries=dict(max_attempts=30))
-        return boto3.client('stepfunctions', config=config)
+
+    config = Config(region_name=region, retries=dict(max_attempts=30))
+    return boto3.client('stepfunctions', config=config)

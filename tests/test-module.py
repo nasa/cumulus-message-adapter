@@ -10,7 +10,7 @@ from jsonschema.exceptions import ValidationError
 from message_adapter import aws, message_adapter
 
 
-class Test(unittest.TestCase):
+class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
     # pylint: disable=no-member, protected-access
     """ Test class """
 
@@ -546,7 +546,7 @@ class Test(unittest.TestCase):
         self.s3.Bucket(bucket_name).delete()
         self.assertEqual(result, out_msg)
 
-    @patch.object(cumulus_message_adapter, '_MessageAdapter__get_current_sfn_task')
+    @patch.object(message_adapter, '_get_current_sfn_task')
     def test_sfn(self, get_current_sfn_task_function):
         """ test sfn.input.json """
         get_current_sfn_task_function.return_value = "Example"
@@ -562,7 +562,7 @@ class Test(unittest.TestCase):
         result = self.cumulus_message_adapter.create_next_event(msg, in_msg, message_config)
         assert result == out_msg
 
-    @patch.object(cumulus_message_adapter, '_MessageAdapter__get_current_sfn_task')
+    @patch.object(message_adapter, '_get_current_sfn_task')
     def test_context(self, get_current_sfn_task_function):
         """ test storing context metadata """
         get_current_sfn_task_function.return_value = "Example"
@@ -581,7 +581,7 @@ class Test(unittest.TestCase):
         result = self.cumulus_message_adapter.create_next_event(msg, in_msg, message_config)
         assert result == out_msg
 
-    @patch.object(cumulus_message_adapter, '_MessageAdapter__get_current_sfn_task')
+    @patch.object(message_adapter, '_get_current_sfn_task')
     def test_inline_template(self, get_current_sfn_task_function):
         """ test inline_template.input.json """
         get_current_sfn_task_function.return_value = "Example"
@@ -611,7 +611,7 @@ class Test(unittest.TestCase):
         result = self.cumulus_message_adapter.create_next_event(msg, in_msg, message_config)
         assert result == out_msg
 
-    @patch.object(cumulus_message_adapter, '_MessageAdapter__get_current_sfn_task')
+    @patch.object(message_adapter, '_get_current_sfn_task')
     def test_cumulus_context(self, get_current_sfn_task_function):
         """ test storing cumulus_context metadata """
         get_current_sfn_task_function.return_value = "Example"
