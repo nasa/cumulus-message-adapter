@@ -1,5 +1,5 @@
-jsonpath-ng>=1.4.2
-jsonschema~=2.6.0
-boto3>=1.7.74
+jsonpath-ng~=1.4.2
+jsonschema==2.6.0
+boto3~=1.7.74
 six~=1.12.0
 typed-ast>=1.3.0; implementation_name == "cpython"
