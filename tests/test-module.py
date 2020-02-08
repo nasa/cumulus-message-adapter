@@ -93,8 +93,8 @@ class Test(unittest.TestCase):
     # load_nested_event tests
     def test_returns_load_nested_event_local(self):
         """
-        Test returns 'config', 'input' and 'messageConfig' in expected format (workflow_config
-        backwards compatible)
+        Test returns 'config', 'input' and 'messageConfig' in expected format
+        (workflow_config backwards compatible)
         - 'input' in return value is from 'payload' in first argument object
         - 'config' in return value is the task ($.cumulus_meta.task) configuration
            with 'cumulus_message' excluded
