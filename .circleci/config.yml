@@ -161,8 +161,8 @@ workflows:
       - build_python38
       - publish_github:
           requires:
-            - build_python38
             - build_python36
+            - build_python38
           filters:
             branches:
               only: master
