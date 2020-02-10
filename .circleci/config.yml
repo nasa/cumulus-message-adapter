@@ -4,27 +4,12 @@
 #
 version: 2
 references:
-  container_python27: &container_python27
-    docker:
-      - image: circleci/python:2.7.13
-      - name: localstack
-        image: localstack/localstack
-    working_directory: ~/repo
-
   container_python36: &container_python36
     docker:
       - image: circleci/python:3.6.2
       - name: localstack
         image: localstack/localstack
     working_directory: ~/repo
-
-  # Download and cache dependencies
-  restore_cache_python27: &restore_cache_python27
-    restore_cache:
-      keys:
-        - v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
-        # fallback to using the latest cache if no exact match is found
-        - v1-dependencies-
 
   restore_cache_python36: &restore_cache_python36
     restore_cache:
@@ -33,43 +18,35 @@ references:
         # fallback to using the latest cache if no exact match is found
         - v1-dependencies-
 
-  save_cache_python27: &save_cache_python27
-    save_cache:
-      paths:
-        - ~/venv27
-      key: v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
-
   save_cache_python36: &save_cache_python36
     save_cache:
       paths:
         - ~/venv36
       key: v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
 
-jobs:
-  build_python27:
-    <<: *container_python27
-    steps:
-      - checkout
-      - *restore_cache_python27
-      - run:
-          name: install dependencies
-          command: |
-            pip install virtualenv
-            virtualenv ~/venv27
-            . ~/venv27/bin/activate
-            pip install -r requirements.txt
-            pip install -r requirements-dev.txt
-            pip install .
-      - *save_cache_python27
-      - run:
-          name: run tests
-          environment:
-            LOCALSTACK_HOST: localstack
-          command: |
-            . ~/venv27/bin/activate
-            pylint __main__.py -E
-            CUMULUS_ENV=testing nosetests -v -s
 
+  container_python38: &container_python38
+    docker:
+      - image: circleci/python:3.8.1
+      - name: localstack
+        image: localstack/localstack
+    working_directory: ~/repo
+
+  restore_cache_python38: &restore_cache_python38
+    restore_cache:
+      keys:
+        - v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
+        # fallback to using the latest cache if no exact match is found
+        - v1-dependencies-
+
+  save_cache_python38: &save_cache_python38
+    save_cache:
+      paths:
+        - ~/venv38
+      key: v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
+
+
+jobs:
   build_python36:
     <<: *container_python36
     steps:
@@ -94,8 +71,31 @@ jobs:
             pylint __main__.py -E
             CUMULUS_ENV=testing nosetests -v -s
 
+  build_python38:
+    <<: *container_python38
+    steps:
+      - checkout
+      - *restore_cache_python38
+      - run:
+          name: install dependencies
+          command: |
+            /usr/local/bin/virtualenv ~/venv38
+            . ~/venv38/bin/activate
+            pip install -r requirements.txt
+            pip install -r requirements-dev.txt
+            pip install .
+      - *save_cache_python38
+      - run:
+          name: run tests
+          environment:
+            LOCALSTACK_HOST: localstack
+          command: |
+            . ~/venv38/bin/activate
+            pylint __main__.py -E
+            CUMULUS_ENV=testing nosetests -v -s
+
   publish_github:
-    <<: *container_python27
+    <<: *container_python36
     steps:
       - checkout
       - add_ssh_keys
@@ -140,27 +140,29 @@ jobs:
             fi
 
   publish_pypi:
-    <<: *container_python27
+    <<: *container_python36
     steps:
       - checkout
-      - *restore_cache_python27
+      - *restore_cache_python36
       - run:
           name: Deploy to PyPi
           command: |
-            virtualenv ~/venv27
-            . ~/venv27/bin/activate
+            virtualenv ~/venv36
+            . ~/venv36/bin/activate
             pip install twine
             python setup.py sdist
             twine upload --skip-existing --username "${PYPI_USER}" --password "${PYPI_PASS}" dist/*
 
 workflows:
   version: 2
-  build_test_27_publish:
+  build_test_publish:
     jobs:
-      - build_python27
+      - build_python36
+      - build_python38
       - publish_github:
           requires:
-            - build_python27
+            - build_python36
+            - build_python38
           filters:
             branches:
               only: master
@@ -170,6 +172,3 @@ workflows:
           filters:
             branches:
               only: master
-  build_test_36:
-    jobs:
-      - build_python36

@@ -15,8 +15,8 @@ requirements: dist requirements.txt
 	rm -rf dist/docutils
 
 packaged_runtime: requirements
+	pip install -r requirements-dev.txt
 	cp __main__.py ./dist/
-	pip install pyinstaller
 	pyinstaller --distpath dist_package --clean -F -n cma ./dist/__main__.py
 
 cumulus-message-adapter.zip: requirements packaged_runtime
