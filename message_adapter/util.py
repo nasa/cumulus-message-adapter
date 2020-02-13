@@ -7,7 +7,9 @@ def assign_json_path_value(source_message, jspath, value):
     * Assign (update or insert) a value to message based on jsonpath.
     * Create the keys if jspath doesn't already exist in the message. In this case, we
     * support 'simple' jsonpath like $.path1.path2.path3....
-    * @param {*} message The message to be update
+    * @param {dict} source_message The message to be updated
+    * @param {string} jspath JSON path string
+    * @param {*} value Value to update to
     * @return {*} updated message
     """
     message = deepcopy(source_message)
