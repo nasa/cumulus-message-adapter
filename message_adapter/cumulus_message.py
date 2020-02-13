@@ -136,13 +136,13 @@ def resolve_config_templates(event, config):
     return _resolve_config_object(event, task_config)
 
 
-def store_remote_response(incoming_event, max_size, config_keys):
+def store_remote_response(incoming_event, default_max_size, config_keys):
     """
     * Stores part of a response message in S3 if it is too big to send to StepFunctions
-    * @param {*} incoming_event  - The response message
-    * @param {*} max_size        - The maximum size (in bytes) a response message portion
-    *                              can be before the method will store it in s3
-    * @param {*} config_keys     - A list of valid CMA configuration keys
+    * @param {*} incoming_event    - The response message
+    * @param {*} default_max_size  - The maximum size (in bytes) a response message portion
+    *                                can be before the method will store it in s3
+    * @param {*} config_keys       - A list of valid CMA configuration keys
     * @returns {*} A response message, possibly referencing an S3 object for its contents
     """
     event = deepcopy(incoming_event)
@@ -153,7 +153,7 @@ def store_remote_response(incoming_event, max_size, config_keys):
     if replace_config.get('FullMessage', False):
         replace_config['Path'] = '$'
 
-    replace_config_values = _parse_remote_config_from_event(replace_config, max_size)
+    replace_config_values = _parse_remote_config_from_event(replace_config, default_max_size)
 
     for key in config_keys:
         if event.get(key):
@@ -248,14 +248,14 @@ def _resolve_config_object(event, config):
     return config
 
 
-def _parse_remote_config_from_event(replace_config, max_size):
+def _parse_remote_config_from_event(replace_config, default_max_size):
     source_path = replace_config['Path']
     target_path = replace_config.get('TargetPath', replace_config['Path'])
-    max_size = replace_config.get('MaxSize', max_size)
+    default_max_size = replace_config.get('MaxSize', default_max_size)
     parsed_json_path = parse(source_path)
 
     return {
         'target_path': target_path,
-        'max_size': max_size,
+        'max_size': default_max_size,
         'parsed_json_path': parsed_json_path,
     }
