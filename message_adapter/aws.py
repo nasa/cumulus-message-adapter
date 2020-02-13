@@ -99,7 +99,7 @@ def _get_task_name_from_execution_history(execution_history, arn):
         events_by_id[event['id']] = event
 
     for step in execution_history['events']:
-        # Find the ARN in thie history (the API is awful here).  When found, return its
+        # Find the ARN in the history (the API is awful here).  When found, return its
         # previousEventId's (TaskStateEntered) name
         lambda_of_type_and_matching_arn = (
             (step['type'] == 'LambdaFunctionScheduled' and
