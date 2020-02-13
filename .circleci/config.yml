@@ -121,6 +121,9 @@ jobs:
                   $GIT_API_URL/$GIT_PATH/releases \
                   --data $CREATE_RELEASE_REQUEST_BODY | jq .
               echo "Building ${ZIPFILENAME}"
+              pip install --user virtualenv
+              ~/.local/bin/virtualenv ~/venv36
+              . ~/venv36/bin/activate
               sudo pip install pyinstaller
               sudo pip install -r requirements.txt
               make clean
