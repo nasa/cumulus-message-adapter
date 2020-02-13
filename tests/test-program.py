@@ -38,7 +38,7 @@ class Test(unittest.TestCase):
         self.s3.Bucket(bucket_name).delete_objects(Delete=delete_objects_object)
         self.s3.Bucket(bucket_name).delete()
 
-    def execute_command(self, cmd, input_message):
+    def execute_command(self, cmd, input_message):  # pylint: disable=no-self-use
         """
         execute an external command command, and returns command exit status, stdout and stderr
         """

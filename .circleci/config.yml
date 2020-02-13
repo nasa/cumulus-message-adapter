@@ -68,7 +68,7 @@ jobs:
             LOCALSTACK_HOST: localstack
           command: |
             . ~/venv36/bin/activate
-            pylint __main__.py -E
+            pylint_runner
             CUMULUS_ENV=testing nosetests -v -s
 
   build_python38:
@@ -91,7 +91,7 @@ jobs:
             LOCALSTACK_HOST: localstack
           command: |
             . ~/venv38/bin/activate
-            pylint __main__.py -E
+            pylint_runner
             CUMULUS_ENV=testing nosetests -v -s
 
   publish_github:
@@ -147,7 +147,8 @@ jobs:
       - run:
           name: Deploy to PyPi
           command: |
-            virtualenv ~/venv36
+            pip install --user virtualenv
+            ~/.local/bin/virtualenv ~/venv36
             . ~/venv36/bin/activate
             pip install twine
             python setup.py sdist
