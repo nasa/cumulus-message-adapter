@@ -164,9 +164,7 @@ def store_remote_response(incoming_event, max_size, config_keys):
         raise Exception(f'JSON path invalid: {replace_config_values["parsed_json_path"]}')
     replacement_data = replacement_data[0]
 
-    estimated_data_size = len(json.dumps(replacement_data.value))
-    if sys.version_info.major > 3:
-        estimated_data_size = len(json.dumps(replacement_data.value).encode(('utf-8')))
+    estimated_data_size = len(json.dumps(replacement_data.value).encode(('utf-8')))
 
     if estimated_data_size < replace_config_values['max_size']:
         return event
