@@ -1,6 +1,5 @@
 import json
 import re
-import sys
 import uuid
 
 from copy import deepcopy
@@ -158,6 +157,7 @@ def store_remote_response(incoming_event, default_max_size, config_keys):
     for key in config_keys:
         if event.get(key):
             del event[key]
+
     cumulus_meta = deepcopy(event['cumulus_meta'])
     replacement_data = replace_config_values['parsed_json_path'].find(event)
     if len(replacement_data) != 1:
