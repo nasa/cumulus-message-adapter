@@ -1,6 +1,6 @@
 """ Determines the correct AWS endpoint for AWS services """
 import os
-import boto3
+from boto3 import resource, client
 from botocore.config import Config
 
 
@@ -17,7 +17,7 @@ def s3():
     """ Determines the endpoint for the S3 service """
 
     if ('CUMULUS_ENV' in os.environ) and (os.environ['CUMULUS_ENV'] == 'testing'):
-        return boto3.resource(
+        return resource(
             service_name='s3',
             endpoint_url=localhost_s3_url(),
             aws_access_key_id='my-id',
@@ -25,7 +25,7 @@ def s3():
             region_name='us-east-1',
             verify=False
         )
-    return boto3.resource('s3')
+    return resource('s3')
 
 
 def stepFn():
@@ -33,11 +33,11 @@ def stepFn():
        don't make requests to the AWS API in testing."""
     region = os.getenv('AWS_DEFAULT_REGION', 'us-east-1')
     if ('CUMULUS_ENV' in os.environ) and (os.environ["CUMULUS_ENV"] == 'testing'):
-        return boto3.client(service_name='stepfunctions',
-                            endpoint_url=localhost_s3_url(), region_name=region)
+        return client(service_name='stepfunctions',
+                      endpoint_url=localhost_s3_url(), region_name=region)
 
     config = Config(region_name=region, retries=dict(max_attempts=30))
-    return boto3.client('stepfunctions', config=config)
+    return client('stepfunctions', config=config)
 
 
 def get_current_sfn_task(state_machine_arn, execution_name, arn):
