@@ -15,7 +15,7 @@ requirements: dist requirements.txt
 	rm -rf dist/docutils
 
 packaged_runtime: requirements
-	pip install --user -r requirements-dev.txt
+	pip install -r requirements-dev.txt
 	cp __main__.py ./dist/
 	pyinstaller --distpath dist_package --clean -n cma ./dist/__main__.py
 
