@@ -4,6 +4,12 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [v1.2.1] 2020-04-21
+
+### Updated
+
+- Updated deployment to not bundle all associated .so files for pyinstaller in the executable.   This results in slightly better performance/memory requirements at the cost of having all of the associated .so files in the layer directory structure. This change should not impact functionality.
+
 ## [v1.2.0] 2020-02-14
 
 ### BREAKING CHANGES
