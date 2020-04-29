@@ -86,7 +86,9 @@ def singleCommand(functionName):
 
 
 def cmaCli():
-    """Top level CMA cli method, calls correct stream/single command run mode, handles errors"""
+    """
+    Top level CMA cli method, calls correct stream/single command run mode, handles errors
+    """
     exitCode = 1
     functionName = sys.argv[1]
     try:

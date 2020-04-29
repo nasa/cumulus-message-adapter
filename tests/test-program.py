@@ -52,6 +52,9 @@ class Test(unittest.TestCase):
         return exitstatus, outstr.decode(), errorstr.decode()
 
     def read_streaming_output(self, stream_process): # pylint: disable=no-self-use
+        """
+        Given a subprocess, read stdout from that process until <EOC> line recieved
+        """
         proc_stdout = stream_process.stdout
         buffer = ''
         itercount = 0
@@ -68,14 +71,19 @@ class Test(unittest.TestCase):
         raise Exception(err_string)
 
     def write_streaming_input(self, command, proc_input, p_stdin): # pylint: disable=no-self-use
+        """
+        Given a stdin pipe for a subprocess, write command/proc input to CMA subprocess
+        """
         p_stdin.write((command + "\n").encode('utf-8'))
         p_stdin.write(json.dumps(proc_input).encode('utf-8'))
         p_stdin.write('\n'.encode('utf-8'))
         p_stdin.write('<EOC>\n'.encode('utf-8'))
         p_stdin.flush()
 
-
     def transform_messages_streaming(self, testcase, context=None): # pylint: disable=no-self-use
+        """
+        Given a testcase, run 'streaming' interface against input and check if outputs are correct
+        """
         if context is None:
             context = {}
 
