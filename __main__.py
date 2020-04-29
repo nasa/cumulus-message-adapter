@@ -61,7 +61,9 @@ def streamCommands():
     jsonObj = {}
     while cont:
         next_line = sys.stdin.readline().rstrip('\n')
-        if next_line == '<EOC>':
+        if next_line == '<EXIT>':
+            cont = False
+        elif next_line == '<EOC>':
             jsonObj = json.loads(buffer)
             result = callMessageAdapterFunction(command, jsonObj)
             sys.stdout.write(json.dumps(result) + "\n")
@@ -75,8 +77,6 @@ def streamCommands():
                 sys.stderr.write(f'warning setting command to {command}\n')
             else:
                 buffer += next_line
-        if next_line == '<EXIT>':
-            cont = False
 
 
 def singleCommand(functionName):
