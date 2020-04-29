@@ -107,7 +107,7 @@ class Test(unittest.TestCase):
             del load_nested_event_response['messageConfig']
         cma_input = {'handler_response': load_nested_event_response,
                      'event': load_and_update_remote_event_response,
-                     'message_config': message_config, 'schemas': schemas }
+                     'message_config': message_config, 'schemas': schemas}
         self.write_streaming_input('createNextEvent', cma_input, stream_process.stdin)
         create_next_event_response = self.read_streaming_output(stream_process)
 

@@ -7,6 +7,17 @@ from message_adapter.message_adapter import MessageAdapter
 
 
 def callMessageAdapterFunction(functionName, allInput):
+    """
+    CLI helper method to handle 'single command' calls to CMA 'steps'
+
+    Parameters:
+    functionName(string): CMA function to run (one of loadAndUpdateRemoteEvent, loadNestedEvent
+                          and createNextEvent
+    input(dict):          Dict object representing a parsed cumulus message
+
+    Returns:
+    result: JSON response to pass to the next event
+    """
     if 'schemas' in allInput:
         schemas = allInput['schemas']
     else:
@@ -29,6 +40,21 @@ def callMessageAdapterFunction(functionName, allInput):
 
 
 def streamCommands():
+    """
+    Method that runs, and reads messages on STDIN in the format:
+
+    FunctionName
+    JSON string
+    <EOC>
+
+    Method writes responses back to STDOUT in the following format:
+
+    JSON string
+    <EOC>
+
+    A single line "<EXIT>" will cause the program to exit
+    """
+
     cont = True
     buffer = ''
     command = ''
@@ -54,11 +80,13 @@ def streamCommands():
 
 
 def singleCommand(functionName):
+    """Executes a single CMA command"""
     allInput = json.loads(input())
     return callMessageAdapterFunction(functionName, allInput)
 
 
 def cmaCli():
+    """Top level CMA cli method, calls correct stream/single command run mode, handles errors"""
     exitCode = 1
     functionName = sys.argv[1]
     try:
