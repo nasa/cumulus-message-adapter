@@ -30,22 +30,19 @@ def callMessageAdapterFunction(functionName, allInput):
 
 def streamCommands():
     cont = True
-    buffer = ""
-    command = ""
+    buffer = ''
+    command = ''
     jsonObj = {}
     while cont:
         next_line = sys.stdin.readline().rstrip('\n')
         if next_line == '<EOC>':
-            sys.stderr.write('\nBUFFER:' + buffer)
-            sys.stderr.write('\n')
-            sys.stderr.flush()
             jsonObj = json.loads(buffer)
             result = callMessageAdapterFunction(command, jsonObj)
             sys.stdout.write(json.dumps(result) + "\n")
             sys.stdout.write('<EOC>\n')
             sys.stdout.flush()
-            buffer = ""
-            command = ""
+            buffer = ''
+            command = ''
         else:
             if not command:
                 command = next_line.strip()
@@ -80,6 +77,7 @@ def cmaCli():
     except Exception:  # pylint: disable=broad-except
         sys.stderr.write(f'Unexpected Error {str(sys.exc_info()[0])}. {str(sys.exc_info()[1])}')
     sys.exit(exitCode)
+
 
 if __name__ == '__main__':
     cmaCli()
