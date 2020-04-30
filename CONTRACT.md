@@ -4,6 +4,8 @@
 
 Every Cumulus Task includes a business function. `cumulus-message-adapter` and a language-specific library for interacting with `cumulus-message-adapter` are required to integrate a business function as a Cumulus Task into a Cumulus Workflow.
 
+## Command Interface
+
 `cumulus-message-adapter` functions are invoked via the command line and read from stdin. Calling `./cumulus-message-adapter <function_name>` should be followed by a json blob sent to stdin as detailed below.
 
 Note: The `python ./cumulus-message-adapter.zip` is interchangeable with `__main__.py` if the `cumulus-message-adapter.zip` is up-to-date with the code.
@@ -37,11 +39,40 @@ python ./cumulus-message-adapter.zip createNextEvent
 
 These functions should be run in the order outlined above. The output of `loadAndUpdateRemoteEvent` should be sent as `<event_json>` to `createNextEvent`. The output of the `loadNestedEvent` should be fed to a "business function" and the output should be the `<handler_response_json>` sent to `createNextEvent`. More details on these values is provided in sections below.
 
+## Streaming Interface
+
+The CMA also offers a streaming interface that utilizes the commands listed above, but allows for a command/response to be issued without incurring the overhead of loading a subprocess/reloading python dependencies repeatedly:
+
+```bash
+python ./cumulus_message_adapter.zip streaming
+```
+
+With the above invocation, commands can be run by outputting to STDIN in the following format:
+
+```text
+COMMAND
+{ JSON PAYLOAD (may be multi-line) }
+<EOC>
+```
+
+The CMA will respond with a JSON response string if the command is successful, else throw an error and output to STDERR as with the single-command invocation:
+
+```text
+{ JSON OUTPUT }
+<EOC>
+```
+
+To signal an end to the process, send the following input:
+
+```text
+<EXIT>
+```
+
 ## Cumulus Message schemas
 
 Cumulus Messages come in 2 flavors: The full **Cumulus Message** and the **Cumulus Remote Message**.
 
- Because of the potential size of a Cumulus message, mainly the `"payload"` field, a task can be set via configuration to store a portion of its output on S3 with a message key `Remote Message` that defines how to retrieve it and an empty JSON object `{}` in its place.   If the portion of the message targeted exceeds the configured `MaxSize` (defaults to 0 bytes) it will be written to S3. 
+ Because of the potential size of a Cumulus message, mainly the `"payload"` field, a task can be set via configuration to store a portion of its output on S3 with a message key `Remote Message` that defines how to retrieve it and an empty JSON object `{}` in its place.   If the portion of the message targeted exceeds the configured `MaxSize` (defaults to 0 bytes) it will be written to S3.
 
 ### Remote Message Configuration
 
@@ -53,7 +84,7 @@ The CMA remote message functionality can be configured using parameters in sever
 
 Setting the `Path`/`Target` path in the `ReplaceConfig` parameter (and optionally a non-default `MaxSize`)
 
-```yaml 
+```yaml
 DiscoverGranules:
   Parameters:
     cma:
@@ -64,7 +95,7 @@ DiscoverGranules:
         TargetPath: '$.payload'
 ```
 
-will result in any `payload` output larger than the `MaxSize` (in bytes)  to be written to S3.  The CMA will then mark that the key has been replaced via a `replace` key on the event. When the CMA picks up the `replace` key in future steps, it will attempt to retrieve the output from S3 and write it back to `payload`. 
+will result in any `payload` output larger than the `MaxSize` (in bytes)  to be written to S3.  The CMA will then mark that the key has been replaced via a `replace` key on the event. When the CMA picks up the `replace` key in future steps, it will attempt to retrieve the output from S3 and write it back to `payload`.
 
 Note that you can optionally use a different `TargetPath` than `Path`, however as the target is a JSON path there must be a key to target for replacement in the output of that step.    Also note that the JSON path specified must target *one* node, otherwise the CMA will error, as it does not support multiple replacement targets.
 
@@ -83,7 +114,7 @@ DiscoverGranules:
         FullMessage: true
 ```
 
-will result in the CMA assuming the entire inbound message should be stored to S3 if it exceeds the default max size. 
+will result in the CMA assuming the entire inbound message should be stored to S3 if it exceeds the default max size.
 
 This is effectively the same as doing:
 
@@ -131,7 +162,7 @@ The message may contain a reference to an S3 Bucket, Key and TargetPath as follo
   "replace": {
     "Bucket": "cumulus-bucket",
     "Key": "my-large-event.json",
-    "TargetPath": "$" 
+    "TargetPath": "$"
   },
   "cumulus_meta": {}
 }

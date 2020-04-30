@@ -52,7 +52,7 @@ def streamCommands():
     JSON string
     <EOC>
 
-    A single line "<EXIT>" will cause the program to exit
+    A single line "<EXIT>" input will cause the program to exit
     """
 
     cont = True
