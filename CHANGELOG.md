@@ -1,4 +1,6 @@
+
 # Changelog
+
 All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
@@ -7,16 +9,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [v1.3.0] 2020-02-14
 
+### BREAKING CHANGES
+
+- **CUMULUS-1896**
+  - Updated CMA precompiled binary files to a layer subdirectory `./cma_bin`.   Clients who utilize the pre-compiled binary should update their pathing expectations to make use of that directory.
+
 ### Added
 
 - **CUMULUS-1896**
   - Added a 'streaming' mode to the CMA.   This will allow client libraries to avoid requiring three subprocess/python invocations when running the CMA commands in sequence, thus lowering
     the overhead of utilizing the CMA.
-
-### BREAKING CHANGES
-
-- **CUMULUS-1896**
-  - Updated CMA precompiled binary files to a layer subdirectory `./cma_bin`. Users who utilize the pre-compiled binary should update their pathing expectations to that directory.   Users utilizing the distribution zip file as a layer should update their CMA executable target to `/opt/cma` on AWS.
 
 ## [v1.2.1] 2020-04-21
 
