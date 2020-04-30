@@ -44,7 +44,7 @@ These functions should be run in the order outlined above. The output of `loadAn
 The CMA also offers a streaming interface that utilizes the commands listed above, but allows for a command/response to be issued without incurring the overhead of loading a subprocess/reloading python dependencies repeatedly:
 
 ```bash
-python ./cumulus_message_adapter.zip streaming
+python ./cumulus_message_adapter.zip stream
 ```
 
 With the above invocation, commands can be run by outputting to STDIN in the following format:
