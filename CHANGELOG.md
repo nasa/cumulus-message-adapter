@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### BREAKING CHANGES
 
 - **CUMULUS-1896**
-  - Updated CMA precompiled binary files to a layer subdirectory `./cma_bin`.   Clients who utilize the pre-compiled binary should update their pathing expectations to make use of that directory.
+  - CMA precompiled binary files are now copied into a subdirectory `./cma_bin`.  Clients who utilize the pre-compiled binary should update their pathing expectations to make use of that directory. If you are using the CMA via [`cumulus-message-adapter-js`](https://github.com/nasa/cumulus-message-adapter-js), then this change is handled for you transparently as of version 1.2.0.
 
 ### Added
 
