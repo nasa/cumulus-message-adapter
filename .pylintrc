@@ -25,5 +25,4 @@ ignore-docstrings=yes
 # Ignore imports when computing similarities.
 ignore-imports=no
 
-ignore-patterns=**/build/**
-ignore-patterns=**/dist/**
+ignore-patterns=**/build/**,**/dist/**
