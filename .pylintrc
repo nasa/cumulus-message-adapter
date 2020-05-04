@@ -23,4 +23,7 @@ ignore-comments=yes
 ignore-docstrings=yes
 
 # Ignore imports when computing similarities.
-ignore-imports=yes
+ignore-imports=no
+
+ignore-patterns=**/build/**
+ignore-patterns=**/dist/**
