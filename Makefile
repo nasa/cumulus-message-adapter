@@ -1,6 +1,7 @@
 clean:
 	rm -rf dist
 	rm -rf dist_package
+	rm -rf build
 	rm -f cumulus-message-adapter.zip
 
 dist:
