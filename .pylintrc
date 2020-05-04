@@ -10,3 +10,17 @@
 # multiple time (only on the command line, not in the configuration file where
 # it should appear only once).
 disable=W0212,C0103,C0114
+
+[SIMILARITIES]
+
+# Minimum lines number of a similarity.
+min-similarity-lines=4
+
+# Ignore comments when computing similarities.
+ignore-comments=yes
+
+# Ignore docstrings when computing similarities.
+ignore-docstrings=yes
+
+# Ignore imports when computing similarities.
+ignore-imports=no
