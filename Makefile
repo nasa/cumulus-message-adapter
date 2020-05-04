@@ -4,7 +4,7 @@ clean:
 	rm -f cumulus-message-adapter.zip
 
 dist:
-	mkdir -p dist
+	mkdir -p dist/cma_bin
 
 requirements: dist requirements.txt
 	pip install -r requirements.txt --target ./dist/
@@ -22,5 +22,5 @@ packaged_runtime: requirements
 cumulus-message-adapter.zip: requirements packaged_runtime
 	cp __main__.py ./dist/
 	cp -R message_adapter ./dist/
-	cp -R ./dist_package/cma/* ./dist/
+	cp -R ./dist_package/cma/* ./dist/cma_bin
 	(cd dist && zip -r -9 ../cumulus-message-adapter.zip .)
