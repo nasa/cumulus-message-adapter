@@ -1,6 +1,7 @@
 import json
 import re
 import uuid
+import sys
 
 from copy import deepcopy
 from datetime import datetime, timedelta
@@ -15,6 +16,8 @@ def load_config(event, context):
     * @param {*} context The context object passed to AWS Lambda or containing an activityArn
     * @returns {*} The task's configuration
     """
+    sys.stderr.write('Starting load_config')
+
     if 'task_config' in event:
         return event['task_config']
     # Maintained for backwards compatibility
@@ -27,6 +30,8 @@ def load_config(event, context):
         task_name = _load_step_function_task_name(event, context)
     else:
         raise LookupError('Unknown event source: ' + source)
+    sys.stderr.write('Ending load_config')
+
     return _get_config(event, task_name) if task_name is not None else None
 
 
@@ -37,7 +42,7 @@ def load_remote_event(event):
     * @param {*} event An event in the Cumulus message format
     * @returns {*} A Cumulus message with the remote message resolved
     """
-
+    sys.stderr.write('Starting load_remote_event')
     if 'replace' in event:
         local_exception = event.get('exception', None)
         _s3 = s3()
@@ -59,6 +64,7 @@ def load_remote_event(event):
             exception_bool = (local_exception and local_exception != 'None')
             if exception_bool and (not event['exception'] or event['exception'] == 'None'):
                 event['exception'] = local_exception
+    sys.stderr.write('Ending load_remote_event')
     return event
 
 
@@ -82,6 +88,8 @@ def resolve_path_str(event, json_path_string):
     * @param {*} json_path_string A string containing a JSONPath template to resolve
     * @returns {*} The resolved object
     """
+    sys.stderr.write('Starting resolve_path_str')
+
     value_regex = r"^{[^\[\]].*}$"
     array_regex = r"^{\[.*\]}$"
     template_regex = '{[^}]+}'
@@ -102,7 +110,8 @@ def resolve_path_str(event, json_path_string):
             if match_data:
                 json_path_string = json_path_string.replace(match, match_data[0].value)
         return json_path_string
-
+    
+    sys.stderr.write('End resolve_path_str')
     return json_path_string
 
 
@@ -114,11 +123,12 @@ def resolve_input(event, config):
     * @param {*} config The config object
     * @returns {*} The object to place on the input key of the task's event
     """
+    sys.stderr.write('Starting resolve_input')
     if ('cumulus_message' in config and 'input' in config['cumulus_message']):
         input_path = config['cumulus_message']['input']
         return resolve_path_str(event, input_path)
+    sys.stderr.write('End resolve_input')
     return event.get('payload')
-
 
 def resolve_config_templates(event, config):
     """
@@ -129,9 +139,11 @@ def resolve_config_templates(event, config):
     * @param {*} config A config object, containing paths
     * @returns {*} A config object with all JSONPaths resolved
     """
+    sys.stderr.write('Starting resolve_config_templates')
     task_config = config.copy()
     if 'cumulus_message' in task_config:
         del task_config['cumulus_message']
+    sys.stderr.write('Ending resolve_config_templates')
     return _resolve_config_object(event, task_config)
 
 
@@ -144,6 +156,7 @@ def store_remote_response(incoming_event, default_max_size, config_keys):
     * @param {*} config_keys       - A list of valid CMA configuration keys
     * @returns {*} A response message, possibly referencing an S3 object for its contents
     """
+    sys.stderr.write('Starting store_remote_response')
     event = deepcopy(incoming_event)
     replace_config = event.get('ReplaceConfig', None)
     if not replace_config:
@@ -187,6 +200,7 @@ def store_remote_response(incoming_event, default_max_size, config_keys):
                             'TargetPath': replace_config_values['target_path']}
     event['cumulus_meta'] = event.get('cumulus_meta', cumulus_meta)
     event['replace'] = remote_configuration
+    sys.stderr.write('store_remote_response')
     return event
 
 

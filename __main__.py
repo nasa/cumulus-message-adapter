@@ -2,6 +2,7 @@
 # coding=utf-8
 import json
 import sys
+import signal
 
 from message_adapter.message_adapter import MessageAdapter
 
@@ -38,6 +39,10 @@ def callMessageAdapterFunction(functionName, allInput):
         result = transformer.create_next_event(handlerResponse, event, messageConfig)
     return result
 
+def handle_exit():
+    sys.stdout.flush()
+    sys.stderr.flush()
+    sys.exit(1)
 
 def streamCommands():
     """
@@ -59,6 +64,7 @@ def streamCommands():
     buffer = ''
     command = ''
     jsonObj = {}
+    
     while cont:
         next_line = sys.stdin.readline().rstrip('\n')
         if next_line == '<EXIT>':
@@ -91,6 +97,9 @@ def cmaCli():
     """
     exitCode = 1
     functionName = sys.argv[1]
+    signal.signal(signal.SIGINT, handle_exit)
+    signal.signal(signal.SIGTERM, handle_exit)
+
     try:
         if functionName == 'stream':
             streamCommands()

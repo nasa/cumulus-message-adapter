@@ -1,5 +1,6 @@
 """ Determines the correct AWS endpoint for AWS services """
 import os
+import sys
 from boto3 import resource, client
 from botocore.config import Config
 
@@ -57,11 +58,13 @@ def get_current_sfn_task(state_machine_arn, execution_name, arn):
     """
     sfn = stepFn()
     execution_arn = _get_sfn_execution_arn_by_name(state_machine_arn, execution_name)
+    sys.stderr.write(f'Attempting to get execution history for {execution_arn}')
     execution_history = sfn.get_execution_history(
         executionArn=execution_arn,
         maxResults=40,
         reverseOrder=True
     )
+    sys.stderr.write(f'Completed getting execution history for {execution_arn}')
     return _get_task_name_from_execution_history(execution_history, arn)
 
 
