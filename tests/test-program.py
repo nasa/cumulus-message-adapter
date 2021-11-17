@@ -1,3 +1,5 @@
+# pylint: disable=R1732
+
 """
 Tests for cumulus-message-adapter command-line interface
 """
@@ -26,7 +28,7 @@ class Test(unittest.TestCase):
         bucket_name = in_msg['replace']['Bucket']
         key_name = in_msg['replace']['Key']
         data_filename = os.path.join(self.test_folder, key_name)
-        with open(data_filename, 'r') as data_file:
+        with open(data_filename, 'r', encoding='utf-8') as data_file:
             datasource = json.load(data_file)
         self.s3.Bucket(bucket_name).create()
         self.s3.Object(bucket_name, key_name).put(Body=json.dumps(datasource))
@@ -89,7 +91,7 @@ class Test(unittest.TestCase):
         if context is None:
             context = {}
 
-        inp = open(os.path.join(self.test_folder, f'{testcase}.input.json'))
+        inp = open(os.path.join(self.test_folder, f'{testcase}.input.json'), encoding='utf-8')
         in_msg = json.loads(inp.read())
         s3meta = None
         if 'replace' in in_msg:
@@ -126,7 +128,7 @@ class Test(unittest.TestCase):
         exit_code = stream_process.wait(20)
         assert exit_code == 0
 
-        out = open(os.path.join(self.test_folder, f'{testcase}.output.json'))
+        out = open(os.path.join(self.test_folder, f'{testcase}.output.json'), encoding='utf-8')
         out_msg = json.loads(out.read())
         assert create_next_event_response == out_msg
 
@@ -141,7 +143,7 @@ class Test(unittest.TestCase):
         if context is None:
             context = {}
 
-        inp = open(os.path.join(self.test_folder, f'{testcase}.input.json'))
+        inp = open(os.path.join(self.test_folder, f'{testcase}.input.json'), encoding='utf-8')
         in_msg = json.loads(inp.read())
         s3meta = None
         if 'replace' in in_msg:
@@ -177,7 +179,7 @@ class Test(unittest.TestCase):
             create_next_event, json.dumps(all_input))
         assert exitstatus == 0
 
-        out = open(os.path.join(self.test_folder, f'{testcase}.output.json'))
+        out = open(os.path.join(self.test_folder, f'{testcase}.output.json'), encoding='utf-8')
         out_msg = json.loads(out.read())
         assert json.loads(next_event) == out_msg
 

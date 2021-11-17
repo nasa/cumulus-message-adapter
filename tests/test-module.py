@@ -1,3 +1,4 @@
+# pylint: disable=R1732
 """
 Tests for cumulus-message-adapter
 """
@@ -397,8 +398,8 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
 
     def test_basic(self):
         """ test basic.input.json """
-        inp = open(os.path.join(self.test_folder, 'basic.input.json'))
-        out = open(os.path.join(self.test_folder, 'basic.output.json'))
+        inp = open(os.path.join(self.test_folder, 'basic.input.json'), encoding='utf-8')
+        out = open(os.path.join(self.test_folder, 'basic.output.json'), encoding='utf-8')
         in_msg = json.loads(inp.read())
         out_msg = json.loads(out.read())
 
@@ -411,15 +412,15 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
 
     def test_exception(self):
         """ test exception.input.json """
-        inp = open(os.path.join(self.test_folder, 'exception.input.json'))
-        out = open(os.path.join(self.test_folder, 'exception.output.json'))
+        inp = open(os.path.join(self.test_folder, 'exception.input.json'), encoding='utf-8')
+        out = open(os.path.join(self.test_folder, 'exception.output.json'), encoding='utf-8')
         in_msg = json.loads(inp.read())
         out_msg = json.loads(out.read())
 
         bucket_name = in_msg['replace']['Bucket']
         key_name = in_msg['replace']['Key']
         data_filename = os.path.join(self.test_folder, key_name)
-        with open(data_filename, 'r') as file_data:
+        with open(data_filename, 'r', encoding='utf-8') as file_data:
             datasource = json.load(file_data)
         self.s3.Bucket(bucket_name).create()
         self.s3.Object(bucket_name, key_name).put(Body=json.dumps(datasource))
@@ -438,8 +439,8 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
 
     def test_jsonpath(self):
         """ test jsonpath.input.json """
-        inp = open(os.path.join(self.test_folder, 'jsonpath.input.json'))
-        out = open(os.path.join(self.test_folder, 'jsonpath.output.json'))
+        inp = open(os.path.join(self.test_folder, 'jsonpath.input.json'), encoding='utf-8')
+        out = open(os.path.join(self.test_folder, 'jsonpath.output.json'), encoding='utf-8')
         in_msg = json.loads(inp.read())
         out_msg = json.loads(out.read())
 
@@ -452,8 +453,8 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
 
     def test_meta(self):
         """ test meta.input.json """
-        inp = open(os.path.join(self.test_folder, 'meta.input.json'))
-        out = open(os.path.join(self.test_folder, 'meta.output.json'))
+        inp = open(os.path.join(self.test_folder, 'meta.input.json'), encoding='utf-8')
+        out = open(os.path.join(self.test_folder, 'meta.output.json'), encoding='utf-8')
         in_msg = json.loads(inp.read())
         out_msg = json.loads(out.read())
 
@@ -466,15 +467,15 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
 
     def test_remote(self):
         """ test remote.input.json """
-        inp = open(os.path.join(self.test_folder, 'remote.input.json'))
-        out = open(os.path.join(self.test_folder, 'remote.output.json'))
+        inp = open(os.path.join(self.test_folder, 'remote.input.json'), encoding='utf-8')
+        out = open(os.path.join(self.test_folder, 'remote.output.json'), encoding='utf-8')
         in_msg = json.loads(inp.read())
         out_msg = json.loads(out.read())
 
         bucket_name = in_msg['replace']['Bucket']
         key_name = in_msg['replace']['Key']
         data_filename = os.path.join(self.test_folder, key_name)
-        with open(data_filename, 'r') as file_data:
+        with open(data_filename, 'r', encoding='utf-8') as file_data:
             datasource = json.load(file_data)
         self.s3.Bucket(bucket_name).create()
         self.s3.Object(bucket_name, key_name).put(Body=json.dumps(datasource))
@@ -493,15 +494,15 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
 
     def test_configured_remote(self):
         """ test configured_remote.input.json """
-        inp = open(os.path.join(self.test_folder, 'configured_remote.input.json'))
-        out = open(os.path.join(self.test_folder, 'configured_remote.output.json'))
+        inp = open(os.path.join(self.test_folder, 'configured_remote.input.json'), encoding='utf-8')
+        out = open(os.path.join(self.test_folder, 'configured_remote.output.json'), encoding='utf-8')
         in_msg = json.loads(inp.read())
         out_msg = json.loads(out.read())
 
         bucket_name = in_msg['cma']['event']['replace']['Bucket']
         key_name = in_msg['cma']['event']['replace']['Key']
         data_filename = os.path.join(self.test_folder, key_name)
-        with open(data_filename, 'r') as file_data:
+        with open(data_filename, 'r', encoding='utf-8') as file_data:
             datasource = json.load(file_data)
         self.s3.Bucket(bucket_name).create()
         self.s3.Object(bucket_name, key_name).put(Body=json.dumps(datasource))
@@ -520,15 +521,15 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
 
     def test_non_object_configured_remote(self):
         """ test_non_object_configured_remote.input.json """
-        inp = open(os.path.join(self.test_folder, 'configured_non_object_remote.input.json'))
-        out = open(os.path.join(self.test_folder, 'configured_non_object_remote.output.json'))
+        inp = open(os.path.join(self.test_folder, 'configured_non_object_remote.input.json'), encoding='utf-8')
+        out = open(os.path.join(self.test_folder, 'configured_non_object_remote.output.json'), encoding='utf-8')
         in_msg = json.loads(inp.read())
         out_msg = json.loads(out.read())
 
         bucket_name = in_msg['cma']['event']['replace']['Bucket']
         key_name = in_msg['cma']['event']['replace']['Key']
         data_filename = os.path.join(self.test_folder, key_name)
-        with open(data_filename, 'r') as file_data:
+        with open(data_filename, 'r', encoding='utf-8') as file_data:
             datasource = json.load(file_data)
         self.s3.Bucket(bucket_name).create()
         self.s3.Object(bucket_name, key_name).put(Body=json.dumps(datasource))
@@ -549,8 +550,8 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
     def test_sfn(self, get_current_sfn_task_function):
         """ test sfn.input.json """
         get_current_sfn_task_function.return_value = "Example"
-        inp = open(os.path.join(self.test_folder, 'sfn.input.json'))
-        out = open(os.path.join(self.test_folder, 'sfn.output.json'))
+        inp = open(os.path.join(self.test_folder, 'sfn.input.json'), encoding='utf-8')
+        out = open(os.path.join(self.test_folder, 'sfn.output.json'), encoding='utf-8')
         in_msg = json.loads(inp.read())
         out_msg = json.loads(out.read())
 
@@ -565,9 +566,9 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
     def test_context(self, get_current_sfn_task_function):
         """ test storing context metadata """
         get_current_sfn_task_function.return_value = "Example"
-        inp = open(os.path.join(self.test_folder, 'context.input.json'))
-        out = open(os.path.join(self.test_folder, 'context.output.json'))
-        ctx = open(os.path.join(self.context_folder, 'lambda-context.json'))
+        inp = open(os.path.join(self.test_folder, 'context.input.json'), encoding='utf-8')
+        out = open(os.path.join(self.test_folder, 'context.output.json'), encoding='utf-8')
+        ctx = open(os.path.join(self.context_folder, 'lambda-context.json'), encoding='utf-8')
         in_msg = json.loads(inp.read())
         out_msg = json.loads(out.read())
         context = json.loads(ctx.read())
@@ -584,8 +585,8 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
     def test_inline_template(self, get_current_sfn_task_function):
         """ test inline_template.input.json """
         get_current_sfn_task_function.return_value = "Example"
-        inp = open(os.path.join(self.test_folder, 'inline_template.input.json'))
-        out = open(os.path.join(self.test_folder, 'inline_template.output.json'))
+        inp = open(os.path.join(self.test_folder, 'inline_template.input.json'), encoding='utf-8')
+        out = open(os.path.join(self.test_folder, 'inline_template.output.json'), encoding='utf-8')
         in_msg = json.loads(inp.read())
         out_msg = json.loads(out.read())
 
@@ -598,8 +599,8 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
 
     def test_templates(self):
         """ test templates.input.json """
-        inp = open(os.path.join(self.test_folder, 'templates.input.json'))
-        out = open(os.path.join(self.test_folder, 'templates.output.json'))
+        inp = open(os.path.join(self.test_folder, 'templates.input.json'), encoding='utf-8')
+        out = open(os.path.join(self.test_folder, 'templates.output.json'), encoding='utf-8')
         in_msg = json.loads(inp.read())
         out_msg = json.loads(out.read())
 
@@ -614,8 +615,8 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
     def test_cumulus_context(self, get_current_sfn_task_function):
         """ test storing cumulus_context metadata """
         get_current_sfn_task_function.return_value = "Example"
-        inp = open(os.path.join(self.test_folder, 'cumulus_context.input.json'))
-        out = open(os.path.join(self.test_folder, 'cumulus_context.output.json'))
+        inp = open(os.path.join(self.test_folder, 'cumulus_context.input.json'), encoding='utf-8')
+        out = open(os.path.join(self.test_folder, 'cumulus_context.output.json'), encoding='utf-8')
         in_msg = json.loads(inp.read())
         out_msg = json.loads(out.read())
 
@@ -628,7 +629,7 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
 
     def test_input_jsonschema(self):
         """ test a working input schema """
-        inp = open(os.path.join(self.test_folder, 'templates.input.json'))
+        inp = open(os.path.join(self.test_folder, 'templates.input.json'), encoding='utf-8')
         schemas = {'input': 'input.json'}
         adapter = message_adapter.MessageAdapter(schemas)
         in_msg = json.loads(inp.read())
@@ -638,7 +639,7 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
 
     def test_failing_input_jsonschema(self):
         """ test a failing input schema """
-        inp = open(os.path.join(self.test_folder, 'templates.input.json'))
+        inp = open(os.path.join(self.test_folder, 'templates.input.json'), encoding='utf-8')
         schemas = {'input': 'input.json'}
         adapter = message_adapter.MessageAdapter(schemas)
         in_msg = json.loads(inp.read())
@@ -650,7 +651,7 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
 
     def test_config_jsonschema(self):
         """ test a working config schema """
-        inp = open(os.path.join(self.test_folder, 'templates.input.json'))
+        inp = open(os.path.join(self.test_folder, 'templates.input.json'), encoding='utf-8')
         schemas = {'config': 'config.json'}
         adapter = message_adapter.MessageAdapter(schemas)
         in_msg = json.loads(inp.read())
@@ -659,7 +660,7 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
 
     def test_failing_config_jsonschema(self):
         """ test a failing input schema """
-        inp = open(os.path.join(self.test_folder, 'templates.input.json'))
+        inp = open(os.path.join(self.test_folder, 'templates.input.json'), encoding='utf-8')
         schemas = {'config': 'config.json'}
         adapter = message_adapter.MessageAdapter(schemas)
         in_msg = json.loads(inp.read())
@@ -672,7 +673,7 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
 
     def test_output_jsonschema(self):
         """ test a working output schema """
-        inp = open(os.path.join(self.test_folder, 'templates.input.json'))
+        inp = open(os.path.join(self.test_folder, 'templates.input.json'), encoding='utf-8')
         schemas = {'output': 'output.json'}
         adapter = message_adapter.MessageAdapter(schemas)
         in_msg = json.loads(inp.read())
@@ -684,7 +685,7 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
 
     def test_failing_output_jsonschema(self):
         """ test a working output schema """
-        inp = open(os.path.join(self.test_folder, 'templates.input.json'))
+        inp = open(os.path.join(self.test_folder, 'templates.input.json'), encoding='utf-8')
         schemas = {'output': 'output.json'}
         adapter = message_adapter.MessageAdapter(schemas)
         in_msg = json.loads(inp.read())

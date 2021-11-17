@@ -3,7 +3,7 @@ See:
 https://packaging.python.org/en/latest/distributing.html
 https://github.com/pypa/sampleproject
 """
-
+# pylint: disable=W0402
 import imp
 
 from os import path
