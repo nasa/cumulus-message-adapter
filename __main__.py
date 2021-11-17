@@ -40,6 +40,7 @@ def callMessageAdapterFunction(functionName, allInput):
     return result
 
 def handle_exit():
+    """ Method that explicitly flushes stderr/stdout before exiting 1"""
     sys.stdout.flush()
     sys.stderr.flush()
     sys.exit(1)
@@ -64,7 +65,7 @@ def streamCommands():
     buffer = ''
     command = ''
     jsonObj = {}
-    
+
     while cont:
         next_line = sys.stdin.readline().rstrip('\n')
         if next_line == '<EXIT>':
