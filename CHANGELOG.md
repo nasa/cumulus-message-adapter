@@ -6,6 +6,13 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [v1.3.1] 2021-11-17
+
+### Updated
+
+- **CUMULUS-2751**
+  - Update CMA logging to explicitly flush stderr on log write
+  - Add diagnostic logging to CMA 'steps'
 
 ## [v1.3.0] 2020-02-14
 
