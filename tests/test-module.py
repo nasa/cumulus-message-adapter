@@ -86,7 +86,7 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
         result = self.cumulus_message_adapter.load_and_update_remote_event(
             self.config_event_with_replace, None)
         expected = {'task_config': self.config_event_with_replace['cma']['task_config'],
-                    'input': u':blue_whale:',
+                    'input': ':blue_whale:',
                     'replace': self.config_event_with_replace['cma']['event']['replace']}
         self.assertEqual(expected, result)
 
@@ -521,8 +521,10 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
 
     def test_non_object_configured_remote(self):
         """ test_non_object_configured_remote.input.json """
-        inp = open(os.path.join(self.test_folder, 'configured_non_object_remote.input.json'), encoding='utf-8')
-        out = open(os.path.join(self.test_folder, 'configured_non_object_remote.output.json'), encoding='utf-8')
+        inp = open(os.path.join(self.test_folder,
+                   'configured_non_object_remote.input.json'), encoding='utf-8')
+        out = open(os.path.join(self.test_folder,
+                   'configured_non_object_remote.output.json'), encoding='utf-8')
         in_msg = json.loads(inp.read())
         out_msg = json.loads(out.read())
 
