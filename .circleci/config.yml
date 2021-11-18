@@ -124,7 +124,6 @@ jobs:
               pip install --user virtualenv
               ~/.local/bin/virtualenv ~/venv36
               . ~/venv36/bin/activate
-              # sudo pip install pyinstaller
               sudo pip install -r requirements.txt
               make clean
               make $ZIPFILENAME
