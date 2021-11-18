@@ -109,7 +109,6 @@ jobs:
             mkdir -p ~/.ssh
             ssh-keyscan github.com >> ~/.ssh/known_hosts
             VERSION=`awk -F\' '{print $2,$4}' message_adapter/version.py`
-            echo $VERSION
             # Only tag and release if the version doesn't already exist
             if [ -z $(git ls-remote --tags origin | grep $VERSION) ]; then
               git tag $VERSION
