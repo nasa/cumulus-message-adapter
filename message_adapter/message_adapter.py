@@ -82,12 +82,13 @@ class MessageAdapter:
         """
         schema_filepath = self.__get_jsonschema(schema_type)
         if schema_filepath:
-            schema = json.load(open(schema_filepath))
-            try:
-                validate(document, schema)
-            except Exception as exception:
-                exception.message = f'{schema_type} schema: {str(exception)}'
-                raise exception
+            with open(schema_filepath, encoding='utf-8') as schema_handle:
+                schema = json.load(schema_handle)
+                try:
+                    validate(document, schema)
+                except Exception as exception:
+                    exception.message = f'{schema_type} schema: {str(exception)}'
+                    raise exception
 
     def load_nested_event(self, event, context):
         """
