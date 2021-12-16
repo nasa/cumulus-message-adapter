@@ -5,11 +5,11 @@ import uuid
 from copy import deepcopy
 from datetime import datetime, timedelta
 from jsonpath_ng import parse
-from .aws import get_current_sfn_task, s3
+from .aws import s3
 from .error import write_error
 
 
-def load_config(event, context):
+def load_config(event):
     """
     * Given a Cumulus message and context, returns the config object for the task
     * @param {*} event An event in the Cumulus message format with remote parts resolved
@@ -20,20 +20,7 @@ def load_config(event, context):
 
     if 'task_config' in event:
         return event['task_config']
-    # Maintained for backwards compatibility
-    source = event['cumulus_meta']['message_source']
-    if source is None:
-        raise LookupError('cumulus_meta requires a message_source')
-    if source == 'local':
-        task_name = event['cumulus_meta']['task']
-    elif source == 'sfn':
-        task_name = _load_step_function_task_name(event, context)
-    else:
-        raise LookupError('Unknown event source: ' + source)
-    write_error('Ending load_config')
-
-    return _get_config(event, task_name) if task_name is not None else None
-
+    return None
 
 def load_remote_event(event):
     """
@@ -202,22 +189,6 @@ def store_remote_response(incoming_event, default_max_size, config_keys):
     event['replace'] = remote_configuration
     write_error('store_remote_response')
     return event
-
-
-def _load_step_function_task_name(event, context):
-    """
-    * For StepFunctions, returns the configuration corresponding to the current execution
-    * @param {*} event An event in the Cumulus message format with remote parts resolved
-    * @param {*} context The context object passed to AWS Lambda or containing an activityArn
-    * @returns {*} The task's configuration
-    """
-    meta = event['cumulus_meta']
-    if 'invokedFunctionArn' in context:
-        arn = context['invokedFunctionArn']
-    else:
-        arn = context.get('invoked_function_arn', context.get('activityArn'))
-    return get_current_sfn_task(meta['state_machine'], meta['execution_name'], arn)
-
 
 def _get_config(event, task_name):
     """
