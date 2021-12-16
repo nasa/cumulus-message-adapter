@@ -3,11 +3,12 @@ import os
 from boto3 import resource, client
 from botocore.config import Config
 
+from .error import write_error
 
 def localhost_s3_url():
     """ Returns configured LOCALSTACK_HOST url or default for localstack s3 """
     if 'LOCALSTACK_HOST' in os.environ:
-        s3_url = 'http://%s:4572' % os.environ['LOCALSTACK_HOST']
+        s3_url = f"http://{os.environ['LOCALSTACK_HOST']}:4572"
     else:
         s3_url = 'http://localhost:4572'
     return s3_url
@@ -57,11 +58,13 @@ def get_current_sfn_task(state_machine_arn, execution_name, arn):
     """
     sfn = stepFn()
     execution_arn = _get_sfn_execution_arn_by_name(state_machine_arn, execution_name)
+    write_error(f'Attempting to get execution history for {execution_arn}')
     execution_history = sfn.get_execution_history(
         executionArn=execution_arn,
         maxResults=40,
         reverseOrder=True
     )
+    write_error(f'Completed getting execution history for {execution_arn}')
     return _get_task_name_from_execution_history(execution_history, arn)
 
 
