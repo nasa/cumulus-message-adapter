@@ -190,20 +190,6 @@ def store_remote_response(incoming_event, default_max_size, config_keys):
     write_error('store_remote_response')
     return event
 
-def _get_config(event, task_name):
-    """
-    * Returns the configuration for the task with the given name, or an empty object if no
-    * such task is configured.
-    * @param {*} event An event in the Cumulus message format with remote parts resolved
-    * @param {*} task_name The name of the Cumulus task
-    * @returns {*} The configuration object
-    """
-    config = {}
-    if ('workflow_config' in event and task_name in event['workflow_config']):
-        config = event['workflow_config'][task_name]
-    return config
-
-
 def _resolve_config_object(event, config):
     """
     * Recursive helper for resolve_config_templates
