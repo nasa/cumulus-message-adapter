@@ -97,8 +97,8 @@ class Test(unittest.TestCase):
         if 'replace' in in_msg:
             s3meta = self.place_remote_message(in_msg)
         schemas = {
-            'input': 'schemas/exmaples-messages.output.json',
-            'output': 'schemas/exmaples-messages.output.json',
+            'input': 'schemas/examples-messages.output.json',
+            'output': 'schemas/examples-messages.output.json',
             'config': 'schemas/examples-messages.config.json'
         }
         cma_input = {'event': in_msg, 'context': context, 'schemas': schemas}
@@ -149,8 +149,8 @@ class Test(unittest.TestCase):
         if 'replace' in in_msg:
             s3meta = self.place_remote_message(in_msg)
         schemas = {
-            'input': 'schemas/exmaples-messages.output.json',
-            'output': 'schemas/exmaples-messages.output.json',
+            'input': 'schemas/examples-messages.output.json',
+            'output': 'schemas/examples-messages.output.json',
             'config': 'schemas/examples-messages.config.json'
         }
 
@@ -181,6 +181,12 @@ class Test(unittest.TestCase):
 
         out = open(os.path.join(self.test_folder, f'{testcase}.output.json'), encoding='utf-8')
         out_msg = json.loads(out.read())
+        print('Comparing expected event to actual event:\n\n')
+        print('\n-=-=-=-=-=-=-=-=-\n')
+        print(out_msg)
+        print('\n-=-=-=-=-=-=-=-=-\n')
+        print(next_event)
+        print('\n-=-=-=-=-=-=-=-=-\n')
         assert json.loads(next_event) == out_msg
 
         if s3meta is not None:
@@ -223,3 +229,23 @@ class Test(unittest.TestCase):
         except AssertionError:
             return
         assert False
+
+    def test_workflow_task_meta(self):
+        """ test meta.workflow task """
+        context = {
+            'functionName': 'first_function',
+            'invokedFunctionArn': 'fakearn',
+            'functionVersion': '1',
+        }
+        self.transform_messages('workflow_tasks', context)
+        self.transform_messages_streaming('workflow_tasks', context)
+
+    def test_multiple_workflow_tasks_meta(self):
+        """ test multiple meta.workflow_task entries"""
+        context = {
+            'functionName': 'second_function',
+            'invokedFunctionArn': 'fakearn2',
+            'functionVersion': '2',
+        }
+        self.transform_messages('workflow_tasks_multiple', context)
+        self.transform_messages_streaming('workflow_tasks_multiple', context)

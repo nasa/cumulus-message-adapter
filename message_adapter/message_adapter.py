@@ -3,7 +3,6 @@ import json
 
 from copy import deepcopy
 from jsonschema import validate
-from .aws import get_current_sfn_task
 
 from .util import assign_json_path_value
 from .cumulus_message import (resolve_config_templates, resolve_input,
@@ -54,18 +53,17 @@ class MessageAdapter:
         else:
             event = load_remote_event(event)
 
-        if context and 'meta' in event and 'workflow_tasks' in event['meta']:
-            cumulus_meta = event['cumulus_meta']
+        if context and 'meta' in event:
             task_meta = {}
             task_meta['name'] = context.get('function_name', context.get('functionName'))
             task_meta['version'] = context.get('function_version', context.get('functionVersion'))
             task_meta['arn'] = context.get('invoked_function_arn',
                                            context.get('invokedFunctionArn',
                                                        context.get('activityArn')))
-            task_name = get_current_sfn_task(cumulus_meta['state_machine'],
-                                             cumulus_meta['execution_name'],
-                                             task_meta['arn'])
-            event['meta']['workflow_tasks'][task_name] = task_meta
+            if not 'workflow_tasks' in event['meta']:
+                event['meta']['workflow_tasks'] = {}
+            task_index = len(event['meta']['workflow_tasks'])
+            event['meta']['workflow_tasks'][task_index] = task_meta
         return event
 
     def __get_jsonschema(self, schema_type):
@@ -90,14 +88,14 @@ class MessageAdapter:
                     exception.message = f'{schema_type} schema: {str(exception)}'
                     raise exception
 
-    def load_nested_event(self, event, context):
+    def load_nested_event(self, event):
         """
         * Interprets an incoming event as a Cumulus workflow message
         *
         * @param {*} event The input message sent to the Lambda
         * @returns {*} message that is ready to pass to an inner task
         """
-        config = load_config(event, context)
+        config = load_config(event)
         final_config = resolve_config_templates(event, config)
         final_payload = resolve_input(event, config)
         response = {'input': final_payload}

@@ -1,0 +1,37 @@
+{
+    "task_config": {
+      "bar": "baz",
+      "cumulus_message": {
+        "input": "{$.payload.input}",
+        "outputs": [
+          {
+            "source": "{$.input.anykey}",
+            "destination": "{$.payload.out}"
+          }
+        ]
+      }
+    },
+    "cumulus_meta": {
+      "message_source": "local",
+      "id": "id-1234"
+    },
+    "meta": {
+      "foo": "bar",
+      "workflow_tasks": {
+        "0": {
+          "name": "first_function",
+          "version": "1",
+          "arn": "fakearn"
+        },
+        "1": {
+          "name": "second_function",
+          "version": "2",
+          "arn": "fakearn2"
+        }
+      }
+    },
+    "payload": {
+      "out": "anyvalue"
+    },
+    "exception": "None"
+  }

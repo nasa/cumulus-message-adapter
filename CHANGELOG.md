@@ -6,6 +6,14 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [v2.0.0] 2021-12-17
+
+### BREAKING CHANGES
+
+- **CUMULUS-2751**
+  - Changes the key for the values populated in meta.workflow_tasks from the step function node name to an internally indexed integer string
+  - Updates `load_nested_event` to no longer do a legacy task name lookup from either the step function API or `cumulus_meta` for configuration from `event.workflow_config`
+
 ## [v1.3.1] 2021-11-17
 
 ### Updated
