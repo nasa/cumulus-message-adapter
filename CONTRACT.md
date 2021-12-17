@@ -208,7 +208,7 @@ loadAndUpdateRemote output is a full Cumulus Message as a json blob.
 
 * `input` object for the task function based on the `task_config`.  This defaults to the passed in `payload` object if nothing is specified for the input.
 * `config` object based on the configured `task_config`.
-* `messageConfig` object if `cumulus_message` is defined in the `task_config`the `task_config` the `task_config`.
+* `messageConfig` object if `cumulus_message` is defined in the `task_config`
 * `cumulus_config` object containing internal configuration from the `cumulus_meta` key on the event, if provided.
 
 ### `loadNestedEvent` output
