@@ -1,0 +1,26 @@
+{
+    "task_config": {
+      "bar": "baz",
+      "cumulus_message": {
+        "input": "{$.payload.input}",
+        "outputs": [
+          {
+            "source": "{$.input.anykey}",
+            "destination": "{$.payload.out}"
+          }
+        ]
+      }
+    },
+    "cumulus_meta": {
+      "message_source": "local",
+      "id": "id-1234"
+    },
+    "meta": {
+      "foo": "bar"
+    },
+    "payload": {
+      "input": {
+        "anykey": "anyvalue"
+      }
+    }
+  }

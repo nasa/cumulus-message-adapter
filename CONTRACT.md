@@ -200,31 +200,20 @@ loadAndUpdateRemote output is a full Cumulus Message as a json blob.
 
 ### `loadNestedEvent` input
 
-* `<event_json>` to cumulus-message-adapter `loadNestedEvent` should be a full Cumulus Message as defined above.
+* `event` should be a full Cumulus Message as defined above, with optional `task_config` section defined.
 
-* `<context_json>` to cumulus-message-adapter `loadNestedEvent` should be the context from the lambda.
+### `loadNestedEvent` Details
 
-* `<schemas_json>` to cumulus-message-adapter `loadNestedEvent` should be an object with filepaths to json schemas for the `input` and `config` properties that a "business function" expects to receive
+`loadNestedEvent` will read the configuration specified in `task_config`, and return a response object with:
 
-**`loadNestedEvent` Details:**
-
-`loadNestedEvent` requests metadata from the AWS Step Function API and uses that metadata to self-identify by determining which task in the workflow is "in-progress". This is a roundabout way of the lambda asking `whoami` and will be removed once AWS updates the lambda context object.
-
-The task name found associated with the running task is used to look up the task-specific configuration and construct the values of `config` and `messageConfig` fields sent to the business function. For example, when the `task_config` Parameter is supplied, then the `config` object sent to the business function is the value of `task_config` and the `messageConfig` object sent to the business function is the value of `task_config['cumulus_message']`. These configurations are used to dispatch values to other parts of the Cumulus Message, via URL templates, which are required by the business function or `createNextEvent`.
-
-An example of the `<schemas_json>` that should be passed to `loadNestedEvent`:
-
-```json
-{
-  "input": "/filepath/to/input.json",
-  "config": "/filepath/to/config.json"
-}
-```
+* `input` object for the task function based on the `task_config`.  This defaults to the passed in `payload` object if nothing is specified for the input.
+* `config` object based on the configured `task_config`.
+* `messageConfig` object if `cumulus_message` is defined in the `task_config`
+* `cumulus_config` object containing internal configuration from the `cumulus_meta` key on the event, if provided.
 
 ### `loadNestedEvent` output
 
-The output of `loadNestedEvent` is a json blob containing the keys `input`, `config` and `messageConfig`.
-
+The output of `loadNestedEvent` is a json blob containing the keys `input`, `config`, `cumulus_config` and `messageConfig`.
 
 ## `createNextEvent` input and output
 
