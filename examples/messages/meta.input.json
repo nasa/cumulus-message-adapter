@@ -19,14 +19,7 @@
     "id": "id-1234"
   },
   "meta": {
-    "foo": "bar",
-    "workflow_tasks": {
-      "1": {
-        "arn": "somearn",
-        "name": "somename",
-        "version": 1
-      }
-    }
+    "foo": "bar"
   },
   "payload": {
     "anykey": "anyvalue"

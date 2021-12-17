@@ -20,14 +20,7 @@
   },
   "meta": {
     "foo": "bar",
-    "baz": "anyvalue",
-    "workflow_tasks": {
-      "1": {
-        "arn": "somearn",
-        "name": "somename",
-        "version": 1
-      }
-    }
+    "baz": "anyvalue"
   },
   "payload": {
     "input": { "anykey": "anyvalue" },
