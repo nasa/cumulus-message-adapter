@@ -1,6 +1,7 @@
 from copy import deepcopy
 from pprint import pprint
 from jsonpath_ng import parse
+from jsonpath_ng.ext import parse as parse_ext
 
 
 from copy import deepcopy
@@ -12,7 +13,7 @@ def assign_json_path_value(message_for_update, jspath, value):
     * Assign (update or insert) a value to message based on jsonpath.
     * Create the keys if jspath doesn't already exist in the message. In this case, we
     * support 'simple' jsonpath like $.path1.path2.path3....
-    * @param {dict} message_for_update The message to be updated
+    * @param {dict} message_for_update The message used for update
     * @param {string} jspath JSON path string
     * @param {*} value Value to update to
     * @return {*} updated message
@@ -48,6 +49,8 @@ def assign_json_path_values(
     * @param {*} value Value to update to
     * @return {*} updated message
     """
+    # Get the hierarchy of array size from dest_jspath
+
     message = deepcopy(message_for_update)
     if dest_jspath[0] == "[":
         dest_jspath = dest_jspath.lstrip("[").rstrip("]")
