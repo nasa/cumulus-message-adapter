@@ -143,13 +143,14 @@ class MessageAdapter:
             result['payload'] = {}
             for output in outputs:
                 source_path = output['source']
+                source_json_path = output['source'].lstrip('{').rstrip('}')
                 dest_path = output['destination']
                 dest_json_path = dest_path.lstrip('{').rstrip('}')
                 value = resolve_path_str(handler_response, source_path)
                 if not isinstance(value, list):
                     result = assign_json_path_value(result, dest_json_path, value)
                 else:
-                    result = assign_json_path_values(result, dest_json_path, value)
+                    result = assign_json_path_values(handler_response, result, source_json_path, dest_json_path, value)
         else:
             result['payload'] = handler_response
 
