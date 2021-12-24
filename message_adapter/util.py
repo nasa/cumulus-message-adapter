@@ -19,7 +19,7 @@ def assign_json_path_value(message_for_update, jspath, value):
     """
     message = deepcopy(message_for_update)
     if not parse(jspath).find(message):
-        paths = jspath.lstrip('$.').split('.')
+        paths = jspath.lstrip("$.").split(".")
         current_item = message
         key_not_found = False
         for path in paths:
@@ -36,7 +36,9 @@ def assign_json_path_value(message_for_update, jspath, value):
     return message
 
 
-def assign_json_path_values(source_message, source_jspath, message_for_update, dest_jspath, value):
+def assign_json_path_values(
+    source_message, source_jspath, message_for_update, dest_jspath, value
+):
     """
     * Assign (update or insert) a value to message based on jsonpath.
     * Create the keys if dest_jspath doesn't already exist in the message. In this case, we
@@ -47,17 +49,17 @@ def assign_json_path_values(source_message, source_jspath, message_for_update, d
     * @return {*} updated message
     """
     message = deepcopy(message_for_update)
-    if dest_jspath[0]=='[':
-        dest_jspath = dest_jspath.lstrip('[').rstrip(']')
+    if dest_jspath[0] == "[":
+        dest_jspath = dest_jspath.lstrip("[").rstrip("]")
     flag_array_jspath = False
     if not parse(dest_jspath).find(message):
-        paths = dest_jspath.lstrip('$.').split('.')
+        paths = dest_jspath.lstrip("$.").split(".")
         current_item = message
         key_not_found = False
         for path in paths:
             flag_array = False
-            if '[' in path:
-                path = path.split('[')[0]
+            if "[" in path:
+                path = path.split("[")[0]
                 flag_array = True
                 flag_array_jspath = True
             print(path)
@@ -91,10 +93,10 @@ def assign_json_path_values(source_message, source_jspath, message_for_update, d
                 else:
                     current_item = current_item[path]
     if flag_array_jspath:
-        #parse(dest_jspath).update(message, value)
+        # parse(dest_jspath).update(message, value)
         match_data = parse(dest_jspath).find(message)
-        for item,v in zip(match_data,value):
-            item.full_path.update(message,v)
+        for item, v in zip(match_data, value):
+            item.full_path.update(message, v)
     else:
         parse(dest_jspath).update(message, value)
     return message
