@@ -5,7 +5,7 @@ from copy import deepcopy
 from jsonschema import validate
 from .aws import get_current_sfn_task
 
-from .util import assign_json_path_value
+from .util import assign_json_path_value, assign_json_path_values
 from .cumulus_message import (resolve_config_templates, resolve_input,
                               resolve_path_str, load_config, load_remote_event,
                               store_remote_response)
@@ -146,7 +146,10 @@ class MessageAdapter:
                 dest_path = output['destination']
                 dest_json_path = dest_path.lstrip('{').rstrip('}')
                 value = resolve_path_str(handler_response, source_path)
-                result = assign_json_path_value(result, dest_json_path, value)
+                if not isinstance(value, list):
+                    result = assign_json_path_value(result, dest_json_path, value)
+                else:
+                    result = assign_json_path_values(result, dest_json_path, value)
         else:
             result['payload'] = handler_response
 
