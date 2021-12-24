@@ -150,7 +150,7 @@ class MessageAdapter:
                 if not isinstance(value, list):
                     result = assign_json_path_value(result, dest_json_path, value)
                 else:
-                    result = assign_json_path_values(handler_response, result, source_json_path, dest_json_path, value)
+                    result = assign_json_path_values(handler_response, source_json_path, result, dest_json_path, value)
         else:
             result['payload'] = handler_response
 

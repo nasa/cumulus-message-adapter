@@ -36,7 +36,7 @@ def assign_json_path_value(message_for_update, jspath, value):
     return message
 
 
-def assign_json_path_values(source_message, message_for_update, source_jspath, dest_jspath, value):
+def assign_json_path_values(source_message, source_jspath, message_for_update, dest_jspath, value):
     """
     * Assign (update or insert) a value to message based on jsonpath.
     * Create the keys if dest_jspath doesn't already exist in the message. In this case, we
