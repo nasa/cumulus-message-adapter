@@ -1,5 +1,4 @@
 from copy import deepcopy
-from pprint import pprint
 from jsonpath_ng import parse
 from jsonpath_ng.ext import parse as parse_ext
 
@@ -65,8 +64,6 @@ def assign_json_path_values(
                 path = path.split("[")[0]
                 flag_array = True
                 flag_array_jspath = True
-            print(path)
-            pprint(type(current_item))
             if isinstance(current_item, list):
                 current_items = current_item
                 for current_item in current_items:
