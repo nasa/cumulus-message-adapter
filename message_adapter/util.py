@@ -1,10 +1,7 @@
 from copy import deepcopy
+import re
 from jsonpath_ng import parse
 from jsonpath_ng.ext import parse as parse_ext
-
-
-from copy import deepcopy
-from jsonpath_ng import parse
 
 
 def assign_json_path_value(message_for_update, jspath, value):
@@ -48,6 +45,15 @@ def assign_json_path_values(
     * @param {*} value Value to update to
     * @return {*} updated message
     """
+    # Collect array info from jspath
+    array_regex = r"([^$\.\]\[\*]+)\[\*\]"
+    source_array = re.findall(array_regex, source_jspath)
+    dest_array = re.findall(array_regex, dest_jspath)
+    if len(source_array) != len(dest_array):
+        raise ValueError(
+            "inconsistent number of arrays found from the output source and destination path in CMA"
+        )
+
     # Get the hierarchy of array size from dest_jspath
 
     message = deepcopy(message_for_update)
