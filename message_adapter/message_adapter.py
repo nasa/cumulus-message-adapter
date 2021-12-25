@@ -1,5 +1,6 @@
 import os
 import json
+import re
 
 from copy import deepcopy
 from jsonschema import validate
@@ -147,10 +148,10 @@ class MessageAdapter:
                 dest_path = output['destination']
                 dest_json_path = dest_path.lstrip('{').rstrip('}')
                 value = resolve_path_str(handler_response, source_path)
-                if not isinstance(value, list):
-                    result = assign_json_path_value(result, dest_json_path, value)
-                else:
+                if re.match(r'^\[.*\]$', dest_json_path):
                     result = assign_json_path_values(handler_response, source_json_path, result, dest_json_path, value)
+                else:
+                    result = assign_json_path_value(result, dest_json_path, value)
         else:
             result['payload'] = handler_response
 
