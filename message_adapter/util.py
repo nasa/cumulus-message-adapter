@@ -47,14 +47,18 @@ def assign_json_path_values(
     """
     # Collect array info from jspath
     array_regex = r"([^$\.\]\[\*]+)\[\*\]"
-    source_array = re.findall(array_regex, source_jspath)
-    dest_array = re.findall(array_regex, dest_jspath)
-    if len(source_array) != len(dest_array):
+    source_jspath_array_names = re.findall(array_regex, source_jspath)
+    source_jspath_array_indices = [m.start(0) for m in re.finditer(array_regex, source_jspath)]
+    dest_jspath_arrays = re.findall(array_regex, dest_jspath)
+    if len(source_jspath_array_names) != len(dest_jspath_arrays):
         raise ValueError(
             "inconsistent number of arrays found from the output source and destination path in CMA"
         )
 
-    # Get the hierarchy of array size from dest_jspath
+    # Get the hierarchy of array size from source_jspath
+    for (source_jspath_array_name, source_jspath_array_index) in zip(source_jspath_array_names, source_jspath_array_indices):
+        partial_jspath = source_jspath[:source_jspath_array_index] + source_jspath_array_name
+        ns = [m.value for m in parse_ext(partial_jspath + '.`len`').find(source_message)]
 
     message = deepcopy(message_for_update)
     if dest_jspath[0] == "[":
