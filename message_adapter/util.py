@@ -33,6 +33,10 @@ def assign_json_path_value(message_for_update, jspath, value):
     return message
 
 
+def __sanitize_path(path):
+    m = re.match('^(.*)\[\*\]$', path)
+    return m.groups()[0] if m else path
+    
 def assign_json_path_values(
     source_message, source_jspath, message_for_update, dest_jspath, value
 ):
@@ -45,6 +49,27 @@ def assign_json_path_values(
     * @param {*} value Value to update to
     * @return {*} updated message
     """
+    message = deepcopy(message_for_update)
+
+    # Find where source_jspath and dest_jspath begin to diverge
+    source_paths = source_jspath.lstrip('$.').split('.')
+    dest_paths = dest_jspath.lstrip('$.').split('.')
+    idx_diverged = len(source_paths)
+    for idx, (source_path, dest_path) in enumerate(zip(source_paths, dest_paths)):
+        if __sanitize_path(source_path) != __sanitize_path(dest_path):
+            idx_diverged = idx
+            break
+
+    # Copy items from source to destination
+    # before their jsonpath begin to diverge
+    for idx in range(idx_diverged):
+        pass # Don't need to do anything?
+
+    # 
+    for idx in range(idx_diverged, len(dest_paths)):
+
+
+
     # Collect array info from jspath
     array_regex = r"([^$\.\]\[\*]+)\[\*\]"
     source_jspath_array_names = re.findall(array_regex, source_jspath)
@@ -60,9 +85,26 @@ def assign_json_path_values(
         partial_jspath = source_jspath[:source_jspath_array_index] + source_jspath_array_name
         ns = [m.value for m in parse_ext(partial_jspath + '.`len`').find(source_message)]
 
+
+    if not parse(jspath).find(message):
+        paths = jspath.lstrip('$.').split('.')
+        current_item = message
+        key_not_found = False
+        for path in paths:
+            m = re.match('^(.*)\[\*\]$', path)
+            if m: path = m.groups(0)
+            if key_not_found or path not in current_item:
+                key_not_found = True
+                new_path_dict = {}
+                # Add missing key to existing dict
+                current_item[path] = new_path_dict
+                # Set current item to newly created dict
+                current_item = new_path_dict
+            else:
+                current_item = current_item[path]
+
+    '''
     message = deepcopy(message_for_update)
-    if dest_jspath[0] == "[":
-        dest_jspath = dest_jspath.lstrip("[").rstrip("]")
     flag_array_jspath = False
     if not parse(dest_jspath).find(message):
         paths = dest_jspath.lstrip("$.").split(".")
@@ -109,4 +151,6 @@ def assign_json_path_values(
             item.full_path.update(message, v)
     else:
         parse(dest_jspath).update(message, value)
+    '''
+
     return message
