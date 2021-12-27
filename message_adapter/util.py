@@ -37,6 +37,16 @@ def __sanitize_path(path):
     m = re.match('^(.*)\[\*\]$', path)
     return m.groups()[0] if m else path
     
+
+class JspathTree:
+
+    def __init__(self, val):
+        self.val = val
+        self.children = []
+
+    def add_node(self, val):
+        self.children.append(JspathTree(val))
+
 def assign_json_path_values(
     source_message, source_jspath, message_for_update, dest_jspath, value
 ):
@@ -51,6 +61,7 @@ def assign_json_path_values(
     """
     message = deepcopy(message_for_update)
 
+    '''
     # Find where source_jspath and dest_jspath begin to diverge
     source_paths = source_jspath.lstrip('$.').split('.')
     dest_paths = dest_jspath.lstrip('$.').split('.')
@@ -67,6 +78,8 @@ def assign_json_path_values(
 
     # 
     for idx in range(idx_diverged, len(dest_paths)):
+        pass
+    '''
 
 
 
@@ -81,9 +94,49 @@ def assign_json_path_values(
         )
 
     # Get the hierarchy of array size from source_jspath
+    array_size_hierarchy = []
     for (source_jspath_array_name, source_jspath_array_index) in zip(source_jspath_array_names, source_jspath_array_indices):
         partial_jspath = source_jspath[:source_jspath_array_index] + source_jspath_array_name
-        ns = [m.value for m in parse_ext(partial_jspath + '.`len`').find(source_message)]
+        array_size_hierarchy.append([m.value for m in parse_ext(partial_jspath + '.`len`').find(source_message)])
+    print(array_size_hierarchy)
+
+    # Starting from the root,
+    #   for the existing nodes in dest_jspath,
+    #   make sure the array size matches that from the corresponding source_jspath
+    paths = dest_jspath.lstrip('$.').split('.')
+    current_item = message
+    paths_remaining = paths
+    for idx, path in enumerate(paths):
+        is_array = False
+        if '[' in path:
+            path = path.split('[')[0]
+            is_array = True
+        if path in current_item:
+            current_item = current_item[path]
+            if is_array:
+                # Make sure number of items matches that from the source
+                pass #NOTE not implemented yet
+        else:
+            paths_remaining = paths[idx:]
+            break
+
+    # For the remaining non-existing nodes in dest_jspath,
+    #   add 
+    for idx, path in enumerate(paths_remaining):
+        is_array = False
+        if '[' in path:
+            path = path.split('[')[0]
+            is_array = True
+        if is_array:
+            # 
+            pass
+        else:
+            new_path_dict = {}
+            # Add missing key to existing dict
+            current_item[path] = new_path_dict
+            # Set current item to newly created dict
+            current_item = new_path_dict
+
 
 
     if not parse(jspath).find(message):
@@ -103,7 +156,6 @@ def assign_json_path_values(
             else:
                 current_item = current_item[path]
 
-    '''
     message = deepcopy(message_for_update)
     flag_array_jspath = False
     if not parse(dest_jspath).find(message):
@@ -151,6 +203,5 @@ def assign_json_path_values(
             item.full_path.update(message, v)
     else:
         parse(dest_jspath).update(message, value)
-    '''
 
     return message
