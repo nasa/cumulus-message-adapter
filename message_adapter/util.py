@@ -46,13 +46,6 @@ class JspathTree:
         return child
 
 
-# function to print all path from root
-# to leaf in binary tree
-def printPaths(root):
-    # list to store path
-    path = []
-    printPathsRec(root, path, 0)
- 
 # Helper function to print path from root
 # to leaf in binary tree
 def printPathsRec(root, path, pathLen):
@@ -128,7 +121,7 @@ def assign_json_path_values(
                 count += 1
         parents = children
 
-    printPaths(root)
+    printPathsRec(root, [], 0)
     import sys; sys.exit(0)
 
 
