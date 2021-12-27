@@ -72,23 +72,12 @@ def printPathsRec(root, path_list, path, pathLen):
     if not root.children:
          
         # leaf node then print the list
-        printArray(path, pathLen)
-        print("indside path: ",path)
-        print("indside list before: ",path_list)
         path_list.append(deepcopy(path))
-        print("indside list after : ",path_list)
     else:
         # try for left and right subtree
         for child in root.children:
             printPathsRec(child, path_list, path, pathLen)
  
-# Helper function to print list in which
-# root-to-leaf path is stored
-def printArray(ints, len):
-    for i in ints[0 : len]:
-        print(i," ",end="")
-    print()
-
 def assign_json_path_values(
     source_message, source_jspath, message_for_update, dest_jspath, value
 ):
