@@ -36,7 +36,6 @@ def assign_json_path_value(message_for_update, jspath, value):
 class JspathTree:
 
     def __init__(self, idx=0, val="", is_array=False):
-        self.idx = idx
         self.val = val
         if is_array:
             self.val += '['+str(idx)+']'
@@ -48,35 +47,19 @@ class JspathTree:
         return child
 
 
-# Helper function to print path from root
-# to leaf in binary tree
-def printPathsRec(root, path_list, path, pathLen):
-     
-    # Base condition - if binary tree is
-    # empty return
-    if root is None:
-        return
- 
-    # add current root's val into
-    # path_ar list
-     
-    # if length of list is gre
-    if(len(path) > pathLen):
-        path[pathLen] = root.val
+def build_jspath_recursively(root, path_list, path, tree_level):
+
+    if(len(path) > tree_level):
+        path[tree_level] = root.val
     else:
         path.append(root.val)
- 
-    # increment pathLen by 1
-    pathLen = pathLen + 1
- 
-    if not root.children:
-         
-        # leaf node then print the list
-        path_list.append(deepcopy(path))
-    else:
-        # try for left and right subtree
+  
+    if root.children:
+        tree_level = tree_level + 1
         for child in root.children:
-            printPathsRec(child, path_list, path, pathLen)
+            build_jspath_recursively(child, path_list, path, tree_level)
+    else:
+        path_list.append(deepcopy(path))
  
 def assign_json_path_values(
     source_message, source_jspath, message_for_update, dest_jspath, value
@@ -117,7 +100,7 @@ def assign_json_path_values(
         parents = children
 
     path_list = []
-    printPathsRec(root, path_list, [], 0)
+    build_jspath_recursively(root, path_list, [], 0)
     from pprint import pprint; pprint(path_list)
     import sys; sys.exit(0)
 
