@@ -33,19 +33,62 @@ def assign_json_path_value(message_for_update, jspath, value):
     return message
 
 
-def __sanitize_path(path):
-    m = re.match('^(.*)\[\*\]$', path)
-    return m.groups()[0] if m else path
-    
-
 class JspathTree:
 
-    def __init__(self, val):
-        self.val = val
+    def __init__(self, idx=0, val=""):
+        self.idx = idx
+        self.val = val+'['+str(idx)+']'
         self.children = []
 
-    def add_node(self, val):
-        self.children.append(JspathTree(val))
+    def add_child(self, idx, val):
+        child = JspathTree(idx, val)
+        self.children.append(child)
+        return child
+
+
+# function to print all path from root
+# to leaf in binary tree
+def printPaths(root):
+    # list to store path
+    path = []
+    printPathsRec(root, path, 0)
+ 
+# Helper function to print path from root
+# to leaf in binary tree
+def printPathsRec(root, path, pathLen):
+     
+    # Base condition - if binary tree is
+    # empty return
+    if root is None:
+        return
+ 
+    # add current root's val into
+    # path_ar list
+     
+    # if length of list is gre
+    if(len(path) > pathLen):
+        path[pathLen] = root.val
+    else:
+        path.append(root.val)
+ 
+    # increment pathLen by 1
+    pathLen = pathLen + 1
+ 
+    if not root.children:
+         
+        # leaf node then print the list
+        printArray(path, pathLen)
+    else:
+        # try for left and right subtree
+        for child in root.children:
+            printPathsRec(child, path, pathLen)
+ 
+# Helper function to print list in which
+# root-to-leaf path is stored
+def printArray(ints, len):
+    for i in ints[0 : len]:
+        print(i," ",end="")
+    print()
 
 def assign_json_path_values(
     source_message, source_jspath, message_for_update, dest_jspath, value
@@ -59,27 +102,36 @@ def assign_json_path_values(
     * @param {*} value Value to update to
     * @return {*} updated message
     """
+    print(source_jspath, dest_jspath)
     message = deepcopy(message_for_update)
 
-    '''
-    # Find where source_jspath and dest_jspath begin to diverge
-    source_paths = source_jspath.lstrip('$.').split('.')
-    dest_paths = dest_jspath.lstrip('$.').split('.')
-    idx_diverged = len(source_paths)
-    for idx, (source_path, dest_path) in enumerate(zip(source_paths, dest_paths)):
-        if __sanitize_path(source_path) != __sanitize_path(dest_path):
-            idx_diverged = idx
-            break
+    #
+    source_jspath_arrays = source_jspath.split('[*]')[:-1]
+    dest_jspath_arrays = [m.strip('.') for m in dest_jspath.split('[*]')][:-1]
+    if len(source_jspath_arrays) != len(dest_jspath_arrays):
+        raise ValueError(
+            "inconsistent number of arrays found from the output source and destination path in CMA"
+        )
+    root = JspathTree('$.')
+    parents = [root]
+    for idx, (source_jspath_array, dest_jspath_array) in enumerate(zip(source_jspath_arrays, dest_jspath_arrays)):
+        source_jspath_partial = '$.' + '[*].'.join(source_jspath_arrays[:idx+1])
+        nums_children = [m.value for m in parse_ext(source_jspath_partial+ '.`len`').find(source_message)]
+        if len(nums_children) != len(parents):
+            raise Exception("Something goes wrong")
+        children = []
+        count = 0
+        for i, parent in enumerate(parents):
+            for j in range(nums_children[i]):
+                child = parent.add_child(j, dest_jspath_array)
+                children.append(child)
+                count += 1
+        parents = children
 
-    # Copy items from source to destination
-    # before their jsonpath begin to diverge
-    for idx in range(idx_diverged):
-        pass # Don't need to do anything?
+    printPaths(root)
+    import sys; sys.exit(0)
 
-    # 
-    for idx in range(idx_diverged, len(dest_paths)):
-        pass
-    '''
+
 
 
 
@@ -99,6 +151,14 @@ def assign_json_path_values(
         partial_jspath = source_jspath[:source_jspath_array_index] + source_jspath_array_name
         array_size_hierarchy.append([m.value for m in parse_ext(partial_jspath + '.`len`').find(source_message)])
     print(array_size_hierarchy)
+
+
+
+
+
+
+
+
 
     # Starting from the root,
     #   for the existing nodes in dest_jspath,
