@@ -45,7 +45,7 @@ class ArrayPathTree:
         self.children = []
 
     def add_child(self, idx, val):
-        child = ArrayPathTree(idx, val, True)
+        child = ArrayPathTree(idx, val)
         self.children.append(child)
         return child
 
@@ -99,7 +99,7 @@ def assign_json_path_values(
     # C[0] C[1] C[2] C[0]   C[1]
     #
     source_jspath_arrays = source_jspath.split('[*]')[:-1]
-    dest_jspath_arrays = [m.strip('.') for m in dest_jspath.split('[*]')][:-1]
+    dest_jspath_arrays = [m.lstrip('$').strip('.') for m in dest_jspath.split('[*]')][:-1]
     if len(source_jspath_arrays) != len(dest_jspath_arrays):
         raise ValueError(
             "inconsistent number of arrays found from the output source and destination path in CMA"
