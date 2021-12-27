@@ -124,12 +124,17 @@ def assign_json_path_values(
     build_jspath_recursively(root, path_list, [], 0)
     from pprint import pprint; pprint(path_list)
 
-    #
+    # Update
+    count = 0
+    pprint(message)
     for path in path_list:
-        jspath = '.'.join(path)
+        jspath = '.'.join(path) + dest_jspath.split('[*]')[-1] #NOTE not clean
         print(jspath)
+        parse_ext(jspath).update_or_create(message, value[count])
+        count += 1
+    pprint(message)
 
-    import sys; sys.exit(0)
+    return message
 
 
 
