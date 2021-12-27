@@ -35,20 +35,22 @@ def assign_json_path_value(message_for_update, jspath, value):
 
 class JspathTree:
 
-    def __init__(self, idx=0, val=""):
+    def __init__(self, idx=0, val="", is_array=False):
         self.idx = idx
-        self.val = val+'['+str(idx)+']'
+        self.val = val
+        if is_array:
+            self.val += '['+str(idx)+']'
         self.children = []
 
     def add_child(self, idx, val):
-        child = JspathTree(idx, val)
+        child = JspathTree(idx, val, True)
         self.children.append(child)
         return child
 
 
 # Helper function to print path from root
 # to leaf in binary tree
-def printPathsRec(root, path, pathLen):
+def printPathsRec(root, path_list, path, pathLen):
      
     # Base condition - if binary tree is
     # empty return
@@ -71,10 +73,14 @@ def printPathsRec(root, path, pathLen):
          
         # leaf node then print the list
         printArray(path, pathLen)
+        print("indside path: ",path)
+        print("indside list before: ",path_list)
+        path_list.append(deepcopy(path))
+        print("indside list after : ",path_list)
     else:
         # try for left and right subtree
         for child in root.children:
-            printPathsRec(child, path, pathLen)
+            printPathsRec(child, path_list, path, pathLen)
  
 # Helper function to print list in which
 # root-to-leaf path is stored
@@ -105,7 +111,7 @@ def assign_json_path_values(
         raise ValueError(
             "inconsistent number of arrays found from the output source and destination path in CMA"
         )
-    root = JspathTree('$.')
+    root = JspathTree(0, '$.')
     parents = [root]
     for idx, (source_jspath_array, dest_jspath_array) in enumerate(zip(source_jspath_arrays, dest_jspath_arrays)):
         source_jspath_partial = '$.' + '[*].'.join(source_jspath_arrays[:idx+1])
@@ -121,7 +127,9 @@ def assign_json_path_values(
                 count += 1
         parents = children
 
-    printPathsRec(root, [], 0)
+    path_list = []
+    printPathsRec(root, path_list, [], 0)
+    from pprint import pprint; pprint(path_list)
     import sys; sys.exit(0)
 
 
