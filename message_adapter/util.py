@@ -83,17 +83,21 @@ def assign_json_path_values(
     #   and the subsequent levels are partitioned by the array components of the jsonpath
     # The degree of a tree node is determined by the number of elements from source_jsonpath
     # E.g., for a source_jsonpath of "$.X[*].Y[*]" and a dest_jsonpath of "$.A.B[*].C[*]",
-    #   the tree structure would be:
+    #   if the array size is 2 for "$.X[*]", 3 for "$.X[0].Y[*]", and 2 for "$.X[1].Y[*]",
+    #   the tree structure will be:
+    #
     #              $
     #             / \
     #            /   \
     #           /     \
     #          /       \
+    #         /         \
     #      A.B[0]       A.B[1]
     #      / | \        / \
     #     /  |  \      /   \
     #    /   |   \    /     \
     # C[0] C[1] C[2] C[0]   C[1]
+    #
     source_jspath_arrays = source_jspath.split('[*]')[:-1]
     dest_jspath_arrays = [m.strip('.') for m in dest_jspath.split('[*]')][:-1]
     if len(source_jspath_arrays) != len(dest_jspath_arrays):
