@@ -33,16 +33,19 @@ def assign_json_path_value(message_for_update, jspath, value):
     return message
 
 
-class JspathTree:
+class ArrayPathTree:
+    """
+    Tree implementation which saves the array part of the jsonpath
+    """
 
-    def __init__(self, idx=0, val="", is_array=False):
+    def __init__(self, idx=0, val="", is_root=False):
         self.val = val
-        if is_array:
+        if not is_root:
             self.val += '['+str(idx)+']'
         self.children = []
 
     def add_child(self, idx, val):
-        child = JspathTree(idx, val, True)
+        child = ArrayPathTree(idx, val, True)
         self.children.append(child)
         return child
 
@@ -73,17 +76,31 @@ def assign_json_path_values(
     * @param {*} value Value to update to
     * @return {*} updated message
     """
-    print(source_jspath, dest_jspath)
     message = deepcopy(message_for_update)
 
-    #
+    # Construct the tree which saves the array part of the jsonpath
+    # The top tree level is the root of jsonpath ("$")
+    #   and the subsequent levels are partitioned by the array components of the jsonpath
+    # The degree of a tree node is determined by the number of elements from source_jsonpath
+    # E.g., for a source_jsonpath of "$.X[*].Y[*]" and a dest_jsonpath of "$.A.B[*].C[*]",
+    #   the tree structure would be:
+    #              $
+    #             / \
+    #            /   \
+    #           /     \
+    #          /       \
+    #      A.B[0]       A.B[1]
+    #      / | \        / \
+    #     /  |  \      /   \
+    #    /   |   \    /     \
+    # C[0] C[1] C[2] C[0]   C[1]
     source_jspath_arrays = source_jspath.split('[*]')[:-1]
     dest_jspath_arrays = [m.strip('.') for m in dest_jspath.split('[*]')][:-1]
     if len(source_jspath_arrays) != len(dest_jspath_arrays):
         raise ValueError(
             "inconsistent number of arrays found from the output source and destination path in CMA"
         )
-    root = JspathTree(0, '$.')
+    root = ArrayPathTree(0, '$', is_root=True)
     parents = [root]
     for idx, (source_jspath_array, dest_jspath_array) in enumerate(zip(source_jspath_arrays, dest_jspath_arrays)):
         source_jspath_partial = '$.' + '[*].'.join(source_jspath_arrays[:idx+1])
