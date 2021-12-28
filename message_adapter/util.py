@@ -100,6 +100,8 @@ def assign_json_path_values(
     #
     source_jspath_arrays = source_jspath.split('[*]')[:-1]
     dest_jspath_arrays = [m.lstrip('$').strip('.') for m in dest_jspath.split('[*]')][:-1]
+    #array_regex = r"([^$\]\[\*]+)\[\*\]"
+    #print("ZHL ",dest_jspath_arrays, re.findall(array_regex, dest_jspath))
     if len(source_jspath_arrays) != len(dest_jspath_arrays):
         raise ValueError(
             "inconsistent number of arrays found from the output source and destination path in CMA"
@@ -120,153 +122,16 @@ def assign_json_path_values(
                 count += 1
         parents = children
 
+    # Build the tree
     path_list = []
     build_jspath_recursively(root, path_list, [], 0)
-    from pprint import pprint; pprint(path_list)
 
-    # Update
+    # Update the jspath
     count = 0
-    pprint(message)
     for path in path_list:
         jspath = '.'.join(path) + dest_jspath.split('[*]')[-1] #NOTE not clean
-        print(jspath)
         parse_ext(jspath).update_or_create(message, value[count])
         count += 1
-    pprint(message)
 
-    return message
-
-
-
-
-
-    # Collect array info from jspath
-    array_regex = r"([^$\.\]\[\*]+)\[\*\]"
-    source_jspath_array_names = re.findall(array_regex, source_jspath)
-    source_jspath_array_indices = [m.start(0) for m in re.finditer(array_regex, source_jspath)]
-    dest_jspath_arrays = re.findall(array_regex, dest_jspath)
-    if len(source_jspath_array_names) != len(dest_jspath_arrays):
-        raise ValueError(
-            "inconsistent number of arrays found from the output source and destination path in CMA"
-        )
-
-    # Get the hierarchy of array size from source_jspath
-    array_size_hierarchy = []
-    for (source_jspath_array_name, source_jspath_array_index) in zip(source_jspath_array_names, source_jspath_array_indices):
-        partial_jspath = source_jspath[:source_jspath_array_index] + source_jspath_array_name
-        array_size_hierarchy.append([m.value for m in parse_ext(partial_jspath + '.`len`').find(source_message)])
-    print(array_size_hierarchy)
-
-
-
-
-
-
-
-
-
-    # Starting from the root,
-    #   for the existing nodes in dest_jspath,
-    #   make sure the array size matches that from the corresponding source_jspath
-    paths = dest_jspath.lstrip('$.').split('.')
-    current_item = message
-    paths_remaining = paths
-    for idx, path in enumerate(paths):
-        is_array = False
-        if '[' in path:
-            path = path.split('[')[0]
-            is_array = True
-        if path in current_item:
-            current_item = current_item[path]
-            if is_array:
-                # Make sure number of items matches that from the source
-                pass #NOTE not implemented yet
-        else:
-            paths_remaining = paths[idx:]
-            break
-
-    # For the remaining non-existing nodes in dest_jspath,
-    #   add 
-    for idx, path in enumerate(paths_remaining):
-        is_array = False
-        if '[' in path:
-            path = path.split('[')[0]
-            is_array = True
-        if is_array:
-            # 
-            pass
-        else:
-            new_path_dict = {}
-            # Add missing key to existing dict
-            current_item[path] = new_path_dict
-            # Set current item to newly created dict
-            current_item = new_path_dict
-
-
-
-    if not parse(jspath).find(message):
-        paths = jspath.lstrip('$.').split('.')
-        current_item = message
-        key_not_found = False
-        for path in paths:
-            m = re.match('^(.*)\[\*\]$', path)
-            if m: path = m.groups(0)
-            if key_not_found or path not in current_item:
-                key_not_found = True
-                new_path_dict = {}
-                # Add missing key to existing dict
-                current_item[path] = new_path_dict
-                # Set current item to newly created dict
-                current_item = new_path_dict
-            else:
-                current_item = current_item[path]
-
-    message = deepcopy(message_for_update)
-    flag_array_jspath = False
-    if not parse(dest_jspath).find(message):
-        paths = dest_jspath.lstrip("$.").split(".")
-        current_item = message
-        key_not_found = False
-        for path in paths:
-            flag_array = False
-            if "[" in path:
-                path = path.split("[")[0]
-                flag_array = True
-                flag_array_jspath = True
-            if isinstance(current_item, list):
-                current_items = current_item
-                for current_item in current_items:
-                    if key_not_found or path not in current_item:
-                        key_not_found = True
-                        if flag_array:
-                            new_path_dict = []
-                        else:
-                            new_path_dict = {}
-                        # Add missing key to existing dict
-                        current_item[path] = new_path_dict
-                        # Set current item to newly created dict
-                        current_item = new_path_dict
-                    else:
-                        current_item = current_item[path]
-            else:
-                if key_not_found or path not in current_item:
-                    key_not_found = True
-                    if flag_array:
-                        new_path_dict = []
-                    else:
-                        new_path_dict = {}
-                    # Add missing key to existing dict
-                    current_item[path] = new_path_dict
-                    # Set current item to newly created dict
-                    current_item = new_path_dict
-                else:
-                    current_item = current_item[path]
-    if flag_array_jspath:
-        # parse(dest_jspath).update(message, value)
-        match_data = parse(dest_jspath).find(message)
-        for item, v in zip(match_data, value):
-            item.full_path.update(message, v)
-    else:
-        parse(dest_jspath).update(message, value)
-
+    # Return
     return message
