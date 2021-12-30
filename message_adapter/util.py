@@ -80,7 +80,7 @@ def assign_json_path_values(
     message = deepcopy(message_for_update)
 
     # Split source and destination jsonpath by their array components
-    #   with root ('$.') skipped
+    #   with root ('$.') skipped.
     # For example, a jsonpath of '$.A.B[0:2].C[*].D' will be split into:
     #   ['A.B', 'C']
     # and a jsonpath of '$.A[*].B.C[:3].D' will be split into:
@@ -96,10 +96,11 @@ def assign_json_path_values(
             "inconsistent number of arrays found from the output source and destination path in CMA"
         )
 
-    # Construct the tree which saves the array part of the jsonpath
-    # The top tree level is the root of jsonpath ("$")
-    #   and the subsequent levels are partitioned by the array components of the jsonpath
-    # The degree of a tree node is determined by the number of elements from source_jsonpath
+    # Construct the tree which saves the array part of the jsonpath.
+    # The top tree level is the root of jsonpath ("$"),
+    #   and the subsequent levels are partitioned by the array components of the jsonpath.
+    # The degree of a tree node is determined by the number of elements from source_jsonpath,
+    #   and the array index is included in the node value.
     # E.g., for a source_jsonpath of "$.X[*].Y[*]" and a dest_jsonpath of "$.A.B[*].C[*]",
     #   if the array size is 2 for "$.X[*]", 3 for "$.X[0].Y[*]", and 2 for "$.X[1].Y[*]",
     #   the tree structure will be:
@@ -120,7 +121,6 @@ def assign_json_path_values(
     parents = [root]
     for idx, dest_jspath_array in enumerate(dest_jspath_arrays):
         source_jspath_partial = "$." + "[*].".join(source_jspath_arrays[: idx + 1])
-        print(source_jspath_partial)
         nums_children = [
             m.value
             for m in parse_ext(source_jspath_partial + ".`len`").find(source_message)
@@ -128,17 +128,16 @@ def assign_json_path_values(
         if len(nums_children) != len(parents):
             raise Exception("Something goes wrong")
         children = []
-        count = 0
-        for i, parent in enumerate(parents):
-            for j in range(nums_children[i]):
+        for parent, num_children in zip(parents, nums_children):
+            for j in range(num_children):
                 child = parent.add_child(dest_jspath_array, j)
                 children.append(child)
-                count += 1
         parents = children
 
     # Build the tree
     path_list = []
     build_jspath_recursively(root, path_list, [], 0)
+    print(path_list)
 
     # Update the jspath
     count = 0
