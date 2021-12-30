@@ -50,7 +50,7 @@ class JsonpathArrayTree:
         return child
 
 
-def build_jspath_array_list_recursively(root, jsonpath_array_list, path, tree_level):
+def build_jspath_array_list(root, jsonpath_array_list, path, tree_level):
 
     if len(path) > tree_level:
         path[tree_level] = root.val
@@ -60,7 +60,7 @@ def build_jspath_array_list_recursively(root, jsonpath_array_list, path, tree_le
     if root.children:
         tree_level = tree_level + 1
         for child in root.children:
-            build_jspath_array_list_recursively(
+            build_jspath_array_list(
                 child, jsonpath_array_list, path, tree_level
             )
     else:
@@ -81,12 +81,14 @@ def assign_json_path_values(
     """
     message = deepcopy(message_for_update)
 
+    #
     # Split source and destination jsonpath by their array components
     #   with root ('$.') skipped.
     # For example, a jsonpath of '$.A.B[0:2].C[*].D' will be split into:
     #   ['A.B', 'C']
     # and a jsonpath of '$.A[*].B.C[:3].D' will be split into:
     #   ['A', 'B.C']
+    #
     [source_jspath_arrays, dest_jspath_arrays] = list(
         map(
             lambda x: re.findall(r"(.*?)\[[0-9:\*]+\]\.?", x.lstrip("$.")),
@@ -98,6 +100,7 @@ def assign_json_path_values(
             "inconsistent number of arrays found from the output source and destination path in CMA"
         )
 
+    #
     # Build the tree which saves the array part of the jsonpath.
     # The top tree level is the root of jsonpath ("$"),
     #   and the subsequent levels are partitioned by the array components of the jsonpath.
@@ -135,17 +138,25 @@ def assign_json_path_values(
             ]
         parents = children
 
-    # Recursively get the list of the array components
-    #   by traversing the above tree
+    #
+    # Traverse the tree and
+    #   get list of node values (which is the array components of the jsonpath)
+    #   along each tree path from root to leaf
+    # For the tree illustrated above, the resulting list will be:
+    #   [['$', 'A.B[0], 'C[0]'],
+    #    ['$', 'A.B[0], 'C[1]'],
+    #    ['$', 'A.B[0], 'C[2]'],
+    #    ['$', 'A.B[1], 'C[0]'],
+    #    ['$', 'A.B[1], 'C[1]']]
+    #
     jsonpath_array_list = []
-    build_jspath_array_list_recursively(root, jsonpath_array_list, [], 0)
+    build_jspath_array_list(root, jsonpath_array_list, [], tree_level = 0)
 
-    # Update the jspath
-    count = 0
-    for paths in jsonpath_array_list:
+    # Update (or create) the destination jspath values
+    #   for each path from the above list,
+    for idx, paths in enumerate(jsonpath_array_list):
         jspath = ".".join(paths) + dest_jspath.split("[*]")[-1]
-        parse_ext(jspath).update_or_create(message, source_values[count])
-        count += 1
+        parse_ext(jspath).update_or_create(message, source_values[idx])
 
     # Return
     return message
