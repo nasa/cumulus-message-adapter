@@ -81,8 +81,10 @@ def assign_json_path_values(
 
     # Split source and destination jsonpath by their array components
     #   with root ('$.') skipped
-    # For example, a jsonpath of "$.A.B[*].C[*]" will be split into:
+    # For example, a jsonpath of '$.A.B[0:2].C[*].D' will be split into:
     #   ['A.B', 'C']
+    # and a jsonpath of '$.A[*].B.C[:3].D' will be split into:
+    #   ['A', 'B.C']
     [source_jspath_arrays, dest_jspath_arrays] = list(
         map(
             lambda x: re.findall(r"(.*?)\[[0-9:\*]+\]\.?", x.lstrip("$.")),
@@ -116,9 +118,7 @@ def assign_json_path_values(
     #
     root = ArrayPathTree("$", 0, is_root=True)
     parents = [root]
-    for idx, (source_jspath_array, dest_jspath_array) in enumerate(
-        zip(source_jspath_arrays, dest_jspath_arrays)
-    ):
+    for idx, dest_jspath_array in enumerate(dest_jspath_arrays):
         source_jspath_partial = "$." + "[*].".join(source_jspath_arrays[: idx + 1])
         print(source_jspath_partial)
         nums_children = [
