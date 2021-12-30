@@ -151,7 +151,9 @@ class MessageAdapter:
                 if re.match(r'^\[.*\]$', dest_json_path):
                     source_json_path = source_json_path.lstrip('[').rstrip(']')
                     dest_json_path = dest_json_path.lstrip('[').rstrip(']')
-                    result = assign_json_path_values(handler_response, source_json_path, result, dest_json_path, value)
+                    result = assign_json_path_values(
+                        handler_response, source_json_path, result, dest_json_path, value
+                    )
                 else:
                     result = assign_json_path_value(result, dest_json_path, value)
         else:

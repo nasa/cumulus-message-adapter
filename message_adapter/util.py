@@ -45,6 +45,9 @@ class JsonpathArrayTree:
         self.children = []
 
     def add_child(self, val, node_idx):
+        """
+        Add and return a child
+        """
         child = JsonpathArrayTree(val, node_idx)
         self.children.append(child)
         return child
