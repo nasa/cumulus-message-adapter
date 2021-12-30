@@ -127,17 +127,15 @@ def assign_json_path_values(
         ]
         if len(nums_children) != len(parents):
             raise Exception("Something goes wrong")
-        children = []
         for parent, num_children in zip(parents, nums_children):
-            for j in range(num_children):
-                child = parent.add_child(dest_jspath_array, j)
-                children.append(child)
+            children = [
+                parent.add_child(dest_jspath_array, i) for i in range(num_children)
+            ]
         parents = children
 
     # Build the tree
     path_list = []
     build_jspath_recursively(root, path_list, [], 0)
-    print(path_list)
 
     # Update the jspath
     count = 0
