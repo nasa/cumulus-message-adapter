@@ -38,14 +38,14 @@ class ArrayPathTree:
     Tree implementation which saves the array part of the jsonpath
     """
 
-    def __init__(self, idx=0, val="", is_root=False):
+    def __init__(self, val="", node_idx=0, is_root=False):
         self.val = val
         if not is_root:
-            self.val += '['+str(idx)+']'
+            self.val += '['+str(node_idx)+']'
         self.children = []
 
-    def add_child(self, idx, val):
-        child = ArrayPathTree(idx, val)
+    def add_child(self, val, node_idx):
+        child = ArrayPathTree(val, node_idx)
         self.children.append(child)
         return child
 
@@ -106,7 +106,7 @@ def assign_json_path_values(
         raise ValueError(
             "inconsistent number of arrays found from the output source and destination path in CMA"
         )
-    root = ArrayPathTree(0, '$', is_root=True)
+    root = ArrayPathTree('$', 0, is_root=True)
     parents = [root]
     for idx, (source_jspath_array, dest_jspath_array) in enumerate(zip(source_jspath_arrays, dest_jspath_arrays)):
         source_jspath_partial = '$.' + '[*].'.join(source_jspath_arrays[:idx+1])
@@ -117,7 +117,7 @@ def assign_json_path_values(
         count = 0
         for i, parent in enumerate(parents):
             for j in range(nums_children[i]):
-                child = parent.add_child(j, dest_jspath_array)
+                child = parent.add_child(dest_jspath_array,j )
                 children.append(child)
                 count += 1
         parents = children
