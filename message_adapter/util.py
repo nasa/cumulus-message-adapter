@@ -79,6 +79,19 @@ def assign_json_path_values(
     """
     message = deepcopy(message_for_update)
 
+    # Split source and destination jsonpath by their array components
+    source_jspath_arrays = re.findall(r'(.*?)\[[0-9:\*]+\]\.?', source_jspath)
+    dest_jspath_arrays = [m.lstrip("$").strip(".") for m in dest_jspath.split("[*]")][
+        :-1
+    ]
+    dest_jspath_arrays2 = re.findall(r'(.*?)\[[0-9:\*]+\]\.?', dest_jspath)
+    print(dest_jspath_arrays)
+    print(dest_jspath_arrays2)
+    if len(source_jspath_arrays) != len(dest_jspath_arrays):
+        raise ValueError(
+            "inconsistent number of arrays found from the output source and destination path in CMA"
+        )
+
     # Construct the tree which saves the array part of the jsonpath
     # The top tree level is the root of jsonpath ("$")
     #   and the subsequent levels are partitioned by the array components of the jsonpath
@@ -99,22 +112,12 @@ def assign_json_path_values(
     #    /   |   \    /     \
     # C[0] C[1] C[2] C[0]   C[1]
     #
-    source_jspath_arrays = source_jspath.split("[*]")[:-1]
-    dest_jspath_arrays = [m.lstrip("$").strip(".") for m in dest_jspath.split("[*]")][
-        :-1
-    ]
-    # array_regex = r"([^$\]\[\*]+)\[\*\]"
-    # print("ZHL ",dest_jspath_arrays, re.findall(array_regex, dest_jspath))
-    if len(source_jspath_arrays) != len(dest_jspath_arrays):
-        raise ValueError(
-            "inconsistent number of arrays found from the output source and destination path in CMA"
-        )
     root = ArrayPathTree("$", 0, is_root=True)
     parents = [root]
     for idx, (source_jspath_array, dest_jspath_array) in enumerate(
         zip(source_jspath_arrays, dest_jspath_arrays)
     ):
-        source_jspath_partial = "$." + "[*].".join(source_jspath_arrays[: idx + 1])
+        source_jspath_partial = "[*].".join(source_jspath_arrays[: idx + 1])
         nums_children = [
             m.value
             for m in parse_ext(source_jspath_partial + ".`len`").find(source_message)
