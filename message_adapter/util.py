@@ -33,7 +33,7 @@ def assign_json_path_value(message_for_update, jspath, value):
     return message
 
 
-class ArrayPathTree:
+class JsonpathArrayTree:
     """
     Tree implementation which saves the array part of the jsonpath
     """
@@ -45,12 +45,12 @@ class ArrayPathTree:
         self.children = []
 
     def add_child(self, val, node_idx):
-        child = ArrayPathTree(val, node_idx)
+        child = JsonpathArrayTree(val, node_idx)
         self.children.append(child)
         return child
 
 
-def build_jspath_recursively(root, path_list, path, tree_level):
+def build_jspath_array_list_recursively(root, jsonpath_array_list, path, tree_level):
 
     if len(path) > tree_level:
         path[tree_level] = root.val
@@ -60,21 +60,23 @@ def build_jspath_recursively(root, path_list, path, tree_level):
     if root.children:
         tree_level = tree_level + 1
         for child in root.children:
-            build_jspath_recursively(child, path_list, path, tree_level)
+            build_jspath_array_list_recursively(
+                child, jsonpath_array_list, path, tree_level
+            )
     else:
-        path_list.append(deepcopy(path))
+        jsonpath_array_list.append(deepcopy(path))
 
 
 def assign_json_path_values(
-    source_message, source_jspath, message_for_update, dest_jspath, value
+    source_message, source_jspath, message_for_update, dest_jspath, source_values
 ):
     """
-    * Assign (update or insert) a value to message based on jsonpath.
+    * Assign (update or insert) a source_values to message based on jsonpath.
     * Create the keys if dest_jspath doesn't already exist in the message. In this case, we
     * support 'simple' jsonpath like $.path1.path2.path3....
     * @param {dict} message_for_update The message to be updated
     * @param {string} dest_jspath JSON path string
-    * @param {*} value Value to update to
+    * @param {*} source_values Value to update to
     * @return {*} updated message
     """
     message = deepcopy(message_for_update)
@@ -96,7 +98,7 @@ def assign_json_path_values(
             "inconsistent number of arrays found from the output source and destination path in CMA"
         )
 
-    # Construct the tree which saves the array part of the jsonpath.
+    # Build the tree which saves the array part of the jsonpath.
     # The top tree level is the root of jsonpath ("$"),
     #   and the subsequent levels are partitioned by the array components of the jsonpath.
     # The degree of a tree node is determined by the number of elements from source_jsonpath,
@@ -117,7 +119,7 @@ def assign_json_path_values(
     #    /   |   \    /     \
     # C[0] C[1] C[2] C[0]   C[1]
     #
-    root = ArrayPathTree("$", 0, is_root=True)
+    root = JsonpathArrayTree("$", 0, is_root=True)
     parents = [root]
     for idx, dest_jspath_array in enumerate(dest_jspath_arrays):
         source_jspath_partial = "$." + "[*].".join(source_jspath_arrays[: idx + 1])
@@ -133,15 +135,16 @@ def assign_json_path_values(
             ]
         parents = children
 
-    # Build the tree
-    path_list = []
-    build_jspath_recursively(root, path_list, [], 0)
+    # Recursively get the list of the array components
+    #   by traversing the above tree
+    jsonpath_array_list = []
+    build_jspath_array_list_recursively(root, jsonpath_array_list, [], 0)
 
     # Update the jspath
     count = 0
-    for path in path_list:
-        jspath = ".".join(path) + dest_jspath.split("[*]")[-1]  # NOTE not clean
-        parse_ext(jspath).update_or_create(message, value[count])
+    for paths in jsonpath_array_list:
+        jspath = ".".join(paths) + dest_jspath.split("[*]")[-1]
+        parse_ext(jspath).update_or_create(message, source_values[count])
         count += 1
 
     # Return
