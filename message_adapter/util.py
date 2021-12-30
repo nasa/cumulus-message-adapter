@@ -51,6 +51,11 @@ class JsonpathArrayTree:
 
 
 def build_jspath_array_list(root, jsonpath_array_list, path, tree_level):
+    """
+    Traverse the tree and
+      get list of node values (which is the array components of the jsonpath)
+      along each tree path from root to leaf
+    """
 
     if len(path) > tree_level:
         path[tree_level] = root.val
