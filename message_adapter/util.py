@@ -41,7 +41,7 @@ class ArrayPathTree:
     def __init__(self, val="", node_idx=0, is_root=False):
         self.val = val
         if not is_root:
-            self.val += '['+str(node_idx)+']'
+            self.val += "[" + str(node_idx) + "]"
         self.children = []
 
     def add_child(self, val, node_idx):
@@ -52,18 +52,19 @@ class ArrayPathTree:
 
 def build_jspath_recursively(root, path_list, path, tree_level):
 
-    if(len(path) > tree_level):
+    if len(path) > tree_level:
         path[tree_level] = root.val
     else:
         path.append(root.val)
-  
+
     if root.children:
         tree_level = tree_level + 1
         for child in root.children:
             build_jspath_recursively(child, path_list, path, tree_level)
     else:
         path_list.append(deepcopy(path))
- 
+
+
 def assign_json_path_values(
     source_message, source_jspath, message_for_update, dest_jspath, value
 ):
@@ -98,26 +99,33 @@ def assign_json_path_values(
     #    /   |   \    /     \
     # C[0] C[1] C[2] C[0]   C[1]
     #
-    source_jspath_arrays = source_jspath.split('[*]')[:-1]
-    dest_jspath_arrays = [m.lstrip('$').strip('.') for m in dest_jspath.split('[*]')][:-1]
-    #array_regex = r"([^$\]\[\*]+)\[\*\]"
-    #print("ZHL ",dest_jspath_arrays, re.findall(array_regex, dest_jspath))
+    source_jspath_arrays = source_jspath.split("[*]")[:-1]
+    dest_jspath_arrays = [m.lstrip("$").strip(".") for m in dest_jspath.split("[*]")][
+        :-1
+    ]
+    # array_regex = r"([^$\]\[\*]+)\[\*\]"
+    # print("ZHL ",dest_jspath_arrays, re.findall(array_regex, dest_jspath))
     if len(source_jspath_arrays) != len(dest_jspath_arrays):
         raise ValueError(
             "inconsistent number of arrays found from the output source and destination path in CMA"
         )
-    root = ArrayPathTree('$', 0, is_root=True)
+    root = ArrayPathTree("$", 0, is_root=True)
     parents = [root]
-    for idx, (source_jspath_array, dest_jspath_array) in enumerate(zip(source_jspath_arrays, dest_jspath_arrays)):
-        source_jspath_partial = '$.' + '[*].'.join(source_jspath_arrays[:idx+1])
-        nums_children = [m.value for m in parse_ext(source_jspath_partial+ '.`len`').find(source_message)]
+    for idx, (source_jspath_array, dest_jspath_array) in enumerate(
+        zip(source_jspath_arrays, dest_jspath_arrays)
+    ):
+        source_jspath_partial = "$." + "[*].".join(source_jspath_arrays[: idx + 1])
+        nums_children = [
+            m.value
+            for m in parse_ext(source_jspath_partial + ".`len`").find(source_message)
+        ]
         if len(nums_children) != len(parents):
             raise Exception("Something goes wrong")
         children = []
         count = 0
         for i, parent in enumerate(parents):
             for j in range(nums_children[i]):
-                child = parent.add_child(dest_jspath_array,j )
+                child = parent.add_child(dest_jspath_array, j)
                 children.append(child)
                 count += 1
         parents = children
@@ -129,7 +137,7 @@ def assign_json_path_values(
     # Update the jspath
     count = 0
     for path in path_list:
-        jspath = '.'.join(path) + dest_jspath.split('[*]')[-1] #NOTE not clean
+        jspath = ".".join(path) + dest_jspath.split("[*]")[-1]  # NOTE not clean
         parse_ext(jspath).update_or_create(message, value[count])
         count += 1
 
