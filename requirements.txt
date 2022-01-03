@@ -1,4 +1,4 @@
-jsonpath-ng~=1.4.2
+jsonpath-ng~=1.5.3
 jsonschema==2.6.0
 boto3~=1.18.40
 six~=1.12.0
