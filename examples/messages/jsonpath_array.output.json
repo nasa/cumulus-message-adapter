@@ -1,25 +1,62 @@
 {
-  "task_config": {
-    "bar": "baz",
-    "cumulus_message": {
-      "input": "{$.payload.input}",
-      "outputs": [
-        {
-          "source": "{$.input.anykey}",
-          "destination": "{$.payload.out}"
-        }
-      ]
-    }
-  },
-  "cumulus_meta": {
-    "message_source": "local",
-    "id": "id-1234"
-  },
-  "meta": {
-    "foo": "bar"
-  },
-  "payload": {
-    "out": "anyvalue"
-  },
-  "exception": "None"
+   "cumulus_meta":{
+      "id":"id-1234",
+      "message_source":"local"
+   },
+   "exception":"None",
+   "payload":{
+      "output":{
+         "granules":[
+            {
+               "files":[
+                  {
+                     "filenameRenamed":"s3://cumulus-bucket/cumulus-object-A1",
+                     "filepathRenamed":"cumulus/path/A1"
+                  },
+                  {
+                     "filenameRenamed":"s3://cumulus-bucket/cumulus-object-A2",
+                     "filepathRenamed":"cumulus/path/A2"
+                  },
+                  {
+                     "filenameRenamed":"s3://cumulus-bucket/cumulus-object-A3",
+                     "filepathRenamed":"cumulus/path/A3"
+                  }
+               ],
+               "versionRenamed":"A"
+            },
+            {
+               "files":[
+                  {
+                     "filenameRenamed":"s3://cumulus-bucket/cumulus-object-B1",
+                     "filepathRenamed":"cumulus/path/B1"
+                  },
+                  {
+                     "filenameRenamed":"s3://cumulus-bucket/cumulus-object-B2",
+                     "filepathRenamed":"cumulus/path/B2"
+                  }
+               ],
+               "versionRenamed":"B"
+            }
+         ]
+      }
+   },
+   "task_config":{
+      "cumulus_message":{
+         "input":"{$.payload.input}",
+         "outputs":[
+            {
+               "destination":"{[$.payload.output.granules[*].versionRenamed]}",
+               "source":"{[$.input.granules[*].version]}"
+            },
+            {
+               "destination":"{[$.payload.output.granules[*].files[*].filenameRenamed]}",
+               "source":"{[$.input.granules[*].files[*].filename]}"
+            },
+            {
+               "destination":"{[$.payload.output.granules[*].files[*].filepathRenamed]}",
+               "source":"{[$.input.granules[*].files[*].filepath]}"
+            }
+         ]
+      }
+   }
 }

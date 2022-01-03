@@ -1,12 +1,19 @@
 {
   "task_config": {
-    "bar": "baz",
     "cumulus_message": {
       "input": "{$.payload.input}",
       "outputs": [
         {
-          "source": "{$.input.anykey}",
-          "destination": "{$.payload.out}"
+          "source": "{[$.input.granules[*].version]}",
+          "destination": "{[$.payload.output.granules[*].versionRenamed]}"
+        },
+        {
+          "source": "{[$.input.granules[*].files[*].filename]}",
+          "destination": "{[$.payload.output.granules[*].files[*].filenameRenamed]}"
+        },
+        {
+          "source": "{[$.input.granules[*].files[*].filepath]}",
+          "destination": "{[$.payload.output.granules[*].files[*].filepathRenamed]}"
         }
       ]
     }
@@ -15,12 +22,40 @@
     "message_source": "local",
     "id": "id-1234"
   },
-  "meta": {
-    "foo": "bar"
-  },
   "payload": {
     "input": {
-      "anykey": "anyvalue"
+       "granules":[
+          {
+             "version":"A",
+             "files":[
+                {
+                   "filename":"s3://cumulus-bucket/cumulus-object-A1",
+                   "filepath":"cumulus/path/A1"
+                },
+                {
+                   "filename":"s3://cumulus-bucket/cumulus-object-A2",
+                   "filepath":"cumulus/path/A2"
+                },
+                {
+                   "filename":"s3://cumulus-bucket/cumulus-object-A3",
+                   "filepath":"cumulus/path/A3"
+                }
+             ]
+          },
+          {
+             "version":"B",
+             "files":[
+                {
+                   "filename":"s3://cumulus-bucket/cumulus-object-B1",
+                   "filepath":"cumulus/path/B1"
+                },
+                {
+                   "filename":"s3://cumulus-bucket/cumulus-object-B2",
+                   "filepath":"cumulus/path/B2"
+                }
+             ]
+          }
+       ]
     }
   }
 }
