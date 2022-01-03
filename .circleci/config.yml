@@ -29,7 +29,7 @@ references:
     docker:
       - image: circleci/python:3.8.1
       - name: localstack
-        image: localstack/localstack:0.10.9
+        image: localstack/localstack:0.12.17
     working_directory: ~/repo
 
   restore_cache_python38: &restore_cache_python38
