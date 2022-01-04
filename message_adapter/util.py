@@ -95,10 +95,13 @@ def assign_json_path_values(
     *       and array "$.A.B[0].C[*]" with size of 3,
     *       and array "$.A.B[1].C[0]" with size of 6
     *   if array "$.A.B[*]" and "$.A.B[*].C[*]" already exist in destination message,
-    *       they will be directly updated, and no exception will be handled if the array size doesn't match
+    *       they will be directly updated,
+    *       and no exception will be handled if the array size doesn't match
     * Also note that "range indexing" is supported in source jsonpath (but not the destination)
-    * E.g., the source jsonpath in the above example can be "$.X[:2].Y[5:8]", "$.X[:2].Y[*]", or "$.X[*].Y[5:8]"
-    * @param {dict} source_message The source message used to get the array lengths (by parsing source_jspath)
+    * E.g., the source jsonpath in the above example can be "$.X[:2].Y[5:8]",
+    *       "$.X[:2].Y[*]", or "$.X[*].Y[5:8]"
+    * @param {dict} source_message The source message used to get the array lengths
+    *   (by parsing source_jspath)
     * @param {dict} message_for_update The message used for update
     * @param {string} source_jspath Souce JSON path string
     * @param {string} dest_jspath Destination JSON path string
