@@ -1,61 +1,55 @@
 {
-  "task_config": {
-    "cumulus_message": {
-      "input": "{$.payload.input}",
-      "outputs": [
-        {
-          "source": "{[$.input.granules[*].version]}",
-          "destination": "{[$.payload.output.granules[*].versionRenamed]}"
-        },
-        {
-          "source": "{[$.input.granules[*].files[*].filename]}",
-          "destination": "{[$.payload.output.granules[*].files[*].filenameRenamed]}"
-        },
-        {
-          "source": "{[$.input.granules[*].files[*].filepath]}",
-          "destination": "{[$.payload.output.granules[*].files[*].filepathRenamed]}"
-        }
-      ]
-    }
-  },
-  "cumulus_meta": {
-    "message_source": "local",
-    "id": "id-1234"
-  },
-  "payload": {
-    "input": {
-       "granules":[
-          {
-             "version":"A",
-             "files":[
-                {
-                   "filename":"s3://cumulus-bucket/cumulus-object-A1",
-                   "filepath":"cumulus/path/A1"
-                },
-                {
-                   "filename":"s3://cumulus-bucket/cumulus-object-A2",
-                   "filepath":"cumulus/path/A2"
-                },
-                {
-                   "filename":"s3://cumulus-bucket/cumulus-object-A3",
-                   "filepath":"cumulus/path/A3"
-                }
-             ]
-          },
-          {
-             "version":"B",
-             "files":[
-                {
-                   "filename":"s3://cumulus-bucket/cumulus-object-B1",
-                   "filepath":"cumulus/path/B1"
-                },
-                {
-                   "filename":"s3://cumulus-bucket/cumulus-object-B2",
-                   "filepath":"cumulus/path/B2"
-                }
-             ]
-          }
-       ]
-    }
-  }
+   "task_config":{
+      "cumulus_message":{
+         "input":"{$.payload.input}",
+         "outputs":[
+            {
+               "source":"{[$.input.array1[*].array2[*].itemA]}",
+               "destination":"{[$.payload.output.array1[*].array2[*].newItemA]}"
+            },
+            {
+               "source":"{[$.input.array1[*].array2[*].itemB]}",
+               "destination":"{[$.payload.output.array1[*].pathInsertedForItemB.array2[*].newItemB]}"
+            }
+         ]
+      }
+   },
+   "cumulus_meta":{
+      "message_source":"local",
+      "id":"id-1234"
+   },
+   "payload":{
+      "input":{
+         "array1":[
+            {
+               "array2":[
+                  {
+                     "itemA":"11A",
+                     "itemB":"11B"
+                  },
+                  {
+                     "itemA":"12A",
+                     "itemB":"12B"
+                  },
+                  {
+                     "itemA":"13A",
+                     "itemB":"13B"
+                  }
+               ]
+            },
+            {
+               "array2":[
+                  {
+                     "itemA":"21A",
+                     "itemB":"21B"
+                  },
+                  {
+                     "itemA":"22A",
+                     "itemB":"22B"
+                  }
+               ]
+            }
+         ]
+      }
+   }
 }

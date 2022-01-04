@@ -6,36 +6,52 @@
    "exception":"None",
    "payload":{
       "output":{
-         "granules":[
+         "array1":[
             {
-               "files":[
+               "array2":[
                   {
-                     "filenameRenamed":"s3://cumulus-bucket/cumulus-object-A1",
-                     "filepathRenamed":"cumulus/path/A1"
+                     "newItemA":"11A"
                   },
                   {
-                     "filenameRenamed":"s3://cumulus-bucket/cumulus-object-A2",
-                     "filepathRenamed":"cumulus/path/A2"
+                     "newItemA":"12A"
                   },
                   {
-                     "filenameRenamed":"s3://cumulus-bucket/cumulus-object-A3",
-                     "filepathRenamed":"cumulus/path/A3"
+                     "newItemA":"13A"
                   }
                ],
-               "versionRenamed":"A"
+               "pathInsertedForItemB":{
+                  "array2":[
+                     {
+                        "newItemB":"11B"
+                     },
+                     {
+                        "newItemB":"12B"
+                     },
+                     {
+                        "newItemB":"13B"
+                     }
+                  ]
+               }
             },
             {
-               "files":[
+               "array2":[
                   {
-                     "filenameRenamed":"s3://cumulus-bucket/cumulus-object-B1",
-                     "filepathRenamed":"cumulus/path/B1"
+                     "newItemA":"21A"
                   },
                   {
-                     "filenameRenamed":"s3://cumulus-bucket/cumulus-object-B2",
-                     "filepathRenamed":"cumulus/path/B2"
+                     "newItemA":"22A"
                   }
                ],
-               "versionRenamed":"B"
+               "pathInsertedForItemB":{
+                  "array2":[
+                     {
+                        "newItemB":"21B"
+                     },
+                     {
+                        "newItemB":"22B"
+                     }
+                  ]
+               }
             }
          ]
       }
@@ -45,16 +61,12 @@
          "input":"{$.payload.input}",
          "outputs":[
             {
-               "destination":"{[$.payload.output.granules[*].versionRenamed]}",
-               "source":"{[$.input.granules[*].version]}"
+               "destination":"{[$.payload.output.array1[*].array2[*].newItemA]}",
+               "source":"{[$.input.array1[*].array2[*].itemA]}"
             },
             {
-               "destination":"{[$.payload.output.granules[*].files[*].filenameRenamed]}",
-               "source":"{[$.input.granules[*].files[*].filename]}"
-            },
-            {
-               "destination":"{[$.payload.output.granules[*].files[*].filepathRenamed]}",
-               "source":"{[$.input.granules[*].files[*].filepath]}"
+               "destination":"{[$.payload.output.array1[*].pathInsertedForItemB.array2[*].newItemB]}",
+               "source":"{[$.input.array1[*].array2[*].itemB]}"
             }
          ]
       }
