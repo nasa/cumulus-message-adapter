@@ -39,6 +39,9 @@ class JsonpathArrayTree:
     """
 
     def __init__(self, val="", node_idx=0, is_root=False):
+        """
+        Node initialization
+        """
         self.val = val
         if not is_root:
             self.val += "[" + str(node_idx) + "]"
@@ -53,7 +56,7 @@ class JsonpathArrayTree:
         return child
 
 
-def build_jspath_array_list(root, jsonpath_array_list, path, tree_level):
+def __build_jspath_array_list(root, jsonpath_array_list, path, tree_level):
     """
     Traverse the tree and
       get list of node values (which is the array components of the jsonpath)
@@ -68,7 +71,7 @@ def build_jspath_array_list(root, jsonpath_array_list, path, tree_level):
     if root.children:
         tree_level = tree_level + 1
         for child in root.children:
-            build_jspath_array_list(
+            __build_jspath_array_list(
                 child, jsonpath_array_list, path, tree_level
             )
     else:
@@ -79,12 +82,27 @@ def assign_json_path_values(
     source_message, source_jspath, message_for_update, dest_jspath, source_values
 ):
     """
-    * Assign (update or insert) a source_values to message based on jsonpath.
+    * Assign (update or insert) source_values as an array to message based on jsonpath.
     * Create the keys if dest_jspath doesn't already exist in the message. In this case, we
-    * support 'simple' jsonpath like $.path1.path2.path3....
-    * @param {dict} message_for_update The message to be updated
-    * @param {string} dest_jspath JSON path string
-    * @param {*} source_values Value to update to
+    *   support 'broader' jsonpath like $.path1.array1[*].path2...,
+    *   or $.path1.array1[2:6].path2...,
+    * The array lenghs in source jsonpath is evaluated from the source array,
+    *   and used to update/generate the destination message
+    * E.g., for a source jsonpath of "$.X[*].Y[*]" and a destination jsonpath of "$.A.B[*].C[*]",
+    *   if the array size is 2 for "$.X[*]", 3 for "$.X[0].Y[*]", and 6 for "$.X[1].Y[*]",
+    *   and if array "$.A.B[*]" (and "$.A.B[*].C[*]") don't exist in the destination message,
+    *       it will create array "$.A.B[*]" with size of 2,
+    *       and array "$.A.B[0].C[*]" with size of 3,
+    *       and array "$.A.B[1].C[0]" with size of 6
+    *   if array "$.A.B[*]" and "$.A.B[*].C[*]" already exist in destination message,
+    *       they will be directly updated, and no exception will be handled if the array size doesn't match
+    * Also note that "range indexing" is supported in source jsonpath (but not the destination)
+    * E.g., the source jsonpath in the above example can be "$.X[:2].Y[5:8]", "$.X[:2].Y[*]", or "$.X[*].Y[5:8]"
+    * @param {dict} source_message The source message used to get the array lengths (by parsing source_jspath)
+    * @param {dict} message_for_update The message used for update
+    * @param {string} source_jspath Souce JSON path string
+    * @param {string} dest_jspath Destination JSON path string
+    * @param {list} source_values List of values to update to
     * @return {*} updated message
     """
     message = deepcopy(message_for_update)
@@ -158,7 +176,7 @@ def assign_json_path_values(
     #    ['$', 'A.B[1], 'C[1]']]
     #
     jsonpath_array_list = []
-    build_jspath_array_list(root, jsonpath_array_list, [], tree_level = 0)
+    __build_jspath_array_list(root, jsonpath_array_list, [], tree_level = 0)
 
     # Update (or create) the destination jspath values
     #   for each path from the above list,
