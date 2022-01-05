@@ -90,44 +90,6 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
                     'replace': self.config_event_with_replace['cma']['event']['replace']}
         self.assertEqual(expected, result)
 
-    # load_nested_event tests
-    def test_returns_load_nested_event_local(self):
-        """
-        Test returns 'config', 'input' and 'messageConfig' in expected format
-        (workflow_config backwards compatible)
-        - 'input' in return value is from 'payload' in first argument object
-        - 'config' in return value is the task ($.cumulus_meta.task) configuration
-           with 'cumulus_message' excluded
-        - 'messageConfig' in return value is the cumulus_message.input of the task configuration
-        """
-
-        nested_event_local = {
-            "workflow_config": {
-                "Example": {
-                    "bar": "baz",
-                    "cumulus_message": {
-                        "input": "{$.payload.input}",
-                        "outputs": [{"source": "{$.input.anykey}",
-                                     "destination": "{$.payload.out}"}]
-                    }
-                }
-            },
-            "cumulus_meta": {"task": "Example", "message_source": "local", "id": "id-1234"},
-            "meta": {"foo": "bar"},
-            "payload": {"input": {"anykey": "anyvalue"}}
-        }
-
-        nested_event_local_return = {
-            'input': {'anykey': 'anyvalue'},
-            'config': {'bar': 'baz'},
-            'messageConfig': {
-                'input': '{$.payload.input}',
-                'outputs': [{'source': '{$.input.anykey}',
-                             'destination': '{$.payload.out}'}]}
-        }
-
-        result = self.cumulus_message_adapter.load_nested_event(nested_event_local, {})
-        assert result == nested_event_local_return
 
     # load_nested_event task_config tests
     def test_returns_load_nested_event_local_with_task_config(self):
@@ -163,7 +125,7 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
                              'destination': '{$.payload.out}'}]}
         }
 
-        result = self.cumulus_message_adapter.load_nested_event(nested_event_local, {})
+        result = self.cumulus_message_adapter.load_nested_event(nested_event_local)
         assert result == nested_event_local_return
 
     # assign_outputs tests
@@ -403,7 +365,7 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
         in_msg = json.loads(inp.read())
         out_msg = json.loads(out.read())
 
-        msg = self.cumulus_message_adapter.load_nested_event(in_msg, {})
+        msg = self.cumulus_message_adapter.load_nested_event(in_msg)
         message_config = msg.get('messageConfig')
         if 'messageConfig' in msg:
             del msg['messageConfig']
@@ -426,7 +388,7 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
         self.s3.Object(bucket_name, key_name).put(Body=json.dumps(datasource))
 
         remote_event = self.cumulus_message_adapter.load_and_update_remote_event(in_msg, {})
-        msg = self.cumulus_message_adapter.load_nested_event(remote_event, {})
+        msg = self.cumulus_message_adapter.load_nested_event(remote_event)
         message_config = msg.get('messageConfig')
         if 'messageConfig' in msg:
             del msg['messageConfig']
@@ -444,7 +406,7 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
         in_msg = json.loads(inp.read())
         out_msg = json.loads(out.read())
 
-        msg = self.cumulus_message_adapter.load_nested_event(in_msg, {})
+        msg = self.cumulus_message_adapter.load_nested_event(in_msg)
         message_config = msg.get('messageConfig')
         if 'messageConfig' in msg:
             del msg['messageConfig']
@@ -472,7 +434,7 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
         in_msg = json.loads(inp.read())
         out_msg = json.loads(out.read())
 
-        msg = self.cumulus_message_adapter.load_nested_event(in_msg, {})
+        msg = self.cumulus_message_adapter.load_nested_event(in_msg)
         message_config = msg.get('messageConfig')
         if 'messageConfig' in msg:
             del msg['messageConfig']
@@ -495,7 +457,7 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
         self.s3.Object(bucket_name, key_name).put(Body=json.dumps(datasource))
 
         remote_event = self.cumulus_message_adapter.load_and_update_remote_event(in_msg, {})
-        msg = self.cumulus_message_adapter.load_nested_event(remote_event, {})
+        msg = self.cumulus_message_adapter.load_nested_event(remote_event)
         message_config = msg.get('messageConfig')
         if 'messageConfig' in msg:
             del msg['messageConfig']
@@ -523,7 +485,7 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
         self.s3.Object(bucket_name, key_name).put(Body=json.dumps(datasource))
 
         remote_event = self.cumulus_message_adapter.load_and_update_remote_event(in_msg, {})
-        msg = self.cumulus_message_adapter.load_nested_event(remote_event, {})
+        msg = self.cumulus_message_adapter.load_nested_event(remote_event)
         message_config = msg.get('messageConfig')
         if 'messageConfig' in msg:
             del msg['messageConfig']
@@ -552,7 +514,7 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
         self.s3.Object(bucket_name, key_name).put(Body=json.dumps(datasource))
 
         remote_event = self.cumulus_message_adapter.load_and_update_remote_event(in_msg, {})
-        msg = self.cumulus_message_adapter.load_nested_event(remote_event, {})
+        msg = self.cumulus_message_adapter.load_nested_event(remote_event)
         message_config = msg.get('messageConfig')
         if 'messageConfig' in msg:
             del msg['messageConfig']
@@ -563,26 +525,22 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
         self.s3.Bucket(bucket_name).delete()
         self.assertEqual(result, out_msg)
 
-    @patch.object(message_adapter, 'get_current_sfn_task')
-    def test_sfn(self, get_current_sfn_task_function):
+    def test_sfn(self):
         """ test sfn.input.json """
-        get_current_sfn_task_function.return_value = "Example"
         inp = open(os.path.join(self.test_folder, 'sfn.input.json'), encoding='utf-8')
         out = open(os.path.join(self.test_folder, 'sfn.output.json'), encoding='utf-8')
         in_msg = json.loads(inp.read())
         out_msg = json.loads(out.read())
 
-        msg = self.cumulus_message_adapter.load_nested_event(in_msg, {})
+        msg = self.cumulus_message_adapter.load_nested_event(in_msg)
         message_config = msg.get('messageConfig')
         if 'messageConfig' in msg:
             del msg['messageConfig']
         result = self.cumulus_message_adapter.create_next_event(msg, in_msg, message_config)
         assert result == out_msg
 
-    @patch.object(message_adapter, 'get_current_sfn_task')
-    def test_context(self, get_current_sfn_task_function):
+    def test_context(self):
         """ test storing context metadata """
-        get_current_sfn_task_function.return_value = "Example"
         inp = open(os.path.join(self.test_folder, 'context.input.json'), encoding='utf-8')
         out = open(os.path.join(self.test_folder, 'context.output.json'), encoding='utf-8')
         ctx = open(os.path.join(self.context_folder, 'lambda-context.json'), encoding='utf-8')
@@ -591,23 +549,21 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
         context = json.loads(ctx.read())
 
         rem = self.cumulus_message_adapter.load_and_update_remote_event(in_msg, context)
-        msg = self.cumulus_message_adapter.load_nested_event(rem, context)
+        msg = self.cumulus_message_adapter.load_nested_event(rem)
         message_config = msg.get('messageConfig')
         if 'messageConfig' in msg:
             del msg['messageConfig']
         result = self.cumulus_message_adapter.create_next_event(msg, in_msg, message_config)
         assert result == out_msg
 
-    @patch.object(message_adapter, 'get_current_sfn_task')
-    def test_inline_template(self, get_current_sfn_task_function):
+    def test_inline_template(self):
         """ test inline_template.input.json """
-        get_current_sfn_task_function.return_value = "Example"
         inp = open(os.path.join(self.test_folder, 'inline_template.input.json'), encoding='utf-8')
         out = open(os.path.join(self.test_folder, 'inline_template.output.json'), encoding='utf-8')
         in_msg = json.loads(inp.read())
         out_msg = json.loads(out.read())
 
-        msg = self.cumulus_message_adapter.load_nested_event(in_msg, {})
+        msg = self.cumulus_message_adapter.load_nested_event(in_msg)
         message_config = msg.get('messageConfig')
         if 'messageConfig' in msg:
             del msg['messageConfig']
@@ -621,23 +577,21 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
         in_msg = json.loads(inp.read())
         out_msg = json.loads(out.read())
 
-        msg = self.cumulus_message_adapter.load_nested_event(in_msg, {})
+        msg = self.cumulus_message_adapter.load_nested_event(in_msg)
         message_config = msg.get('messageConfig')
         if 'messageConfig' in msg:
             del msg['messageConfig']
         result = self.cumulus_message_adapter.create_next_event(msg, in_msg, message_config)
         assert result == out_msg
 
-    @patch.object(message_adapter, 'get_current_sfn_task')
-    def test_cumulus_context(self, get_current_sfn_task_function):
+    def test_cumulus_context(self):
         """ test storing cumulus_context metadata """
-        get_current_sfn_task_function.return_value = "Example"
         inp = open(os.path.join(self.test_folder, 'cumulus_context.input.json'), encoding='utf-8')
         out = open(os.path.join(self.test_folder, 'cumulus_context.output.json'), encoding='utf-8')
         in_msg = json.loads(inp.read())
         out_msg = json.loads(out.read())
 
-        msg = self.cumulus_message_adapter.load_nested_event(in_msg, {})
+        msg = self.cumulus_message_adapter.load_nested_event(in_msg)
         message_config = msg.get('messageConfig')
         if 'messageConfig' in msg:
             del msg['messageConfig']
@@ -651,7 +605,7 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
         adapter = message_adapter.MessageAdapter(schemas)
         in_msg = json.loads(inp.read())
         in_msg["payload"] = {"hello": "world"}
-        msg = adapter.load_nested_event(in_msg, {})
+        msg = adapter.load_nested_event(in_msg)
         assert msg["input"]["hello"] == "world"
 
     def test_failing_input_jsonschema(self):
@@ -662,7 +616,7 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
         in_msg = json.loads(inp.read())
         in_msg["payload"] = {"hello": 1}
         try:
-            adapter.load_nested_event(in_msg, {})
+            adapter.load_nested_event(in_msg)
         except ValidationError as e:
             assert e.message == "input schema: 1 is not of type u'string'"
 
@@ -672,7 +626,7 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
         schemas = {'config': 'config.json'}
         adapter = message_adapter.MessageAdapter(schemas)
         in_msg = json.loads(inp.read())
-        msg = adapter.load_nested_event(in_msg, {})
+        msg = adapter.load_nested_event(in_msg)
         assert msg["config"]["inlinestr"] == 'prefixbarsuffix'
 
     def test_failing_config_jsonschema(self):
@@ -684,7 +638,7 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
         in_msg["task_config"]["boolean_option"] = '{$.meta.boolean_option}'
         in_msg["meta"]["boolean_option"] = "notgoingtowork"
         try:
-            adapter.load_nested_event(in_msg, {})
+            adapter.load_nested_event(in_msg)
         except ValidationError as e:
             assert e.message == "config schema: 'notgoingtowork' is not of type u'boolean'"
 
@@ -694,7 +648,7 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
         schemas = {'output': 'output.json'}
         adapter = message_adapter.MessageAdapter(schemas)
         in_msg = json.loads(inp.read())
-        msg = adapter.load_nested_event(in_msg, {})
+        msg = adapter.load_nested_event(in_msg)
         message_config = msg.get('messageConfig')
         handler_response = {"goodbye": "world"}
         result = adapter.create_next_event(handler_response, in_msg, message_config)
@@ -706,7 +660,7 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
         schemas = {'output': 'output.json'}
         adapter = message_adapter.MessageAdapter(schemas)
         in_msg = json.loads(inp.read())
-        msg = adapter.load_nested_event(in_msg, {})
+        msg = adapter.load_nested_event(in_msg)
         messageConfig = msg.get('messageConfig')
         handler_response = {"goodbye": 1}
         try:

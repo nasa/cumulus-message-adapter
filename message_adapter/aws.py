@@ -1,9 +1,6 @@
 """ Determines the correct AWS endpoint for AWS services """
 import os
-from boto3 import resource, client
-from botocore.config import Config
-
-from .error import write_error
+from boto3 import resource
 
 def localhost_s3_url():
     """ Returns configured LOCALSTACK_HOST url or default for localstack s3 """
@@ -27,46 +24,6 @@ def s3():
             verify=False
         )
     return resource('s3')
-
-
-def stepFn():
-    """Localstack doesn't support step functions. This method is an interim solution so we
-       don't make requests to the AWS API in testing."""
-    region = os.getenv('AWS_DEFAULT_REGION', 'us-east-1')
-    if ('CUMULUS_ENV' in os.environ) and (os.environ["CUMULUS_ENV"] == 'testing'):
-        return client(service_name='stepfunctions',
-                      endpoint_url=localhost_s3_url(), region_name=region)
-
-    config = Config(region_name=region, retries=dict(max_attempts=30))
-    return client('stepfunctions', config=config)
-
-
-def get_current_sfn_task(state_machine_arn, execution_name, arn):
-    """
-    * Given a state machine ARN, an execution name, and an optional Activity or Lambda ARN
-    * returns the most recent task name started for the given ARN in that execution,
-    * or if no ARN is supplied, the most recent task started.
-    *
-    * IMPORTANT! If no ARN is supplied, this message assumes that the most recently started
-    * execution is the desired execution. This WILL BREAK parallel executions, so always supply
-    * this if possible.
-    *
-    * @param {string} state_machine_arn The ARN of the state machine containing the execution
-    * @param {string} execution_name The name of the step function execution to look up
-    * @param {string} arn An ARN to an Activity or Lambda to find. See "IMPORTANT!"
-    * @returns {string} The name of the task being run
-    """
-    sfn = stepFn()
-    execution_arn = _get_sfn_execution_arn_by_name(state_machine_arn, execution_name)
-    write_error(f'Attempting to get execution history for {execution_arn}')
-    execution_history = sfn.get_execution_history(
-        executionArn=execution_arn,
-        maxResults=40,
-        reverseOrder=True
-    )
-    write_error(f'Completed getting execution history for {execution_arn}')
-    return _get_task_name_from_execution_history(execution_history, arn)
-
 
 def _get_sfn_execution_arn_by_name(state_machine_arn, execution_name):
     """

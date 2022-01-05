@@ -29,7 +29,7 @@ def callMessageAdapterFunction(functionName, allInput):
     if functionName == 'loadAndUpdateRemoteEvent':
         result = transformer.load_and_update_remote_event(event, context)
     elif functionName == 'loadNestedEvent':
-        result = transformer.load_nested_event(event, context)
+        result = transformer.load_nested_event(event)
     elif functionName == 'createNextEvent':
         handlerResponse = allInput['handler_response']
         if 'message_config' in allInput:
