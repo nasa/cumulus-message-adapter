@@ -263,4 +263,5 @@ class Test(unittest.TestCase):
             'functionVersion': '2',
         }
         self.transform_messages({'testcase': 'workflow_tasks_multiple', 'context': context})
-        self.transform_messages_streaming({'testcase': 'workflow_tasks_multiple', 'context': context})
+        self.transform_messages_streaming(
+            {'testcase': 'workflow_tasks_multiple', 'context': context})
