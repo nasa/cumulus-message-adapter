@@ -210,7 +210,7 @@ class Test(unittest.TestCase):
             'output': 'schemas/examples-messages-no-config.output.json',
         }
         self.transform_messages({ 'testcase': 'basic_no_config', 'schemas': schemas })
-        self.transform_messages_streaming({ 'testcase': 'basic_no_config'})
+        self.transform_messages_streaming({ 'testcase': 'basic_no_config', 'schemas': schemas })
 
     def test_exception(self):
         """ test remote message with exception """

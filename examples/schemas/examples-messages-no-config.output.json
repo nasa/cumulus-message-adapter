@@ -2,9 +2,6 @@
     "properties": {
       "input": {
         "type": "object"
-      },
-      "anykey": {
-        "type": "string"
       }
     },
     "additionalProperties": false
