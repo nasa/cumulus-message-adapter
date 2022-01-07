@@ -90,7 +90,7 @@ class Test(unittest.TestCase):
         """
 
         schemas = {
-            'input': 'schemas/examples-messages.output.json',
+            'input': 'schemas/examples-messages.input.json',
             'output': 'schemas/examples-messages.output.json',
             'config': 'schemas/examples-messages.config.json'
         }
@@ -145,7 +145,7 @@ class Test(unittest.TestCase):
         """
 
         schemas = {
-            'input': 'schemas/examples-messages.output.json',
+            'input': 'schemas/examples-messages.input.json',
             'output': 'schemas/examples-messages.output.json',
             'config': 'schemas/examples-messages.config.json'
         }
@@ -206,7 +206,7 @@ class Test(unittest.TestCase):
     def test_basic_no_config(self):
         """ test basic no config message """
         schemas = {
-            'input': 'schemas/examples-messages.output.json',
+            'input': 'schemas/examples-messages.input.json',
             'output': 'schemas/examples-messages-no-config.output.json',
         }
         self.transform_messages({ 'testcase': 'basic_no_config', 'schemas': schemas })
