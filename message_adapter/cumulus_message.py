@@ -20,7 +20,7 @@ def load_config(event):
 
     if 'task_config' in event:
         return event['task_config']
-    return None
+    return {}
 
 def load_remote_event(event):
     """

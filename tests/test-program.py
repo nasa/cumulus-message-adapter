@@ -84,23 +84,26 @@ class Test(unittest.TestCase):
         p_stdin.write('<EOC>\n'.encode('utf-8'))
         p_stdin.flush()
 
-    def transform_messages_streaming(self, testcase, context=None):
+    def transform_messages_streaming(self, params):
         """
         Given a testcase, run 'streaming' interface against input and check if outputs are correct
         """
-        if context is None:
-            context = {}
+
+        schemas = {
+            'input': 'schemas/examples-messages.input.json',
+            'output': 'schemas/examples-messages.output.json',
+            'config': 'schemas/examples-messages.config.json'
+        }
+        context = params.get('context', {})
+        schemas = params.get('schemas', schemas)
+        testcase = params['testcase']
 
         inp = open(os.path.join(self.test_folder, f'{testcase}.input.json'), encoding='utf-8')
         in_msg = json.loads(inp.read())
         s3meta = None
         if 'replace' in in_msg:
             s3meta = self.place_remote_message(in_msg)
-        schemas = {
-            'input': 'schemas/examples-messages.output.json',
-            'output': 'schemas/examples-messages.output.json',
-            'config': 'schemas/examples-messages.config.json'
-        }
+
         cma_input = {'event': in_msg, 'context': context, 'schemas': schemas}
         current_directory = os.getcwd()
 
@@ -135,24 +138,27 @@ class Test(unittest.TestCase):
         if s3meta is not None:
             self.clean_up_remote_message(s3meta['bucket_name'], s3meta['key_name'])
 
-    def transform_messages(self, testcase, context=None):
+    def transform_messages(self, params):
         """
         transform cumulus messages, and check if the command return status and outputs are correct.
         Each test case (such as 'basic') has its corresponding example messages and schemas.
         """
-        if context is None:
-            context = {}
+
+        schemas = {
+            'input': 'schemas/examples-messages.input.json',
+            'output': 'schemas/examples-messages.output.json',
+            'config': 'schemas/examples-messages.config.json'
+        }
+        context = params.get('context', None)
+        schemas = params.get('schemas', schemas)
+        testcase = params['testcase']
 
         inp = open(os.path.join(self.test_folder, f'{testcase}.input.json'), encoding='utf-8')
         in_msg = json.loads(inp.read())
         s3meta = None
         if 'replace' in in_msg:
             s3meta = self.place_remote_message(in_msg)
-        schemas = {
-            'input': 'schemas/examples-messages.output.json',
-            'output': 'schemas/examples-messages.output.json',
-            'config': 'schemas/examples-messages.config.json'
-        }
+
 
         all_input = {'event': in_msg, 'context': context, 'schemas': schemas}
         current_directory = os.getcwd()
@@ -194,38 +200,47 @@ class Test(unittest.TestCase):
 
     def test_basic(self):
         """ test basic message """
-        self.transform_messages('basic')
-        self.transform_messages_streaming('basic')
+        self.transform_messages({ 'testcase': 'basic'})
+        self.transform_messages_streaming({ 'testcase': 'basic'})
+
+    def test_basic_no_config(self):
+        """ test basic no config message """
+        schemas = {
+            'input': 'schemas/examples-messages.input.json',
+            'output': 'schemas/examples-messages-no-config.output.json',
+        }
+        self.transform_messages({ 'testcase': 'basic_no_config', 'schemas': schemas })
+        self.transform_messages_streaming({ 'testcase': 'basic_no_config', 'schemas': schemas })
 
     def test_exception(self):
         """ test remote message with exception """
-        self.transform_messages('exception')
-        self.transform_messages_streaming('exception')
+        self.transform_messages({ 'testcase': 'exception'})
+        self.transform_messages_streaming({ 'testcase': 'exception'})
 
     def test_jsonpath(self):
         """ test jsonpath message """
-        self.transform_messages('jsonpath')
-        self.transform_messages_streaming('jsonpath')
+        self.transform_messages({ 'testcase': 'jsonpath'})
+        self.transform_messages_streaming({ 'testcase': 'jsonpath'})
 
     def test_meta(self):
         """ test meta message """
-        self.transform_messages('meta')
-        self.transform_messages_streaming('meta')
+        self.transform_messages({ 'testcase': 'meta'})
+        self.transform_messages_streaming({ 'testcase': 'meta'})
 
     def test_remote(self):
         """ test remote message """
-        self.transform_messages('remote')
-        self.transform_messages_streaming('remote')
+        self.transform_messages({ 'testcase': 'remote'})
+        self.transform_messages_streaming({ 'testcase': 'remote'})
 
     def test_templates(self):
         """ test templates message """
-        self.transform_messages('templates')
-        self.transform_messages_streaming('templates')
+        self.transform_messages({ 'testcase': 'templates'})
+        self.transform_messages_streaming({ 'testcase': 'templates'})
 
     def test_validation_failure_case(self):
         """ test validation failure case """
         try:
-            self.transform_messages("invalidinput")
+            self.transform_messages({ 'testcase': 'invalidinput'})
         except AssertionError:
             return
         assert False
@@ -237,8 +252,8 @@ class Test(unittest.TestCase):
             'invokedFunctionArn': 'fakearn',
             'functionVersion': '1',
         }
-        self.transform_messages('workflow_tasks', context)
-        self.transform_messages_streaming('workflow_tasks', context)
+        self.transform_messages({'testcase': 'workflow_tasks', 'context': context})
+        self.transform_messages_streaming({'testcase': 'workflow_tasks', 'context': context})
 
     def test_multiple_workflow_tasks_meta(self):
         """ test multiple meta.workflow_task entries"""
@@ -247,5 +262,6 @@ class Test(unittest.TestCase):
             'invokedFunctionArn': 'fakearn2',
             'functionVersion': '2',
         }
-        self.transform_messages('workflow_tasks_multiple', context)
-        self.transform_messages_streaming('workflow_tasks_multiple', context)
+        self.transform_messages({'testcase': 'workflow_tasks_multiple', 'context': context})
+        self.transform_messages_streaming(
+            {'testcase': 'workflow_tasks_multiple', 'context': context})

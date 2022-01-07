@@ -6,6 +6,13 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [v2.0.1] 2022-01-07
+
+### Fixed
+
+- **CUMULUS-2751**
+  - Fix regression in 2.0.0 that caused tasks without `task_config` defined cause CMA to fail
+
 ## [v2.0.0] 2021-12-17
 
 ### BREAKING CHANGES
