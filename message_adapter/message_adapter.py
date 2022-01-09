@@ -101,8 +101,8 @@ class MessageAdapter:
         final_payload = resolve_input(event, config)
         response = {'input': final_payload}
         self.__validate_json(final_payload, 'input')
-        self.__validate_json(final_config, 'config')
-        if final_config is not None:
+        if final_config:
+            self.__validate_json(final_config, 'config')
             response['config'] = final_config
         if 'cumulus_message' in config:
             response['messageConfig'] = config['cumulus_message']
