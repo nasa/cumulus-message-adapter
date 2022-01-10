@@ -103,6 +103,8 @@ class MessageAdapter:
         if final_config:
             self.__validate_json(final_config, 'config')
             response['config'] = final_config
+        else:
+            response['config'] = {}
         if 'cumulus_message' in config:
             response['messageConfig'] = config['cumulus_message']
 
