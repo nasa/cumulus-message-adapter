@@ -2,6 +2,9 @@
     "properties": {
       "input": {
         "type": "object"
+      },
+      "config": {
+        "type": "object"
       }
     },
     "additionalProperties": false

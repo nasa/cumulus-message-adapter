@@ -7,7 +7,8 @@
       "foo": "bar"
     },
     "payload": {
-      "input": { "anykey": "anyvalue" }
-    },
+      "input": { "anykey": "anyvalue" },
+      "config": {}
+    }, 
     "exception": "None"
   }
