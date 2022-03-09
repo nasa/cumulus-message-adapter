@@ -5,9 +5,9 @@ from boto3 import resource
 def localhost_s3_url():
     """ Returns configured LOCALSTACK_HOST url or default for localstack s3 """
     if 'LOCALSTACK_HOST' in os.environ:
-        s3_url = f"http://{os.environ['LOCALSTACK_HOST']}:4572"
+        s3_url = f"http://{os.environ['LOCALSTACK_HOST']}:4566"
     else:
-        s3_url = 'http://localhost:4572'
+        s3_url = 'http://localhost:4566'
     return s3_url
 
 
