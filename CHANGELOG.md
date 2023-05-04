@@ -7,9 +7,17 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [v2.0.3] 2023-05-04
+
+### Updated
+
+- **CUMULUS_3270**
+
+  - Updated Python version/image to Python 3.10. Updated SDK boto3 version.
+
 ## [v2.0.2] 2022-01-10
 
-## Fixed
+### Fixed
 
 - **CUMULUS-2751**
 
