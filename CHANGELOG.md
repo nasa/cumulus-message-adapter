@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - **CUMULUS_3270**
 
-  - Updated Python version/image to Python 3.10. Updated SDK boto3 version.
+  - Updated SDK boto3 version to support new Python runtime versions.
 
 ## [v2.0.2] 2022-01-10
 
