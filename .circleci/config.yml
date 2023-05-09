@@ -4,27 +4,6 @@
 #
 version: 2
 references:
-  container_python36: &container_python36
-    docker:
-      - image: circleci/python:3.6.2
-      - name: localstack
-        image: localstack/localstack:0.11.5
-    working_directory: ~/repo
-
-  restore_cache_python36: &restore_cache_python36
-    restore_cache:
-      keys:
-        - v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
-        # fallback to using the latest cache if no exact match is found
-        - v1-dependencies-
-
-  save_cache_python36: &save_cache_python36
-    save_cache:
-      paths:
-        - ~/venv36
-      key: v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
-
-
   container_python38: &container_python38
     docker:
       - image: circleci/python:3.8.1
@@ -46,30 +25,6 @@ references:
       key: v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
 
 jobs:
-  build_python36:
-    <<: *container_python36
-    steps:
-      - checkout
-      - *restore_cache_python36
-      - run:
-          name: install dependencies
-          command: |
-            pip install --user virtualenv
-            ~/.local/bin/virtualenv ~/venv36
-            . ~/venv36/bin/activate
-            pip install -r requirements.txt
-            pip install -r requirements-dev.txt
-            pip install .
-      - *save_cache_python36
-      - run:
-          name: run tests
-          environment:
-            LOCALSTACK_HOST: localstack
-          command: |
-            . ~/venv36/bin/activate
-            pylint_runner
-            CUMULUS_ENV=testing nosetests -v -s
-
   build_python38:
     <<: *container_python38
     steps:
@@ -159,7 +114,6 @@ workflows:
   version: 2
   build_test_publish:
     jobs:
-      - build_python36
       - build_python38
       - publish_github:
           requires:
