@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - **CUMULUS_3270**
 
   - Updated SDK boto3 version to support new Python runtime versions.
+  - Removed EOL Python 3.6 build jobs.
+  - Fixed some pylint errors from Too Broad Exceptions.
 
 ## [v2.0.2] 2022-01-10
 
