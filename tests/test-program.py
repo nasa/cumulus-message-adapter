@@ -71,7 +71,7 @@ class Test(unittest.TestCase):
                 eoc_count += 1
                 return json.loads(buffer)
         err_string = ''.join([x.decode('utf-8') for x in stream_process.stderr.readlines()])
-        raise IOException(err_string)
+        raise OSError(err_string)
 
     def write_streaming_input(self, command, proc_input, p_stdin):
         """
