@@ -1,0 +1,12 @@
+{
+    "cumulus_meta": {
+      "message_source": "local",
+      "id": "id-1234"
+    },
+    "meta": {
+      "foo": "bar"
+    },
+    "payload": {
+        "anykey": "anyvalue"
+    }
+}
