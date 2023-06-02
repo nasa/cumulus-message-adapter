@@ -30,7 +30,7 @@ jobs:
     <<: *container_python310
     steps:
       - checkout
-      - *restore_cache_python310
+      # - *restore_cache_python310
       - run:
           name: install dependencies
           command: |
