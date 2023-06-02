@@ -32,11 +32,9 @@ jobs:
       - checkout
       - *restore_cache_python310
       - run:
-          name: Install virtualenv
-          command: pip install --user virtualenv
-      - run:
           name: install dependencies
           command: |
+            pip install --user virtualenv
             ~/.local/bin/virtualenv ~/venv310
             . ~/venv310/bin/activate
             pip install -r requirements.txt
