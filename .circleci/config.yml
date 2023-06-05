@@ -30,11 +30,12 @@ jobs:
     <<: *container_python310
     steps:
       - checkout
-      # - *restore_cache_python310
+      - *restore_cache_python310
       - run:
           name: install dependencies
           command: |
             pip install --user virtualenv
+            find .
             ~/.local/bin/virtualenv ~/venv310
             . ~/venv310/bin/activate
             pip install -r requirements.txt
