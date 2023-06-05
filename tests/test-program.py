@@ -13,7 +13,6 @@ from message_adapter import aws
 
 class Test(unittest.TestCase):
     # pylint: disable=attribute-defined-outside-init
-    # pylint: disable=no-self-use
     # pylint: disable=too-many-locals
 
     """ Test class """
@@ -72,7 +71,7 @@ class Test(unittest.TestCase):
                 eoc_count += 1
                 return json.loads(buffer)
         err_string = ''.join([x.decode('utf-8') for x in stream_process.stderr.readlines()])
-        raise Exception(err_string)
+        raise RuntimeError(err_string)
 
     def write_streaming_input(self, command, proc_input, p_stdin):
         """

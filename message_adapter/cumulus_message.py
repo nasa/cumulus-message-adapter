@@ -41,7 +41,7 @@ def load_remote_event(event):
             remote_event = json.loads(data['Body'].read().decode('utf-8'))
             replacement_targets = parsed_json_path.find(event)
             if not replacement_targets or len(replacement_targets) != 1:
-                raise Exception(f'Remote event configuration target {target_json_path} invalid')
+                raise ValueError(f'Remote event configuration target {target_json_path} invalid')
             try:
                 replacement_targets[0].value.update(remote_event)
             except AttributeError:
@@ -161,7 +161,7 @@ def store_remote_response(incoming_event, default_max_size, config_keys):
     cumulus_meta = deepcopy(event['cumulus_meta'])
     replacement_data = replace_config_values['parsed_json_path'].find(event)
     if len(replacement_data) != 1:
-        raise Exception(f'JSON path invalid: {replace_config_values["parsed_json_path"]}')
+        raise ValueError(f'JSON path invalid: {replace_config_values["parsed_json_path"]}')
     replacement_data = replacement_data[0]
 
     estimated_data_size = len(json.dumps(replacement_data.value).encode(('utf-8')))
