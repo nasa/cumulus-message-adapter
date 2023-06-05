@@ -34,8 +34,7 @@ jobs:
       - run:
           name: install dependencies
           command: |
-            pip install --user virtualenv
-            ~/.local/bin/virtualenv ~/venv310
+            virtualenv ~/venv310
             . ~/venv310/bin/activate
             pip install -r requirements.txt
             pip install -r requirements-dev.txt
