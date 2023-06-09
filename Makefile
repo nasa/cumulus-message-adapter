@@ -18,10 +18,11 @@ requirements: dist requirements.txt
 packaged_runtime: requirements
 	pip install -r requirements-dev.txt
 	cp __main__.py ./dist/
-	pyinstaller --distpath dist_package --clean -n cma ./dist/__main__.py
+	pyinstaller --distpath dist_package --add-binary /usr/lib64/libcrypt.so.1:. --clean -n cma ./dist/__main__.py
 
 cumulus-message-adapter.zip: requirements packaged_runtime
 	cp __main__.py ./dist/
 	cp -R message_adapter ./dist/
-	cp -R ./dist_package/cma/* ./dist/cma_bin
-	(cd dist && zip -r -9 ../cumulus-message-adapter.zip .)
+	cp -R ./dist_package/cma/* ./dist/
+	ln -s ../cma ./dist/cma_bin/cma
+	(cd dist && zip --symlinks -r -9 ../cumulus-message-adapter.zip .)
