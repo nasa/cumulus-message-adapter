@@ -4,5 +4,5 @@ pylint>=1.8.2
 flake8~=3.7.9
 autopep8~=1.5.0
 pylint_runner~=0.5.4
-jsonschema==2.6.0
+jsonschema==4.17.3
 pyinstaller==5.10.1
