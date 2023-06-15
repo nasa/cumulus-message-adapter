@@ -6,7 +6,7 @@ version: 2
 references:
   container_python310: &container_python310
     docker:
-      - image: circleci/python:3.10.11
+      - image: cimg/python:3.10.11
       - name: localstack
         image: localstack/localstack:2.0.2
     working_directory: ~/repo
@@ -33,7 +33,7 @@ jobs:
       - run:
           name: install dependencies
           command: |
-            /usr/local/bin/virtualenv ~/venv310
+            virtualenv ~/venv310
             . ~/venv310/bin/activate
             pip install -r requirements.txt
             pip install -r requirements-dev.txt
