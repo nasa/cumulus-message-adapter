@@ -13,6 +13,7 @@ from message_adapter import aws
 
 class Test(unittest.TestCase):
     # pylint: disable=attribute-defined-outside-init
+    # pylint: disable=useless-option-value
     # pylint: disable=no-self-use
     # pylint: disable=too-many-locals
 
