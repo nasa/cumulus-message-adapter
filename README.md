@@ -46,13 +46,13 @@ Running tests requires [localstack](https://github.com/localstack/localstack).
 Tests only require localstack running S3, which can be initiated with the following command:
 
 ```shell
-SERVICES=s3 localstack start
+EAGER_SERVICE_LOADING=1 SERVICES=s3 localstack start
 ```
 
 And then you can check tests pass with the following nosetests command:
 
 ```shell
-CUMULUS_ENV=testing nosetests -v -s
+CUMULUS_ENV=testing nose2 -v
 ```
 
 ### Linting
