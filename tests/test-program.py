@@ -13,7 +13,6 @@ from message_adapter import aws
 
 class Test(unittest.TestCase):
     # pylint: disable=attribute-defined-outside-init
-    # pylint: disable=no-self-use
     # pylint: disable=too-many-locals
 
     """ Test class """
@@ -42,7 +41,8 @@ class Test(unittest.TestCase):
         self.s3.Bucket(bucket_name).delete_objects(Delete=delete_objects_object)
         self.s3.Bucket(bucket_name).delete()
 
-    def execute_command(self, cmd, input_message):
+    @staticmethod
+    def execute_command(cmd, input_message):
         """
         execute an external command command, and returns command exit status, stdout and stderr
         """
@@ -55,7 +55,8 @@ class Test(unittest.TestCase):
             print(errorstr.decode())  # pylint: disable=superfluous-parens
         return exitstatus, outstr.decode(), errorstr.decode()
 
-    def read_streaming_output(self, stream_process):
+    @staticmethod
+    def read_streaming_output(stream_process):
         """
         Given a subprocess, read stdout from that process until <EOC> line recieved
         """
@@ -72,9 +73,10 @@ class Test(unittest.TestCase):
                 eoc_count += 1
                 return json.loads(buffer)
         err_string = ''.join([x.decode('utf-8') for x in stream_process.stderr.readlines()])
-        raise Exception(err_string)
+        raise ValueError(err_string)
 
-    def write_streaming_input(self, command, proc_input, p_stdin):
+    @staticmethod
+    def write_streaming_input(command, proc_input, p_stdin):
         """
         Given a stdin pipe for a subprocess, write command/proc input to CMA subprocess
         """
