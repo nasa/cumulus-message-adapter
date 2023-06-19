@@ -11,6 +11,11 @@ references:
         image: localstack/localstack:2.0.2
     working_directory: ~/repo
 
+  container_lambda_python310: &container_lambda_python310
+    docker:
+      - image: aws/aws-lambda-python:3.10
+    working_directory: ~/repo
+
   restore_cache_python310: &restore_cache_python310
     restore_cache:
       keys:
@@ -49,7 +54,7 @@ jobs:
             CUMULUS_ENV=testing nose2 -v
 
   publish_github:
-    <<: *container_python310
+    <<: *container_lambda_python310
     steps:
       - checkout
       - add_ssh_keys
@@ -78,7 +83,7 @@ jobs:
               pip install --user virtualenv
               ~/.local/bin/virtualenv ~/venv310
               . ~/venv310/bin/activate
-              sudo pip install -r requirements.txt
+              sudo pip install .
               make clean
               make $ZIPFILENAME
               if [ -f $ZIPFILENAME ]; then
@@ -96,7 +101,7 @@ jobs:
             fi
 
   publish_pypi:
-    <<: *container_python310
+    <<: *container_lambda_python310
     steps:
       - checkout
       - *restore_cache_python310
