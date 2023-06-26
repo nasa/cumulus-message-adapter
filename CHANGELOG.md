@@ -5,6 +5,13 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
+## [Unreleased]
+
+## Updated
+
+- removed extraneous dependencies from requests.txt
+  - typed-ast
+  - six (remains as a subdependency)
 
 
 ## [v2.0.3] 2023-05-04
