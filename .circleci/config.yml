@@ -107,6 +107,7 @@ jobs:
             ZIPFILENAME: cumulus-message-adapter.zip
           command: |
             mkdir -p ~/.ssh
+            cp -r /home/circleci/.ssh/* ~/.ssh
             ssh-keyscan github.com >> ~/.ssh/known_hosts
             VERSION=`awk -F\' '{print $2,$4}' message_adapter/version.py`
             # Only tag and release if the version doesn't already exist
