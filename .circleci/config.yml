@@ -4,53 +4,98 @@
 #
 version: 2
 references:
-  container_python310: &container_python310
+  container_python36: &container_python36
     docker:
-      - image: cimg/python:3.10.11
+      - image: circleci/python:3.6.2
       - name: localstack
-        image: localstack/localstack:2.0.2
+        image: localstack/localstack:0.11.5
     working_directory: ~/repo
 
-  restore_cache_python310: &restore_cache_python310
+  restore_cache_python36: &restore_cache_python36
     restore_cache:
       keys:
         - v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
         # fallback to using the latest cache if no exact match is found
         - v1-dependencies-
 
-  save_cache_python310: &save_cache_python310
+  save_cache_python36: &save_cache_python36
     save_cache:
       paths:
-        - ~/venv310
+        - ~/venv36
+      key: v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
+
+
+  container_python38: &container_python38
+    docker:
+      - image: circleci/python:3.8.1
+      - name: localstack
+        image: localstack/localstack:0.11.5
+    working_directory: ~/repo
+
+  restore_cache_python38: &restore_cache_python38
+    restore_cache:
+      keys:
+        - v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
+        # fallback to using the latest cache if no exact match is found
+        - v1-dependencies-
+
+  save_cache_python38: &save_cache_python38
+    save_cache:
+      paths:
+        - ~/venv38
       key: v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
 
 
 jobs:
-  build_python310:
-    <<: *container_python310
+  build_python36:
+    <<: *container_python36
     steps:
       - checkout
-      - *restore_cache_python310
+      - *restore_cache_python36
       - run:
           name: install dependencies
           command: |
-            virtualenv ~/venv310
-            . ~/venv310/bin/activate
+            pip install --user virtualenv
+            ~/.local/bin/virtualenv ~/venv36
+            . ~/venv36/bin/activate
             pip install -r requirements.txt
             pip install -r requirements-dev.txt
             pip install .
-      - *save_cache_python310
+      - *save_cache_python36
       - run:
           name: run tests
           environment:
             LOCALSTACK_HOST: localstack
           command: |
-            . ~/venv310/bin/activate
+            . ~/venv36/bin/activate
             pylint_runner
-            CUMULUS_ENV=testing nose2 -v
+            CUMULUS_ENV=testing nosetests -v -s
+
+  build_python38:
+    <<: *container_python38
+    steps:
+      - checkout
+      - *restore_cache_python38
+      - run:
+          name: install dependencies
+          command: |
+            /usr/local/bin/virtualenv ~/venv38
+            . ~/venv38/bin/activate
+            pip install -r requirements.txt
+            pip install -r requirements-dev.txt
+            pip install .
+      - *save_cache_python38
+      - run:
+          name: run tests
+          environment:
+            LOCALSTACK_HOST: localstack
+          command: |
+            . ~/venv38/bin/activate
+            pylint_runner
+            CUMULUS_ENV=testing nosetests -v -s
 
   publish_github:
-    <<: *container_python310
+    <<: *container_python36
     steps:
       - checkout
       - add_ssh_keys
@@ -77,8 +122,8 @@ jobs:
                   --data $CREATE_RELEASE_REQUEST_BODY | jq .
               echo "Building ${ZIPFILENAME}"
               pip install --user virtualenv
-              ~/.local/bin/virtualenv ~/venv310
-              . ~/venv310/bin/activate
+              ~/.local/bin/virtualenv ~/venv36
+              . ~/venv36/bin/activate
               sudo pip install -r requirements.txt
               make clean
               make $ZIPFILENAME
@@ -97,16 +142,16 @@ jobs:
             fi
 
   publish_pypi:
-    <<: *container_python310
+    <<: *container_python36
     steps:
       - checkout
-      - *restore_cache_python310
+      - *restore_cache_python36
       - run:
           name: Deploy to PyPi
           command: |
             pip install --user virtualenv
-            ~/.local/bin/virtualenv ~/venv310
-            . ~/venv310/bin/activate
+            ~/.local/bin/virtualenv ~/venv36
+            . ~/venv36/bin/activate
             pip install twine
             python setup.py sdist
             twine upload --skip-existing --username "${PYPI_USER}" --password "${PYPI_PASS}" dist/*
@@ -115,10 +160,12 @@ workflows:
   version: 2
   build_test_publish:
     jobs:
-      - build_python310
+      - build_python36
+      - build_python38
       - publish_github:
           requires:
-            - build_python310
+            - build_python36
+            - build_python38
           filters:
             branches:
               only: master

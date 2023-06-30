@@ -73,7 +73,7 @@ class Test(unittest.TestCase):
                 eoc_count += 1
                 return json.loads(buffer)
         err_string = ''.join([x.decode('utf-8') for x in stream_process.stderr.readlines()])
-        raise RuntimeError(err_string)
+        raise ValueError(err_string)
 
     @staticmethod
     def write_streaming_input(command, proc_input, p_stdin):
