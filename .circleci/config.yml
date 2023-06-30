@@ -74,31 +74,31 @@ jobs:
               git tag $VERSION
               echo "Pushing tag ${VERSION}"
               git push origin $VERSION
-            #   # strip white space from create release request body
-            #   CREATE_RELEASE_REQUEST_BODY=$(echo '{"tag_name": "'$VERSION'", "name": "'$VERSION'"}' | tr -d '[:space:]')
-            #   echo "Creating release for tag ${VERSION}"
-            #   curl -X POST -u cumulusgit:$CUMULUSGIT_GITHUB_API_ACCESS_TOKEN \
-            #       $GIT_API_URL/$GIT_PATH/releases \
-            #       --data $CREATE_RELEASE_REQUEST_BODY | jq .
-            #   echo "Building ${ZIPFILENAME}"
-            #   pip install --user virtualenv
-            #   ~/.local/bin/virtualenv ~/venv310
-            #   . ~/venv310/bin/activate
-            #   sudo pip install .
-            #   make clean
-            #   make $ZIPFILENAME
-            #   if [ -f $ZIPFILENAME ]; then
-            #     UPLOAD_URL_TEMPLATE=$(curl $GIT_API_URL/$GIT_PATH/releases/tags/$VERSION | jq '.upload_url' --raw-output)
-            #     UPLOAD_URL=${UPLOAD_URL_TEMPLATE//{?name,label\}/?name=$ZIPFILENAME}
-            #     echo "Uploading release to ${UPLOAD_URL}"
-            #     curl -X POST -u cumulusgit:$CUMULUSGIT_GITHUB_API_ACCESS_TOKEN \
-            #       -H "Content-Type: application/zip" \
-            #       $UPLOAD_URL \
-            #       --data-binary @./$ZIPFILENAME | jq .
-            #   else
-            #      echo "$ZIPFILENAME does not exist."
-            #      exit 1
-            #   fi
+              # strip white space from create release request body
+              CREATE_RELEASE_REQUEST_BODY=$(echo '{"tag_name": "'$VERSION'", "name": "'$VERSION'"}' | tr -d '[:space:]')
+              echo "Creating release for tag ${VERSION}"
+              curl -X POST -u cumulusgit:$CUMULUSGIT_GITHUB_API_ACCESS_TOKEN \
+                  $GIT_API_URL/$GIT_PATH/releases \
+                  --data $CREATE_RELEASE_REQUEST_BODY | jq .
+              echo "Building ${ZIPFILENAME}"
+              pip install --user virtualenv
+              ~/.local/bin/virtualenv ~/venv310
+              . ~/venv310/bin/activate
+              sudo pip install .
+              make clean
+              make $ZIPFILENAME
+              if [ -f $ZIPFILENAME ]; then
+                UPLOAD_URL_TEMPLATE=$(curl $GIT_API_URL/$GIT_PATH/releases/tags/$VERSION | jq '.upload_url' --raw-output)
+                UPLOAD_URL=${UPLOAD_URL_TEMPLATE//{?name,label\}/?name=$ZIPFILENAME}
+                echo "Uploading release to ${UPLOAD_URL}"
+                curl -X POST -u cumulusgit:$CUMULUSGIT_GITHUB_API_ACCESS_TOKEN \
+                  -H "Content-Type: application/zip" \
+                  $UPLOAD_URL \
+                  --data-binary @./$ZIPFILENAME | jq .
+              else
+                 echo "$ZIPFILENAME does not exist."
+                 exit 1
+              fi
             fi
 
   publish_pypi:
