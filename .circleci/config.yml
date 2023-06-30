@@ -13,7 +13,7 @@ references:
 
   container_lambda_python310: &container_lambda_python310
     docker:
-      - image: aws/aws-lambda-python:3.10
+      - image: amazon/aws-lambda-python:3.10
     working_directory: ~/repo
 
   restore_cache_python310: &restore_cache_python310
