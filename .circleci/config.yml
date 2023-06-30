@@ -68,12 +68,12 @@ jobs:
             yum update && yum install -y openssh-clients git curl make jq
             mkdir -p ~/.ssh
             ssh-keyscan github.com >> ~/.ssh/known_hosts
-            # VERSION=`awk -F\' '{print $2,$4}' message_adapter/version.py`
-            # # Only tag and release if the version doesn't already exist
-            # if [ -z $(git ls-remote --tags origin | grep $VERSION) ]; then
-            #   git tag $VERSION
-            #   echo "Pushing tag ${VERSION}"
-            #   git push origin $VERSION
+            VERSION=`awk -F\' '{print $2,$4}' message_adapter/version.py`
+            # Only tag and release if the version doesn't already exist
+            if [ -z $(git ls-remote --tags origin | grep $VERSION) ]; then
+              git tag $VERSION
+              echo "Pushing tag ${VERSION}"
+              git push origin $VERSION
             #   # strip white space from create release request body
             #   CREATE_RELEASE_REQUEST_BODY=$(echo '{"tag_name": "'$VERSION'", "name": "'$VERSION'"}' | tr -d '[:space:]')
             #   echo "Creating release for tag ${VERSION}"
@@ -99,7 +99,7 @@ jobs:
             #      echo "$ZIPFILENAME does not exist."
             #      exit 1
             #   fi
-            # fi
+            fi
 
   publish_pypi:
     <<: *container_lambda_python310
