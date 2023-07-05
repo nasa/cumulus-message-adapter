@@ -4,98 +4,57 @@
 #
 version: 2
 references:
-  container_python36: &container_python36
+  container_python310: &container_python310
     docker:
-      - image: circleci/python:3.6.2
+      - image: cimg/python:3.10.11
       - name: localstack
-        image: localstack/localstack:0.11.5
+        image: localstack/localstack:2.0.2
     working_directory: ~/repo
 
-  restore_cache_python36: &restore_cache_python36
+  container_lambda_python310: &container_lambda_python310
+    docker:
+      - image: amazon/aws-lambda-python:3.10
+    working_directory: ~/repo
+
+  restore_cache_python310: &restore_cache_python310
     restore_cache:
       keys:
         - v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
         # fallback to using the latest cache if no exact match is found
         - v1-dependencies-
 
-  save_cache_python36: &save_cache_python36
+  save_cache_python310: &save_cache_python310
     save_cache:
       paths:
-        - ~/venv36
+        - ~/venv310
       key: v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
-
-
-  container_python38: &container_python38
-    docker:
-      - image: circleci/python:3.8.1
-      - name: localstack
-        image: localstack/localstack:0.11.5
-    working_directory: ~/repo
-
-  restore_cache_python38: &restore_cache_python38
-    restore_cache:
-      keys:
-        - v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
-        # fallback to using the latest cache if no exact match is found
-        - v1-dependencies-
-
-  save_cache_python38: &save_cache_python38
-    save_cache:
-      paths:
-        - ~/venv38
-      key: v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
-
 
 jobs:
-  build_python36:
-    <<: *container_python36
+  build_python310:
+    <<: *container_python310
     steps:
       - checkout
-      - *restore_cache_python36
+      - *restore_cache_python310
       - run:
           name: install dependencies
           command: |
-            pip install --user virtualenv
-            ~/.local/bin/virtualenv ~/venv36
-            . ~/venv36/bin/activate
+            virtualenv ~/venv310
+            . ~/venv310/bin/activate
             pip install -r requirements.txt
             pip install -r requirements-dev.txt
             pip install .
-      - *save_cache_python36
+      - *save_cache_python310
       - run:
           name: run tests
           environment:
             LOCALSTACK_HOST: localstack
           command: |
-            . ~/venv36/bin/activate
+            . ~/venv310/bin/activate
             pylint_runner
-            CUMULUS_ENV=testing nosetests -v -s
-
-  build_python38:
-    <<: *container_python38
-    steps:
-      - checkout
-      - *restore_cache_python38
-      - run:
-          name: install dependencies
-          command: |
-            /usr/local/bin/virtualenv ~/venv38
-            . ~/venv38/bin/activate
-            pip install -r requirements.txt
-            pip install -r requirements-dev.txt
-            pip install .
-      - *save_cache_python38
-      - run:
-          name: run tests
-          environment:
-            LOCALSTACK_HOST: localstack
-          command: |
-            . ~/venv38/bin/activate
-            pylint_runner
-            CUMULUS_ENV=testing nosetests -v -s
+            CUMULUS_ENV=testing nose2 -v
 
   publish_github:
-    <<: *container_python36
+    <<: *container_lambda_python310
     steps:
       - checkout
       - add_ssh_keys
@@ -106,6 +65,7 @@ jobs:
             GIT_API_URL: https://api.github.com/repos
             ZIPFILENAME: cumulus-message-adapter.zip
           command: |
+            yum update && yum install -y openssh-clients git curl make jq
             mkdir -p ~/.ssh
             ssh-keyscan github.com >> ~/.ssh/known_hosts
             VERSION=`awk -F\' '{print $2,$4}' message_adapter/version.py`
@@ -122,9 +82,9 @@ jobs:
                   --data $CREATE_RELEASE_REQUEST_BODY | jq .
               echo "Building ${ZIPFILENAME}"
               pip install --user virtualenv
-              ~/.local/bin/virtualenv ~/venv36
-              . ~/venv36/bin/activate
-              sudo pip install -r requirements.txt
+              ~/.local/bin/virtualenv ~/venv310
+              . ~/venv310/bin/activate
+              sudo pip install .
               make clean
               make $ZIPFILENAME
               if [ -f $ZIPFILENAME ]; then
@@ -142,16 +102,16 @@ jobs:
             fi
 
   publish_pypi:
-    <<: *container_python36
+    <<: *container_lambda_python310
     steps:
       - checkout
-      - *restore_cache_python36
+      - *restore_cache_python310
       - run:
           name: Deploy to PyPi
           command: |
             pip install --user virtualenv
-            ~/.local/bin/virtualenv ~/venv36
-            . ~/venv36/bin/activate
+            ~/.local/bin/virtualenv ~/venv310
+            . ~/venv310/bin/activate
             pip install twine
             python setup.py sdist
             twine upload --skip-existing --username "${PYPI_USER}" --password "${PYPI_PASS}" dist/*
@@ -160,12 +120,10 @@ workflows:
   version: 2
   build_test_publish:
     jobs:
-      - build_python36
-      - build_python38
+      - build_python310
       - publish_github:
           requires:
-            - build_python36
-            - build_python38
+            - build_python310
           filters:
             branches:
               only: master
