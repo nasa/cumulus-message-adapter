@@ -413,6 +413,20 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
         result = self.cumulus_message_adapter.create_next_event(msg, in_msg, message_config)
         assert result == out_msg
 
+    def test_jsonpath_array(self):
+        """ test jsonpath_array.input.json """
+        inp = open(os.path.join(self.test_folder, 'jsonpath_array.input.json'), encoding='utf-8')
+        out = open(os.path.join(self.test_folder, 'jsonpath_array.output.json'), encoding='utf-8')
+        in_msg = json.loads(inp.read())
+        out_msg = json.loads(out.read())
+
+        msg = self.cumulus_message_adapter.load_nested_event(in_msg, {})
+        message_config = msg.get('messageConfig')
+        if 'messageConfig' in msg:
+            del msg['messageConfig']
+        result = self.cumulus_message_adapter.create_next_event(msg, in_msg, message_config)
+        assert result == out_msg
+
     def test_meta(self):
         """ test meta.input.json """
         inp = open(os.path.join(self.test_folder, 'meta.input.json'), encoding='utf-8')
