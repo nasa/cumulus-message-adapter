@@ -84,7 +84,7 @@ jobs:
               pip install --user virtualenv
               ~/.local/bin/virtualenv ~/venv310
               . ~/venv310/bin/activate
-              sudo pip install .
+              pip install .
               make clean
               make $ZIPFILENAME
               if [ -f $ZIPFILENAME ]; then
