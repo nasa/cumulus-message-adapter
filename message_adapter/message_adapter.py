@@ -10,6 +10,7 @@ from .cumulus_message import (resolve_config_templates, resolve_input,
                               store_remote_response)
 from typing import Dict, Any
 
+
 class MessageAdapter:
     """
     transforms the cumulus message
