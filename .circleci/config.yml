@@ -77,7 +77,7 @@ jobs:
               # strip white space from create release request body
               CREATE_RELEASE_REQUEST_BODY=$(echo '{"tag_name": "'$VERSION'", "name": "'$VERSION'"}' | tr -d '[:space:]')
               echo "Creating release for tag ${VERSION}"
-              curl -X POST -u cumulusgit:$CUMULUSGIT_GITHUB_API_ACCESS_TOKEN \
+              curl -X POST -u etcart:$CUMULUSGIT_GITHUB_API_ACCESS_TOKEN \
                   $GIT_API_URL/$GIT_PATH/releases \
                   --data $CREATE_RELEASE_REQUEST_BODY | jq .
               echo "Building ${ZIPFILENAME}"
@@ -124,9 +124,6 @@ workflows:
       - publish_github:
           requires:
             - build_python310
-          filters:
-            branches:
-              only: master
       - publish_pypi:
           requires:
             - publish_github
