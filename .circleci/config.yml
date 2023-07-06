@@ -73,7 +73,7 @@ jobs:
             if [ -z $(git ls-remote --tags origin | grep $VERSION) ]; then
               git tag $VERSION
               echo "Pushing tag ${VERSION}"
-              git push origin $VERSION
+              git push https://${CUMULUSGIT_GITHUB_API_ACCESS_TOKEN}@github.com/nasa/cumulus-message-adapter.git origin $VERSION
               # strip white space from create release request body
               CREATE_RELEASE_REQUEST_BODY=$(echo '{"tag_name": "'$VERSION'", "name": "'$VERSION'"}' | tr -d '[:space:]')
               echo "Creating release for tag ${VERSION}"
