@@ -55,6 +55,7 @@ def load_remote_event(event):
     return event
 
 
+
 # Config templating
 def resolve_path_str(event, json_path_string):
     """
