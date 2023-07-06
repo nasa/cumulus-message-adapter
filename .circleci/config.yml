@@ -91,7 +91,7 @@ jobs:
                 UPLOAD_URL_TEMPLATE=$(curl $GIT_API_URL/$GIT_PATH/releases/tags/$VERSION | jq '.upload_url' --raw-output)
                 UPLOAD_URL=${UPLOAD_URL_TEMPLATE//{?name,label\}/?name=$ZIPFILENAME}
                 echo "Uploading release to ${UPLOAD_URL}"
-                curl -X POST -u cumulusgit:$CUMULUSGIT_GITHUB_API_ACCESS_TOKEN \
+                curl -X POST -u etcart:$CUMULUSGIT_GITHUB_API_ACCESS_TOKEN \
                   -H "Content-Type: application/zip" \
                   $UPLOAD_URL \
                   --data-binary @./$ZIPFILENAME | jq .
