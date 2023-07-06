@@ -8,7 +8,7 @@ from .util import assign_json_path_value
 from .cumulus_message import (resolve_config_templates, resolve_input,
                               resolve_path_str, load_config, load_remote_event,
                               store_remote_response)
-
+from typing import Dict, Any
 
 class MessageAdapter:
     """
@@ -25,7 +25,9 @@ class MessageAdapter:
     ##################################
 
     @staticmethod
-    def __parse_parameter_configuration(event):
+    def __parse_parameter_configuration(
+        event: Dict[str, Any]
+    ) -> Dict[str, Any]:
         parsed_event = event
         if event.get('cma'):
             updated_event = {k: v for (k, v) in event['cma'].items() if k != 'event'}
@@ -33,7 +35,11 @@ class MessageAdapter:
             parsed_event.update(updated_event)
         return parsed_event
 
-    def load_and_update_remote_event(self, incoming_event, context):
+    def load_and_update_remote_event(
+        self,
+        incoming_event: Dict[str, Any],
+        context
+    ) -> Dict[str, Any]:
         """
         * Looks at a Cumulus message. If the message has part of its data stored remotely in
         * S3, fetches that data, otherwise it returns the full message, both cases updated with

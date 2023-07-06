@@ -1,12 +1,18 @@
 from copy import deepcopy
 from jsonpath_ng import parse
+from typing import Dict, Any
 
 
-def assign_json_path_value(source_message, jspath, value):
+def assign_json_path_value(
+    source_message: Dict[str, Any],
+    jspath: str,
+    value: Any
+) -> Dict[str, Any]:
     """
     * Assign (update or insert) a value to message based on jsonpath.
-    * Create the keys if jspath doesn't already exist in the message. In this case, we
-    * support 'simple' jsonpath like $.path1.path2.path3....
+    * Create the keys if jspath doesn't already exist in the message.
+    * In this case, we support 'simple' jsonpath
+    * like $.path1.path2.path3....
     * @param {dict} source_message The message to be updated
     * @param {string} jspath JSON path string
     * @param {*} value Value to update to
