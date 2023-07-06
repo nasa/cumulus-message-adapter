@@ -124,9 +124,6 @@ workflows:
       - publish_github:
           requires:
             - build_python310
-          filters:
-            branches:
-              only: master
       - publish_pypi:
           requires:
             - publish_github
