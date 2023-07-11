@@ -3,11 +3,12 @@
 import json
 import sys
 import signal
-
+from typing import Any, Dict, cast
 from message_adapter.message_adapter import MessageAdapter
+from message_adapter.types import CumulusMessage, CumulusMessage, AllInput
 
 
-def callMessageAdapterFunction(functionName, allInput):
+def callMessageAdapterFunction(functionName: str, allInput: AllInput) -> CumulusMessage:
     """
     CLI helper method to handle 'single command' calls to CMA 'steps'
 
@@ -19,13 +20,12 @@ def callMessageAdapterFunction(functionName, allInput):
     Returns:
     result: JSON response to pass to the next event
     """
-    if 'schemas' in allInput:
-        schemas = allInput['schemas']
-    else:
-        schemas = None
+    schemas = allInput.get('schemas', None)
     transformer = MessageAdapter(schemas)
-    event = allInput['event']
-    context = allInput.get('context')
+    event: CumulusMessage = allInput['event']
+    context = allInput.get('context', None)
+    #whatif bad function name? this will raise an error around result not functionName
+    result: CumulusMessage
     if functionName == 'loadAndUpdateRemoteEvent':
         result = transformer.load_and_update_remote_event(event, context)
     elif functionName == 'loadNestedEvent':
@@ -39,13 +39,13 @@ def callMessageAdapterFunction(functionName, allInput):
         result = transformer.create_next_event(handlerResponse, event, messageConfig)
     return result
 
-def handle_exit():
+def handle_exit() -> None:
     """ Method that explicitly flushes stderr/stdout before exiting 1"""
     sys.stdout.flush()
     sys.stderr.flush()
     sys.exit(1)
 
-def streamCommands():
+def streamCommands() -> None:
     """
     Method that runs, and reads messages on STDIN in the format:
 
@@ -72,7 +72,7 @@ def streamCommands():
             cont = False
         elif next_line == '<EOC>':
             jsonObj = json.loads(buffer)
-            result = callMessageAdapterFunction(command, jsonObj)
+            result = callMessageAdapterFunction(command, cast(AllInput, jsonObj))
             sys.stdout.write(json.dumps(result) + "\n")
             sys.stdout.write('<EOC>\n')
             sys.stdout.flush()
@@ -86,20 +86,20 @@ def streamCommands():
                 buffer += next_line
 
 
-def singleCommand(functionName):
+def singleCommand(functionName: str) -> CumulusMessage:
     """Executes a single CMA command"""
     allInput = json.loads(input())
-    return callMessageAdapterFunction(functionName, allInput)
+    return callMessageAdapterFunction(functionName, cast(AllInput, allInput))
 
 
-def cmaCli():
+def cmaCli() -> None:
     """
     Top level CMA cli method, calls correct stream/single command run mode, handles errors
     """
     exitCode = 1
     functionName = sys.argv[1]
-    signal.signal(signal.SIGINT, handle_exit)
-    signal.signal(signal.SIGTERM, handle_exit)
+    signal.signal(signal.SIGINT, handle_exit)  # type: ignore
+    signal.signal(signal.SIGTERM, handle_exit)  # type: ignore
 
     try:
         if functionName == 'stream':

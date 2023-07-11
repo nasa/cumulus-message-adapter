@@ -4,12 +4,18 @@ import uuid
 
 from copy import deepcopy
 from datetime import datetime, timedelta
+from typing import Any, Dict, Union, List, Literal, Optional, Tuple, cast
 from jsonpath_ng import parse
 from .aws import s3
 from .error import write_error
+from .types import (
+    CumulusMessage, CumulusTaskConfig, ReplacementConfig,
+    RemoteReplace, GenericCumulusObject, GenericCumulusSubObject
+)
+from jsonpath_ng import JSONPath
 
 
-def load_config(event):
+def load_config(event: Union[GenericCumulusObject, CumulusMessage]) -> CumulusTaskConfig:
     """
     * Given a Cumulus message and context, returns the config object for the task
     * @param {*} event An event in the Cumulus message format with remote parts resolved
@@ -17,12 +23,13 @@ def load_config(event):
     * @returns {*} The task's configuration
     """
     write_error('Starting load_config')
-
+    # this needs validation of a valid config
     if 'task_config' in event:
-        return event['task_config']
+        return cast(CumulusTaskConfig, event['task_config'])
     return {}
 
-def load_remote_event(event):
+
+def load_remote_event(event: CumulusMessage) -> CumulusMessage:
     """
     * Given a Cumulus message, checks for a 'replace' key and fetches a remote stored
     * object from S3 and inserts it into the configured path
@@ -41,7 +48,8 @@ def load_remote_event(event):
             remote_event = json.loads(data['Body'].read().decode('utf-8'))
             replacement_targets = parsed_json_path.find(event)
             if not replacement_targets or len(replacement_targets) != 1:
-                raise ValueError(f'Remote event configuration target {target_json_path} invalid')
+                raise ValueError(
+                    f'Remote event configuration target {target_json_path} invalid')
             try:
                 replacement_targets[0].value.update(remote_event)
             except AttributeError:
@@ -56,7 +64,10 @@ def load_remote_event(event):
 
 
 # Config templating
-def resolve_path_str(event, json_path_string):
+def resolve_path_str(
+    event: Union[GenericCumulusSubObject, CumulusMessage],
+    json_path_string: str
+) -> GenericCumulusSubObject:
     """
     * Given a Cumulus message (AWS Lambda event) and a string containing a JSONPath
     * template to interpret, returns the result of interpreting that template.
@@ -82,11 +93,13 @@ def resolve_path_str(event, json_path_string):
     template_regex = '{[^}]+}'
 
     if re.search(value_regex, json_path_string):
-        match_data = parse(json_path_string.lstrip('{').rstrip('}')).find(event)
+        match_data = parse(json_path_string.lstrip(
+            '{').rstrip('}')).find(event)
         return match_data[0].value if match_data else None
 
     if re.search(array_regex, json_path_string):
-        parsed_json_path = json_path_string.lstrip('{').rstrip('}').lstrip('[').rstrip(']')
+        parsed_json_path = json_path_string.lstrip(
+            '{').rstrip('}').lstrip('[').rstrip(']')
         match_data = parse(parsed_json_path).find(event)
         return [item.value for item in match_data] if match_data else []
 
@@ -95,14 +108,18 @@ def resolve_path_str(event, json_path_string):
         for match in matches:
             match_data = parse(match.lstrip('{').rstrip('}')).find(event)
             if match_data:
-                json_path_string = json_path_string.replace(match, match_data[0].value)
+                json_path_string = json_path_string.replace(
+                    match, match_data[0].value)
         return json_path_string
 
     write_error('End resolve_path_str')
     return json_path_string
 
 
-def resolve_input(event, config):
+def resolve_input(
+    event: Union[GenericCumulusObject, CumulusMessage],
+    config: CumulusTaskConfig
+) -> Any:
     """
     * Given a Cumulus message and its config, returns the input object to send to the
     * task, as defined under config.cumulus_message
@@ -117,7 +134,11 @@ def resolve_input(event, config):
     write_error('End resolve_input')
     return event.get('payload')
 
-def resolve_config_templates(event, config):
+
+def resolve_config_templates(
+    event: Union[GenericCumulusObject, CumulusMessage],
+    config: CumulusTaskConfig
+) -> CumulusTaskConfig:
     """
     * Given a config object containing possible JSONPath-templated values, resolves
     * all the values in the object using JSONPaths into the provided event.
@@ -127,14 +148,29 @@ def resolve_config_templates(event, config):
     * @returns {*} A config object with all JSONPaths resolved
     """
     write_error('Starting resolve_config_templates')
-    task_config = config.copy()
+    task_config: CumulusTaskConfig = config.copy()
     if 'cumulus_message' in task_config:
         del task_config['cumulus_message']
     write_error('Ending resolve_config_templates')
-    return _resolve_config_object(event, task_config)
+    return cast(
+        CumulusTaskConfig,
+        _resolve_config_object(
+            cast(GenericCumulusObject, event),
+            cast(GenericCumulusObject, task_config)
+        )
+    )
 
 
-def store_remote_response(incoming_event, default_max_size, config_keys):
+def store_remote_response(
+    incoming_event: CumulusMessage,
+    default_max_size: int,
+    config_keys: List[Literal[  # weird naming? this is just a list of keys to delete
+        "exception",
+        "task_config",
+        "replace",
+        "ReplaceConfig"
+    ]]
+) -> CumulusMessage:
     """
     * Stores part of a response message in S3 if it is too big to send to StepFunctions
     * @param {*} incoming_event    - The response message
@@ -145,52 +181,61 @@ def store_remote_response(incoming_event, default_max_size, config_keys):
     """
     write_error('Starting store_remote_response')
     event = deepcopy(incoming_event)
-    replace_config = event.get('ReplaceConfig', None)
-    if not replace_config:
+    if 'ReplaceConfig' not in event:
         return event
+    
+    replace_config: ReplacementConfig = event['ReplaceConfig']
     # Set default value if FullMessage flag set
     if replace_config.get('FullMessage', False):
         replace_config['Path'] = '$'
 
-    replace_config_values = _parse_remote_config_from_event(replace_config, default_max_size)
+    target_path, max_size, parsed_json_path = _parse_remote_config_from_event(
+        replace_config, default_max_size)
 
     for key in config_keys:
-        if event.get(key):
+        if key in event:
             del event[key]
 
     cumulus_meta = deepcopy(event['cumulus_meta'])
-    replacement_data = replace_config_values['parsed_json_path'].find(event)
+    replacement_data = parsed_json_path.find(event)
     if len(replacement_data) != 1:
-        raise ValueError(f'JSON path invalid: {replace_config_values["parsed_json_path"]}')
+        raise ValueError(
+            f'JSON path invalid: {parsed_json_path}')
     replacement_data = replacement_data[0]
 
-    estimated_data_size = len(json.dumps(replacement_data.value).encode(('utf-8')))
+    estimated_data_size = len(json.dumps(
+        replacement_data.value).encode(('utf-8')))
 
-    if estimated_data_size < replace_config_values['max_size']:
+    if estimated_data_size < max_size:
         return event
 
     _s3 = s3()
-    s3_bucket = event['cumulus_meta']['system_bucket']
+    s3_bucket: str = event['cumulus_meta']['system_bucket']
     s3_key = ('/').join(['events', str(uuid.uuid4())])
-    s3_params = {
-        'Expires': datetime.utcnow() + timedelta(days=7),  # Expire in a week
-        'Body': json.dumps(replacement_data.value)
-    }
-    _s3.Object(s3_bucket, s3_key).put(**s3_params)
+    _s3.Object(s3_bucket, s3_key).put(
+        Expires= datetime.utcnow() + timedelta(days=7),  # Expire in a week
+        Body=json.dumps(replacement_data.value)
+    )
 
     try:
         replacement_data.value.clear()
     except AttributeError:
-        replace_config_values['parsed_json_path'].update(event, '')
+        parsed_json_path.update(event, '')
 
-    remote_configuration = {'Bucket': s3_bucket, 'Key': s3_key,
-                            'TargetPath': replace_config_values['target_path']}
+    remote_configuration: RemoteReplace = {
+        'Bucket': s3_bucket,
+        'Key': s3_key,
+        'TargetPath': target_path
+    }
     event['cumulus_meta'] = event.get('cumulus_meta', cumulus_meta)
     event['replace'] = remote_configuration
     write_error('store_remote_response')
     return event
 
-def _resolve_config_object(event, config):
+def _resolve_config_object(
+    event: GenericCumulusSubObject,
+    config: Optional[GenericCumulusSubObject]
+) -> Optional[GenericCumulusSubObject]:
     """
     * Recursive helper for resolve_config_templates
     *
@@ -201,32 +246,38 @@ def _resolve_config_object(event, config):
     * @param {*} config A config object, containing paths
     * @returns {*} A config object with all JSONPaths resolved
     """
-
+    if config is None:
+        return config
+    
     if isinstance(config, str):
         return resolve_path_str(event, config)
+
 
     if isinstance(config, list):
         for i in range(0, len(config)):  # pylint: disable=consider-using-enumerate
             config[i] = _resolve_config_object(event, config[i])
         return config
 
-    if (config is not None and isinstance(config, dict)):
-        result = {}
-        for key in config.keys():
-            result[key] = _resolve_config_object(event, config[key])
+    if isinstance(config, dict):
+        result: Dict[str, Optional[Any]] = {
+            key: _resolve_config_object(event, subcfg)
+            for key, subcfg in config.items()
+        }
+        # subCfg: GenericCumulusObject
+        # for key, subCfg in config.items():
+        #     result[key] = _resolve_config_object(event, subCfg)
         return result
 
     return config
 
 
-def _parse_remote_config_from_event(replace_config, default_max_size):
+def _parse_remote_config_from_event(
+    replace_config: ReplacementConfig,
+    default_max_size: int
+) -> Tuple[str, int, JSONPath]:
     source_path = replace_config['Path']
-    target_path = replace_config.get('TargetPath', replace_config['Path'])
-    default_max_size = replace_config.get('MaxSize', default_max_size)
-    parsed_json_path = parse(source_path)
+    target_path = replace_config.get('TargetPath', source_path)
+    max_size = replace_config.get('MaxSize', default_max_size)
+    parsed_json_path: JSONPath = parse(source_path)
 
-    return {
-        'target_path': target_path,
-        'max_size': default_max_size,
-        'parsed_json_path': parsed_json_path,
-    }
+    return target_path, max_size, parsed_json_path

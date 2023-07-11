@@ -1,13 +1,16 @@
 from copy import deepcopy
 from jsonpath_ng import parse
 from typing import Dict, Any
+from .types import CumulusMessage, GenericCumulusSubObject
+import pydash as py_
+
 
 
 def assign_json_path_value(
-    source_message: Dict[str, Any],
+    source_message: CumulusMessage,
     jspath: str,
-    value: Any
-) -> Dict[str, Any]:
+    value: GenericCumulusSubObject
+) -> CumulusMessage:
     """
     * Assign (update or insert) a value to message based on jsonpath.
     * Create the keys if jspath doesn't already exist in the message.
@@ -19,19 +22,5 @@ def assign_json_path_value(
     * @return {*} updated message
     """
     message = deepcopy(source_message)
-    if not parse(jspath).find(message):
-        paths = jspath.lstrip('$.').split('.')
-        current_item = message
-        key_not_found = False
-        for path in paths:
-            if key_not_found or path not in current_item:
-                key_not_found = True
-                new_path_dict = {}
-                # Add missing key to existing dict
-                current_item[path] = new_path_dict
-                # Set current item to newly created dict
-                current_item = new_path_dict
-            else:
-                current_item = current_item[path]
-    parse(jspath).update(message, value)
+    py_.set_(message, jspath.lstrip('$.'), value)
     return message

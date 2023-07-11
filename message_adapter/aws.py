@@ -1,8 +1,10 @@
 """ Determines the correct AWS endpoint for AWS services """
 import os
 from boto3 import resource
+from mypy_boto3_s3 import S3ServiceResource
+from typing import Dict
 
-def localhost_s3_url():
+def localhost_s3_url() -> str:
     """ Returns configured LOCALSTACK_HOST url or default for localstack s3 """
     if 'LOCALSTACK_HOST' in os.environ:
         s3_url = f"http://{os.environ['LOCALSTACK_HOST']}:4566"
@@ -11,7 +13,7 @@ def localhost_s3_url():
     return s3_url
 
 
-def s3():
+def s3() -> S3ServiceResource:
     """ Determines the endpoint for the S3 service """
 
     if ('CUMULUS_ENV' in os.environ) and (os.environ['CUMULUS_ENV'] == 'testing'):
@@ -25,7 +27,10 @@ def s3():
         )
     return resource('s3')
 
-def _get_sfn_execution_arn_by_name(state_machine_arn, execution_name):
+# TODO deleteme?
+
+
+def _get_sfn_execution_arn_by_name(state_machine_arn: str, execution_name: str) -> str:
     """
     * Given a state machine arn and execution name, returns the execution's ARN
     * @param {string} state_machine_arn The ARN of the state machine containing the execution
@@ -36,7 +41,7 @@ def _get_sfn_execution_arn_by_name(state_machine_arn, execution_name):
                        execution_name])
 
 
-def _get_task_name_from_execution_history(execution_history, arn):
+def _get_task_name_from_execution_history(execution_history, arn):  # type: ignore
     """
     * Given an execution history object returned by the StepFunctions API and an optional
     * Activity or Lambda ARN returns the most recent task name started for the given ARN,
