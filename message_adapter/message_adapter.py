@@ -39,7 +39,7 @@ class MessageAdapter:
         event: CumulusMessage
     ) -> CumulusMessage:
         if "cma" not in event:
-            return cast(CumulusMessage, event)
+            return event
         # messages with non-event cma contents are not tested
         updated_event = {k: v for (k, v) in event['cma'].items() if k != 'event'}
         parsed_event = event['cma']['event']

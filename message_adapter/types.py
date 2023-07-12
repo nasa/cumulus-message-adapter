@@ -11,15 +11,12 @@ GenericCumulusSubObject = Optional[Union[
 GenericCumulusObject = Dict[str, GenericCumulusSubObject]
 
 
-class CumulusInputConfig(TypedDict):
-    input: NotRequired[str]
-
 
 class CumulusTaskConfig(TypedDict):
     inlinestr: NotRequired[str]
     array: NotRequired[str]
     object: NotRequired[str]
-    cumulus_message: NotRequired[CumulusInputConfig]
+    cumulus_message: NotRequired[CumulusMessageConfig]
 
 
 class TaskMeta(TypedDict):
@@ -63,7 +60,7 @@ class CumulusMessage(TypedDict):
     replace: NotRequired[RemoteReplace]
     ReplaceConfig: NotRequired[ReplacementConfig]
     cumulus_config: NotRequired[CumulusConfig]
-    messageConfig: NotRequired[CumulusInputConfig]
+    messageConfig: NotRequired[CumulusMessageConfig]
     cma: NotRequired[CumulusEventWrapper]
 
 class CumulusEventWrapper(CumulusMessage):
@@ -95,7 +92,7 @@ class SDConfig(TypedDict):
 
 class CumulusMessageConfig(TypedDict):
     outputs: NotRequired[List[SDConfig]]
-
+    input: NotRequired[str]
 
 class AllInput(TypedDict):
     handler_response: GenericCumulusObject

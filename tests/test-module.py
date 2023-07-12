@@ -8,7 +8,7 @@ import unittest
 from mock import patch
 from jsonschema.exceptions import ValidationError
 from message_adapter import aws, message_adapter
-from typing import Any
+from typing import Any, cast
 from message_adapter.types import (
     GenericCumulusObject, CumulusMessage, CumulusMessage,
     CumulusMessageConfig
@@ -377,7 +377,7 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
         message_config = msg.get('messageConfig')
         if 'messageConfig' in msg:
             del msg['messageConfig']
-        result = self.cumulus_message_adapter.create_next_event(msg, in_msg, message_config)
+        result = self.cumulus_message_adapter.create_next_event(cast(GenericCumulusObject, msg), in_msg, message_config)
         assert result == out_msg
 
     def test_exception(self) -> None:
