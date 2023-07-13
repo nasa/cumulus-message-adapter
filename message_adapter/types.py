@@ -3,6 +3,7 @@ from typing import Dict, Any, Optional, List, Union, Literal
 from typing_extensions import TypedDict, NotRequired
 
 GenericCumulusSubObject = Optional[Union[
+    int,
     str,
     List['GenericCumulusSubObject'],
     Dict[str, 'GenericCumulusSubObject'],
