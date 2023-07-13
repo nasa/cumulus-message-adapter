@@ -63,6 +63,7 @@ class CumulusMessage(TypedDict):
     cumulus_config: NotRequired[CumulusConfig]
     messageConfig: NotRequired[CumulusMessageConfig]
     cma: NotRequired[CumulusEventWrapper]
+    config: NotRequired[CumulusTaskConfig]
 
 class CumulusEventWrapper(CumulusMessage):
     event: CumulusMessage
