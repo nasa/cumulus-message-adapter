@@ -402,7 +402,7 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
             del msg['messageConfig']
         result = self.cumulus_message_adapter.create_next_event(msg, remote_event, message_config)
 
-        delete_objects_object = {'Objects': [{'Key': key_name}]}
+        delete_objects_object: DeleteTypeDef = {'Objects': [{'Key': key_name}]}
         self.s3.Bucket(bucket_name).delete_objects(Delete=delete_objects_object)
         self.s3.Bucket(bucket_name).delete()
         assert result == out_msg
@@ -457,7 +457,7 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
             del msg['messageConfig']
         result = self.cumulus_message_adapter.create_next_event(msg, remote_event, message_config)
 
-        delete_objects_object = {'Objects': [{'Key': key_name}]}
+        delete_objects_object: DeleteTypeDef = {'Objects': [{'Key': key_name}]}
         self.s3.Bucket(bucket_name).delete_objects(Delete=delete_objects_object)
         self.s3.Bucket(bucket_name).delete()
         assert result == out_msg
@@ -485,7 +485,7 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
             del msg['messageConfig']
         result = self.cumulus_message_adapter.create_next_event(msg, remote_event, message_config)
 
-        delete_objects_object = {'Objects': [{'Key': key_name}]}
+        delete_objects_object: DeleteTypeDef = {'Objects': [{'Key': key_name}]}
         self.s3.Bucket(bucket_name).delete_objects(Delete=delete_objects_object)
         self.s3.Bucket(bucket_name).delete()
         self.assertEqual(result, out_msg)
@@ -514,7 +514,7 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
             del msg['messageConfig']
         result = self.cumulus_message_adapter.create_next_event(msg, remote_event, message_config)
 
-        delete_objects_object = {'Objects': [{'Key': key_name}]}
+        delete_objects_object: DeleteTypeDef = {'Objects': [{'Key': key_name}]}
         self.s3.Bucket(bucket_name).delete_objects(Delete=delete_objects_object)
         self.s3.Bucket(bucket_name).delete()
         self.assertEqual(result, out_msg)
@@ -644,7 +644,7 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
         in_msg = json.loads(inp.read())
         msg = adapter.load_nested_event(in_msg)
         message_config = msg.get('messageConfig')
-        handler_response = {"goodbye": "world"}
+        handler_response: GenericCumulusObject = {"goodbye": "world"}
         result = adapter.create_next_event(handler_response, in_msg, message_config)
         assert result["payload"]["goodbye"] == "world"
 
@@ -656,7 +656,7 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
         in_msg = json.loads(inp.read())
         msg = adapter.load_nested_event(in_msg)
         messageConfig = msg.get('messageConfig')
-        handler_response = {"goodbye": 1}
+        handler_response: GenericCumulusObject = {"goodbye": 1}
         try:
             adapter.create_next_event(handler_response, in_msg, messageConfig,)
         except ValidationError as e:
