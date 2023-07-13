@@ -2,7 +2,7 @@ import os
 import json
 
 from copy import deepcopy
-from typing import Dict, Any, Optional, Literal, List, cast
+from typing import Dict, Any, Optional, Literal, List, cast, Union
 from jsonschema import validate
 
 from .util import assign_json_path_value
@@ -183,7 +183,7 @@ class MessageAdapter:
 
     def create_next_event(
         self,
-        handler_response: GenericCumulusObject,
+        handler_response: Union[CumulusMessage, GenericCumulusObject],
         event: CumulusMessage,
         message_config: Optional[CumulusMessageConfig]
     ) -> CumulusMessage:
