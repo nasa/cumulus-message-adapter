@@ -10,8 +10,11 @@ from jsonschema.exceptions import ValidationError
 from message_adapter import aws, message_adapter
 from typing import Any, cast
 from message_adapter.types import (
-    GenericCumulusObject, CumulusMessage, CumulusMessage,
-    CumulusMessageConfig
+    GenericCumulusObject,
+    CumulusMessage,
+    CumulusMessage,
+    CumulusMessageConfig,
+    CumulusSchemas
 )
 from mypy_boto3_s3.type_defs import DeleteTypeDef
 
@@ -595,7 +598,7 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
     def test_input_jsonschema(self) -> None:
         """ test a working input schema """
         inp = open(os.path.join(self.test_folder, 'templates.input.json'), encoding='utf-8')
-        schemas = {'input': 'input.json'}
+        schemas: CumulusSchemas = {'input': 'input.json'}
         adapter = message_adapter.MessageAdapter(schemas)
         in_msg = json.loads(inp.read())
         in_msg["payload"] = {"hello": "world"}
@@ -605,7 +608,7 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
     def test_failing_input_jsonschema(self) -> None:
         """ test a failing input schema """
         inp = open(os.path.join(self.test_folder, 'templates.input.json'), encoding='utf-8')
-        schemas = {'input': 'input.json'}
+        schemas: CumulusSchemas = {'input': 'input.json'}
         adapter = message_adapter.MessageAdapter(schemas)
         in_msg = json.loads(inp.read())
         in_msg["payload"] = {"hello": 1}
@@ -617,7 +620,7 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
     def test_config_jsonschema(self) -> None:
         """ test a working config schema """
         inp = open(os.path.join(self.test_folder, 'templates.input.json'), encoding='utf-8')
-        schemas = {'config': 'config.json'}
+        schemas: CumulusSchemas = {'config': 'config.json'}
         adapter = message_adapter.MessageAdapter(schemas)
         in_msg = json.loads(inp.read())
         msg = adapter.load_nested_event(in_msg)
@@ -626,7 +629,7 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
     def test_failing_config_jsonschema(self) -> None:
         """ test a failing input schema """
         inp = open(os.path.join(self.test_folder, 'templates.input.json'), encoding='utf-8')
-        schemas = {'config': 'config.json'}
+        schemas: CumulusSchemas = {'config': 'config.json'}
         adapter = message_adapter.MessageAdapter(schemas)
         in_msg = json.loads(inp.read())
         in_msg["task_config"]["boolean_option"] = '{$.meta.boolean_option}'
@@ -639,7 +642,7 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
     def test_output_jsonschema(self) -> None:
         """ test a working output schema """
         inp = open(os.path.join(self.test_folder, 'templates.input.json'), encoding='utf-8')
-        schemas = {'output': 'output.json'}
+        schemas: CumulusSchemas = {'output': 'output.json'}
         adapter = message_adapter.MessageAdapter(schemas)
         in_msg = json.loads(inp.read())
         msg = adapter.load_nested_event(in_msg)
@@ -651,7 +654,7 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
     def test_failing_output_jsonschema(self) -> None:
         """ test a working output schema """
         inp = open(os.path.join(self.test_folder, 'templates.input.json'), encoding='utf-8')
-        schemas = {'output': 'output.json'}
+        schemas: CumulusSchemas = {'output': 'output.json'}
         adapter = message_adapter.MessageAdapter(schemas)
         in_msg = json.loads(inp.read())
         msg = adapter.load_nested_event(in_msg)

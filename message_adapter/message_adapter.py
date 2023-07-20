@@ -12,7 +12,8 @@ from .cumulus_message import (resolve_config_templates, resolve_input,
 
 from .types import (
     CumulusMessage, CumulusMessage, CumulusContext, TaskMeta,
-    CumulusMessageConfig, GenericCumulusObject, CumulusConfig
+    CumulusMessageConfig, GenericCumulusObject, CumulusConfig,
+    CumulusSchemas
 )
 
 class MessageAdapter:
@@ -27,7 +28,7 @@ class MessageAdapter:
         "ReplaceConfig"
     ]] = ['ReplaceConfig', 'task_config']
 
-    def __init__(self, schemas: Optional[Dict[str, Any]]=None) -> None:
+    def __init__(self, schemas: Optional[CumulusSchemas]=None) -> None:
         self.schemas = schemas
 
     ##################################
@@ -86,7 +87,7 @@ class MessageAdapter:
             event['meta']['workflow_tasks'][str(task_index)] = task_meta
         return event
 
-    def __get_jsonschema(self, schema_type: str) -> Optional[str]:
+    def __get_jsonschema(self, schema_type: Literal["input", "output", "config"]) -> Optional[str]:
         schemas = self.schemas
         root_dir = os.environ.get("LAMBDA_TASK_ROOT", '')
         if schemas and schema_type in schemas:
@@ -96,7 +97,7 @@ class MessageAdapter:
         filepath = os.path.join(root_dir, rel_filepath)
         return filepath if os.path.exists(filepath) else None
 
-    def __validate_json(self, document: Dict[str, Any], schema_type: str) -> None:
+    def __validate_json(self, document: Union[GenericCumulusObject, CumulusMessage], schema_type: Literal["input", "output", "config"]) -> None:
         """
         check that json is valid based on a schema
         """

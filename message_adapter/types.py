@@ -64,6 +64,7 @@ class CumulusMessage(TypedDict):
     messageConfig: NotRequired[CumulusMessageConfig]
     cma: NotRequired[CumulusEventWrapper]
     config: NotRequired[CumulusTaskConfig]
+    input: NotRequired[Any]
 
 class CumulusEventWrapper(CumulusMessage):
     event: CumulusMessage
@@ -96,10 +97,17 @@ class CumulusMessageConfig(TypedDict):
     outputs: NotRequired[List[SDConfig]]
     input: NotRequired[str]
 
+
+class CumulusSchemas(TypedDict):
+    input: NotRequired[str]
+    output: NotRequired[str]
+    config: NotRequired[str]
+
+
 class AllInput(TypedDict):
-    handler_response: GenericCumulusObject
+    handler_response: NotRequired[Union[GenericCumulusObject, CumulusMessage]]
     event: CumulusMessage
-    schemas: NotRequired[GenericCumulusObject]
+    schemas: NotRequired[CumulusSchemas]
     context: NotRequired[CumulusContext]
-    message_config: NotRequired[CumulusMessageConfig]
+    message_config: NotRequired[Optional[CumulusMessageConfig]]
 
