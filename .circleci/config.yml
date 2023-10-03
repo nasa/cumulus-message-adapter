@@ -77,7 +77,7 @@ jobs:
               # strip white space from create release request body
               CREATE_RELEASE_REQUEST_BODY=$(echo '{"tag_name": "'$VERSION'", "name": "'$VERSION'"}' | tr -d '[:space:]')
               echo "Creating release for tag ${VERSION}"
-              curl -X POST -u etcart:$CUMULUSGIT_GITHUB_API_ACCESS_TOKEN \
+              curl -X POST -u cumulus-bot:$CUMULUSGIT_GITHUB_API_ACCESS_TOKEN \
                   $GIT_API_URL/$GIT_PATH/releases \
                   --data $CREATE_RELEASE_REQUEST_BODY | jq .
               echo "Building ${ZIPFILENAME}"
@@ -91,7 +91,7 @@ jobs:
                 UPLOAD_URL_TEMPLATE=$(curl $GIT_API_URL/$GIT_PATH/releases/tags/$VERSION | jq '.upload_url' --raw-output)
                 UPLOAD_URL=${UPLOAD_URL_TEMPLATE//{?name,label\}/?name=$ZIPFILENAME}
                 echo "Uploading release to ${UPLOAD_URL}"
-                curl -X POST -u etcart:$CUMULUSGIT_GITHUB_API_ACCESS_TOKEN \
+                curl -X POST -u cumulus-bot:$CUMULUSGIT_GITHUB_API_ACCESS_TOKEN \
                   -H "Content-Type: application/zip" \
                   $UPLOAD_URL \
                   --data-binary @./$ZIPFILENAME | jq .
