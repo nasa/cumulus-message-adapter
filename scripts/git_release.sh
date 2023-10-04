@@ -1,6 +1,6 @@
 
 set -ex
-VERSION=`awk -F\' '{print $2,$4}' message_adapter/version.py`
+VERSION='v2.0.4'
 export LATEST_TAG=$(curl -H \
   "Authorization: token $GITHUB_TOKEN" \
   https://api.github.com/repos/nasa/cumulus-message-adapter/tags | jq --raw-output '.[0].name')
