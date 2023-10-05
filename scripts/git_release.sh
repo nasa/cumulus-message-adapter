@@ -11,7 +11,7 @@ if [ "$VERSION_TAG" != "$LATEST_TAG" ]; then
   echo "tag does not exist for version $VERSION_TAG, creating tag"
 
   # create git tag
-  git tag -a "$VERSION_TAG" -m "$VERSION_TAG" || echo "$VERSION_TAG already exists"
+  git tag -a "$VERSION_TAG" -m "$VERSION_TAG" -s && git tag -v "$VERSION_TAG"
   git push https://cumulus-bot:${GITHUB_TOKEN}@github.com/nasa/cumulus-message-adapter "$VERSION_TAG"
 fi
 
