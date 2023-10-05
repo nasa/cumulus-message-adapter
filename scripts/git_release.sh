@@ -12,7 +12,7 @@ if [ "$VERSION_TAG" != "$LATEST_TAG" ]; then
 
   # create git tag
   git tag -a "$VERSION_TAG" -m "$VERSION_TAG" || echo "$VERSION_TAG already exists"
-  git push origin "$VERSION_TAG"
+  git push https://cumulus-bot:${GITHUB_TOKEN}@github.com/nasa/cumulus-message-adapter "$VERSION_TAG"
 fi
 
 export RELEASE_URL=$(curl -H \
