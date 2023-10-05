@@ -88,9 +88,7 @@ workflows:
   build_test_publish:
     jobs:
       - build_python310
-      - publish_github:
-          requires:
-            - build_python310
+      - publish_github
       - publish_pypi:
           requires:
             - publish_github

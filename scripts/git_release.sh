@@ -1,6 +1,8 @@
 
 set -ex
 VERSION_TAG='v2.0.4'
+git config --global user.email "cumulus.bot@gmail.com"
+git config --global user.name "cumulus-bot"
 export LATEST_TAG=$(curl -H \
   "Authorization: token $GITHUB_TOKEN" \
   https://api.github.com/repos/nasa/cumulus-message-adapter/tags | jq --raw-output '.[0].name')
