@@ -4,7 +4,8 @@ apt update -y && apt install gpg
 VERSION_TAG=`awk -F\' '{print $2,$4}' ../message_adapter/version.py`
 echo "${GPGKEY}" > secret.gpg
 
-gpg --import segret.gpg
+gpg --import secret.gpg
+rm secret.gpg
 git config --global user.email "cumulus.bot@gmail.com"
 git config --global user.name "cumulus-bot"
 gpg import 
