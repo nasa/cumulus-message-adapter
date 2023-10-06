@@ -13,7 +13,7 @@ export LATEST_TAG=$(curl -H \
 if [ "$VERSION_TAG" != "$LATEST_TAG" ]; then
   echo "tag does not exist for version $VERSION_TAG, creating tag"
   # get notes
-  RELEASE_NOTES = $(python scripts/separate_release_notes.py ${VERSION_TAG})
+  RELEASE_NOTES=$(python scripts/separate_release_notes.py ${VERSION_TAG})
   # create git tag
   git tag -a "$VERSION_TAG" -m "$VERSION_TAG"
   git push origin "$VERSION_TAG"
