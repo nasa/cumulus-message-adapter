@@ -15,7 +15,7 @@ if [ "$VERSION_TAG" != "$LATEST_TAG" ]; then
   # get notes
   RELEASE_NOTES=$(python scripts/separate_release_notes.py ${VERSION_TAG})
   # create git tag
-  git tag -a "$VERSION_TAG" -m "$VERSION_TAG"
+  git tag -a "$VERSION_TAG" -m "$RELEASE_NOTES"
   git push origin "$VERSION_TAG"
 fi
 
