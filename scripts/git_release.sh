@@ -1,6 +1,7 @@
 
 set -ex
-VERSION_TAG='v2.0.4'
+VERSION_TAG=`awk -F\' '{print $2,$4}' ../message_adapter/version.py`
+
 git config --global user.email "cumulus.bot@gmail.com"
 git config --global user.name "cumulus-bot"
 export LATEST_TAG=$(curl -H \
