@@ -3,7 +3,7 @@ set -ex
 
 VERSION_TAG=`awk -F\' '{print $2,$4}' ./message_adapter/version.py`
 
-gpg --import "${GPGKEY}"
+gpg --import $GPGKEY
 git config --global user.email "cumulus.bot@gmail.com"
 git config --global user.name "cumulus-bot"
 gpg import 
