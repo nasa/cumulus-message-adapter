@@ -65,7 +65,6 @@ jobs:
             GIT_PATH: nasa/cumulus-message-adapter
             GIT_API_URL: https://api.github.com/repos
             ZIPFILENAME: cumulus-message-adapter.zip
-            GPGKEY: $GPGKEY
           command: | 
             GITHUB_TOKEN=${CUMULUSGIT_GITHUB_API_ACCESS_TOKEN}  sh scripts/git_release.sh
 

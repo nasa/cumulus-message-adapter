@@ -6,6 +6,8 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
 ## [v2.0.3] 2023-06-29
 
 ### Updated
@@ -16,8 +18,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   - Updated SDK boto3 version to support new Python runtime versions.
   - Updated pyinstaller and jsonschema versions.
   - Fixed pylint errors from Too Broad Exceptions.
-
-## [Unreleased]
 
 ## Updated
 
