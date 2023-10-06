@@ -5,7 +5,7 @@ VERSION_TAG=`awk -F\' '{print $2,$4}' ./message_adapter/version.py`
 
 git config --global user.email "cumulus.bot@gmail.com"
 git config --global user.name "cumulus-bot"
-gpg import 
+
 export LATEST_TAG=$(curl -H \
   "Authorization: token $GITHUB_TOKEN" \
   https://api.github.com/repos/nasa/cumulus-message-adapter/tags | jq --raw-output '.[0].name')
