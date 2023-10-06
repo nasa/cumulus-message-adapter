@@ -1,7 +1,7 @@
 
 set -ex
 
-VERSION_TAG=`awk -F\' '{print $2,$4}' ./message_adapter/version.py`
+VERSION_TAG=`awk -F\' '{print $2}' ./message_adapter/version.py`
 
 git config --global user.email "cumulus.bot@gmail.com"
 git config --global user.name "cumulus-bot"
