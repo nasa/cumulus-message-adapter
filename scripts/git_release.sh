@@ -3,7 +3,7 @@ set -ex
 sudo apt update -y && sudo apt install gpg
 ls
 ls ..
-VERSION_TAG=`awk -F\' '{print $2,$4}' ../message_adapter/version.py`
+VERSION_TAG=`awk -F\' '{print $2,$4}' ./message_adapter/version.py`
 echo "${GPGKEY}" > secret.gpg
 
 gpg --import secret.gpg
