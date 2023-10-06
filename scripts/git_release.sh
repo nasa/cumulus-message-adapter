@@ -3,7 +3,6 @@ set -ex
 
 VERSION_TAG=`awk -F\' '{print $2,$4}' ./message_adapter/version.py`
 
-echo $GPGKEY | gpg --import
 git config --global user.email "cumulus.bot@gmail.com"
 git config --global user.name "cumulus-bot"
 gpg import 
@@ -15,7 +14,7 @@ if [ "$VERSION_TAG" != "$LATEST_TAG" ]; then
   echo "tag does not exist for version $VERSION_TAG, creating tag"
 
   # create git tag
-  git tag -a "$VERSION_TAG" -m "$VERSION_TAG" -s && git tag -v "$VERSION_TAG"
+  git tag -a "$VERSION_TAG" -m "$VERSION_TAG"
   git push origin "$VERSION_TAG"
 fi
 
