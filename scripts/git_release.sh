@@ -16,7 +16,8 @@ if [ "$VERSION_TAG" != "$LATEST_TAG" ]; then
   RELEASE_NOTES=$(python scripts/separate_release_notes.py ${VERSION_TAG})
   # create git tag
   git tag -a "$VERSION_TAG" -m "$RELEASE_NOTES"
-  git push origin "$VERSION_TAG"
+  git push https://cumulus-bot:${GITHUB_TOKEN}@github.com/nasa/cumulus-message-adapter "$VERSION_TAG"
+
 fi
 
 export RELEASE_URL=$(curl -H \
