@@ -13,9 +13,9 @@ export LATEST_TAG=$(curl -H \
 if [ "$VERSION_TAG" != "$LATEST_TAG" ]; then
   echo "tag does not exist for version $VERSION_TAG, creating tag"
   # get notes
-  RELEASE_NOTES=$(python scripts/separate_release_notes.py ${VERSION_TAG})
+  
   # create git tag
-  git tag -a "$VERSION_TAG" -m "$RELEASE_NOTES"
+  git tag -a "$VERSION_TAG" -m "$VERSION_TAG"
   git push https://cumulus-bot:${GITHUB_TOKEN}@github.com/nasa/cumulus-message-adapter "$VERSION_TAG"
 
 fi
@@ -26,10 +26,10 @@ export RELEASE_URL=$(curl -H \
 
 if [ -z "$RELEASE_URL" ]; then
   echo "release does not exist"
-
+  RELEASE_NOTES=$(python scripts/separate_release_notes.py ${VERSION_TAG})
   curl -H \
     "Authorization: token $GITHUB_TOKEN" \
-    -d "{\"tag_name\": \"$VERSION_TAG\", \"name\": \"$VERSION_TAG\", \"body\": \"Release $VERSION_TAG\" }"\
+    -d "{\"tag_name\": \"$VERSION_TAG\", \"name\": \"$VERSION_TAG\", \"body\": \"$RELEASE_NOTES\" }"\
     -H "Content-Type: application/json"\
     -X POST \
     https://api.github.com/repos/nasa/cumulus-message-adapter/releases
