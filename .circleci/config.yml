@@ -50,8 +50,8 @@ jobs:
             LOCALSTACK_HOST: localstack
           command: |
             . ~/venv310/bin/activate
-            pylint_runner
             pip freeze
+            pylint_runner
             CUMULUS_ENV=testing nose2 -v
 
   publish_github:
