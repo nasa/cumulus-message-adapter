@@ -51,6 +51,7 @@ jobs:
           command: |
             . ~/venv310/bin/activate
             pylint_runner
+            pip freeze
             CUMULUS_ENV=testing nose2 -v
 
   publish_github:
