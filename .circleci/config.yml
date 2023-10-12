@@ -114,7 +114,7 @@ jobs:
             . ~/venv310/bin/activate
             pip install twine
             python setup.py sdist
-            twine upload --skip-existing --username "${PYPI_USER}" --password "${PYPI_PASS}" dist/*
+            twine upload --username "${PYPI_USER}" --password "${PYPI_PASS}" dist/*
 
 workflows:
   version: 2
@@ -130,6 +130,4 @@ workflows:
       - publish_pypi:
           requires:
             - publish_github
-          filters:
-            branches:
-              only: master
+
