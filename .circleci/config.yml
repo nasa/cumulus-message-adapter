@@ -127,5 +127,5 @@ workflows:
           filters:
             branches:
               only: master
-      - publish_pypi:
+      - publish_pypi
 
