@@ -29,7 +29,7 @@ if [ -z "$RELEASE_URL" ]; then
   RELEASE_NOTES=$(python scripts/separate_release_notes.py ${VERSION_TAG})
   curl -H \
     "Authorization: token $GITHUB_TOKEN" \
-    -d "{\"tag_name\": \"$VERSION_TAG\", \"name\": \"$VERSION_TAG\", \"body\": \"$RELEASE_NOTES\" }"\
+    --data-binary "{\"tag_name\": \"$VERSION_TAG\", \"name\": \"$VERSION_TAG\", \"body\": \"$RELEASE_NOTES\" }"\
     -H "Content-Type: application/json"\
     -X POST \
     https://api.github.com/repos/nasa/cumulus-message-adapter/releases
