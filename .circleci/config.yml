@@ -121,6 +121,6 @@ workflows:
   build_test_publish:
     jobs:
       - build_python310
-      - publish_github:
-      - publish_pypi:
+      - publish_github
+      - publish_pypi
 
