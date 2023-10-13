@@ -48,7 +48,7 @@ splits out the currently active release notes
 
     fileString = load_file(location)
     log_entry = separate_log(fileString, version)
-    print(log_entry)
+    print(log_entry.encode("utf-8"))
 
 
 if __name__ == "__main__":
