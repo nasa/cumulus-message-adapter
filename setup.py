@@ -50,13 +50,11 @@ setup(
         'Topic :: Software Development :: Build Tools',
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8'
+        'Programming Language :: Python :: 3.10',
     ],
     keywords='nasa cumulus message adapter',  # Optional
     packages=find_packages(exclude=['.circleci', 'contrib', 'docs', 'tests']),  # Required
     install_requires=install_requires,
-    python_requires='~=3.6',
+    python_requires='~=3.10',
     dependency_links=dependency_links
 )
