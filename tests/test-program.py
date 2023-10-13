@@ -1,5 +1,3 @@
-# pylint: disable=R1732
-
 """
 Tests for cumulus-message-adapter command-line interface
 """
@@ -202,8 +200,8 @@ class Test(unittest.TestCase):
 
     def test_basic(self):
         """ test basic message """
-        self.transform_messages({ 'testcase': 'basic'})
-        self.transform_messages_streaming({ 'testcase': 'basic'})
+        self.transform_messages({'testcase': 'basic'})
+        self.transform_messages_streaming({'testcase': 'basic'})
 
     def test_basic_no_config(self):
         """ test basic no config message """
@@ -211,38 +209,44 @@ class Test(unittest.TestCase):
             'input': 'schemas/examples-messages.input.json',
             'output': 'schemas/examples-messages-no-config.output.json',
         }
-        self.transform_messages({ 'testcase': 'basic_no_config', 'schemas': schemas })
-        self.transform_messages_streaming({ 'testcase': 'basic_no_config', 'schemas': schemas })
+        self.transform_messages({
+            'testcase': 'basic_no_config',
+            'schemas': schemas
+        })
+        self.transform_messages_streaming({
+            'testcase': 'basic_no_config',
+            'schemas': schemas
+        })
 
     def test_exception(self):
         """ test remote message with exception """
-        self.transform_messages({ 'testcase': 'exception'})
-        self.transform_messages_streaming({ 'testcase': 'exception'})
+        self.transform_messages({'testcase': 'exception'})
+        self.transform_messages_streaming({'testcase': 'exception'})
 
     def test_jsonpath(self):
         """ test jsonpath message """
-        self.transform_messages({ 'testcase': 'jsonpath'})
-        self.transform_messages_streaming({ 'testcase': 'jsonpath'})
+        self.transform_messages({'testcase': 'jsonpath'})
+        self.transform_messages_streaming({'testcase': 'jsonpath'})
 
     def test_meta(self):
         """ test meta message """
-        self.transform_messages({ 'testcase': 'meta'})
-        self.transform_messages_streaming({ 'testcase': 'meta'})
+        self.transform_messages({'testcase': 'meta'})
+        self.transform_messages_streaming({'testcase': 'meta'})
 
     def test_remote(self):
         """ test remote message """
-        self.transform_messages({ 'testcase': 'remote'})
-        self.transform_messages_streaming({ 'testcase': 'remote'})
+        self.transform_messages({'testcase': 'remote'})
+        self.transform_messages_streaming({'testcase': 'remote'})
 
     def test_templates(self):
         """ test templates message """
-        self.transform_messages({ 'testcase': 'templates'})
-        self.transform_messages_streaming({ 'testcase': 'templates'})
+        self.transform_messages({'testcase': 'templates'})
+        self.transform_messages_streaming({'testcase': 'templates'})
 
     def test_validation_failure_case(self):
         """ test validation failure case """
         try:
-            self.transform_messages({ 'testcase': 'invalidinput'})
+            self.transform_messages({'testcase': 'invalidinput'})
         except AssertionError:
             return
         assert False
@@ -254,8 +258,14 @@ class Test(unittest.TestCase):
             'invokedFunctionArn': 'fakearn',
             'functionVersion': '1',
         }
-        self.transform_messages({'testcase': 'workflow_tasks', 'context': context})
-        self.transform_messages_streaming({'testcase': 'workflow_tasks', 'context': context})
+        self.transform_messages({
+            'testcase': 'workflow_tasks',
+            'context': context
+        })
+        self.transform_messages_streaming({
+            'testcase': 'workflow_tasks',
+            'context': context
+        })
 
     def test_multiple_workflow_tasks_meta(self):
         """ test multiple meta.workflow_task entries"""
@@ -265,5 +275,7 @@ class Test(unittest.TestCase):
             'functionVersion': '2',
         }
         self.transform_messages({'testcase': 'workflow_tasks_multiple', 'context': context})
-        self.transform_messages_streaming(
-            {'testcase': 'workflow_tasks_multiple', 'context': context})
+        self.transform_messages_streaming({
+            'testcase': 'workflow_tasks_multiple',
+            'context': context
+        })
