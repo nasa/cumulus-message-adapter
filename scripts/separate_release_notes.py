@@ -1,3 +1,5 @@
+#pylint: disable=missing-function-docstring
+
 from argparse import ArgumentParser
 import os
 import re
