@@ -5,8 +5,7 @@ import json
 import os
 import subprocess
 import unittest
-from io import BytesIO
-from typing import Dict, Literal, Tuple, Optional, Any, cast, List, IO
+from typing import Dict, Literal, Tuple, Optional, cast, List, IO
 from typing_extensions import TypedDict, NotRequired, Protocol
 from message_adapter import aws
 

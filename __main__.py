@@ -3,9 +3,9 @@
 import json
 import sys
 import signal
-from typing import Any, Dict, cast
+from typing import cast
 from message_adapter.message_adapter import MessageAdapter
-from message_adapter.types import CumulusMessage, CumulusMessage, AllInput
+from message_adapter.types import CumulusMessage, AllInput
 
 
 def callMessageAdapterFunction(functionName: str, allInput: AllInput) -> CumulusMessage:
