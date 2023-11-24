@@ -1,4 +1,3 @@
-# pylint: disable=R1732
 """
 Tests for cumulus-message-adapter
 """
@@ -495,10 +494,20 @@ class Test(unittest.TestCase):  # pylint: disable=too-many-public-methods
 
     def test_non_object_configured_remote(self) -> None:
         """ test_non_object_configured_remote.input.json """
-        inp = open(os.path.join(self.test_folder,
-                   'configured_non_object_remote.input.json'), encoding='utf-8')
-        out = open(os.path.join(self.test_folder,
-                   'configured_non_object_remote.output.json'), encoding='utf-8')
+        inp = open(
+            os.path.join(
+                self.test_folder,
+                'configured_non_object_remote.input.json'
+            ),
+            encoding='utf-8'
+        )
+        out = open(
+            os.path.join(
+                self.test_folder,
+                'configured_non_object_remote.output.json'
+            ),
+            encoding='utf-8'
+        )
         in_msg = json.loads(inp.read())
         out_msg = json.loads(out.read())
 

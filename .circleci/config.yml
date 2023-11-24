@@ -65,7 +65,7 @@ jobs:
             GIT_API_URL: https://api.github.com/repos
             ZIPFILENAME: cumulus-message-adapter.zip
           command: |
-            yum update && yum install -y openssh-clients git curl make jq
+            yum update && yum install -y zip openssh-clients git curl make jq binutils
             mkdir -p ~/.ssh
             ssh-keyscan github.com >> ~/.ssh/known_hosts
             VERSION=`awk -F\' '{print $2,$4}' message_adapter/version.py`
@@ -73,25 +73,25 @@ jobs:
             if [ -z $(git ls-remote --tags origin | grep $VERSION) ]; then
               git tag $VERSION
               echo "Pushing tag ${VERSION}"
-              git push origin $VERSION
+              git push https://${CUMULUSGIT_GITHUB_API_ACCESS_TOKEN}@github.com/nasa/cumulus-message-adapter.git --tags
               # strip white space from create release request body
               CREATE_RELEASE_REQUEST_BODY=$(echo '{"tag_name": "'$VERSION'", "name": "'$VERSION'"}' | tr -d '[:space:]')
               echo "Creating release for tag ${VERSION}"
-              curl -X POST -u cumulusgit:$CUMULUSGIT_GITHUB_API_ACCESS_TOKEN \
+              curl -X POST -u etcart:$CUMULUSGIT_GITHUB_API_ACCESS_TOKEN \
                   $GIT_API_URL/$GIT_PATH/releases \
                   --data $CREATE_RELEASE_REQUEST_BODY | jq .
               echo "Building ${ZIPFILENAME}"
               pip install --user virtualenv
               ~/.local/bin/virtualenv ~/venv310
               . ~/venv310/bin/activate
-              sudo pip install .
+              pip install .
               make clean
               make $ZIPFILENAME
               if [ -f $ZIPFILENAME ]; then
                 UPLOAD_URL_TEMPLATE=$(curl $GIT_API_URL/$GIT_PATH/releases/tags/$VERSION | jq '.upload_url' --raw-output)
                 UPLOAD_URL=${UPLOAD_URL_TEMPLATE//{?name,label\}/?name=$ZIPFILENAME}
                 echo "Uploading release to ${UPLOAD_URL}"
-                curl -X POST -u cumulusgit:$CUMULUSGIT_GITHUB_API_ACCESS_TOKEN \
+                curl -X POST -u etcart:$CUMULUSGIT_GITHUB_API_ACCESS_TOKEN \
                   -H "Content-Type: application/zip" \
                   $UPLOAD_URL \
                   --data-binary @./$ZIPFILENAME | jq .
