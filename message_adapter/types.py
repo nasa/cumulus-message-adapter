@@ -14,6 +14,11 @@ GenericCumulusObject = Dict[str, GenericCumulusSubObject]
 
 
 class CumulusTaskConfig(TypedDict):
+    """_summary_
+
+    Args:
+        TypedDict (_type_): _description_
+    """
     inlinestr: NotRequired[str]
     array: NotRequired[str]
     object: NotRequired[str]
