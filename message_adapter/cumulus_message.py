@@ -6,13 +6,14 @@ from copy import deepcopy
 from datetime import datetime, timedelta
 from typing import Any, Dict, Union, List, Literal, Optional, Tuple, cast
 from jsonpath_ng import parse
+from jsonpath_ng import JSONPath
 from .aws import s3
 from .error import write_error
 from .types import (
     CumulusMessage, CumulusTaskConfig, ReplacementConfig,
-    RemoteReplace, GenericCumulusObject, GenericCumulusSubObject
+    GenericCumulusObject, GenericCumulusSubObject
 )
-from jsonpath_ng import JSONPath
+
 
 
 def load_config(event: Union[GenericCumulusObject, CumulusMessage]) -> CumulusTaskConfig:
@@ -183,7 +184,7 @@ def store_remote_response(
     event = deepcopy(incoming_event)
     if 'ReplaceConfig' not in event:
         return event
-    
+
     replace_config: ReplacementConfig = event['ReplaceConfig']
     # Set default value if FullMessage flag set
     if replace_config.get('FullMessage', False):
@@ -209,11 +210,10 @@ def store_remote_response(
     if estimated_data_size < max_size:
         return event
 
-    _s3 = s3()
     s3_bucket: str = event['cumulus_meta']['system_bucket']
     s3_key = ('/').join(['events', str(uuid.uuid4())])
-    _s3.Object(s3_bucket, s3_key).put(
-        Expires= datetime.utcnow() + timedelta(days=7),  # Expire in a week
+    s3().Object(s3_bucket, s3_key).put(
+        Expires=datetime.utcnow() + timedelta(days=7),  # Expire in a week
         Body=json.dumps(replacement_data.value)
     )
 
@@ -222,15 +222,15 @@ def store_remote_response(
     except AttributeError:
         parsed_json_path.update(event, '')
 
-    remote_configuration: RemoteReplace = {
+    event['cumulus_meta'] = event.get('cumulus_meta', cumulus_meta)
+    event['replace'] = {
         'Bucket': s3_bucket,
         'Key': s3_key,
         'TargetPath': target_path
     }
-    event['cumulus_meta'] = event.get('cumulus_meta', cumulus_meta)
-    event['replace'] = remote_configuration
     write_error('store_remote_response')
     return event
+
 
 def _resolve_config_object(
     event: GenericCumulusSubObject,
@@ -248,10 +248,9 @@ def _resolve_config_object(
     """
     if config is None:
         return config
-    
+
     if isinstance(config, str):
         return resolve_path_str(event, config)
-
 
     if isinstance(config, list):
         for i in range(0, len(config)):  # pylint: disable=consider-using-enumerate

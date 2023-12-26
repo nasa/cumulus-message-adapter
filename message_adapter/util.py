@@ -1,8 +1,7 @@
 from copy import deepcopy
-from jsonpath_ng import parse
-from typing import Dict, Any
-from .types import CumulusMessage, GenericCumulusSubObject
 import pydash as py_
+from .types import CumulusMessage, GenericCumulusSubObject
+
 
 
 

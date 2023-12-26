@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Dict, Any, Optional, List, Union, Literal
+from typing import Dict, Any, Optional, List, Union
 from typing_extensions import TypedDict, NotRequired
 
 GenericCumulusSubObject = Optional[Union[
@@ -12,13 +12,7 @@ GenericCumulusSubObject = Optional[Union[
 GenericCumulusObject = Dict[str, GenericCumulusSubObject]
 
 
-
 class CumulusTaskConfig(TypedDict):
-    """_summary_
-
-    Args:
-        TypedDict (_type_): _description_
-    """
     inlinestr: NotRequired[str]
     array: NotRequired[str]
     object: NotRequired[str]
@@ -35,6 +29,7 @@ class CumulusConfig(TypedDict):
     state_machine: NotRequired[str]
     execution_name: NotRequired[str]
     cumulus_context: NotRequired[str]
+
 
 class CumulusMeta(CumulusConfig):
     message_source: NotRequired[str]
@@ -70,6 +65,7 @@ class CumulusMessage(TypedDict):
     cma: NotRequired[CumulusEventWrapper]
     config: NotRequired[CumulusTaskConfig]
     input: NotRequired[Any]
+
 
 class CumulusEventWrapper(CumulusMessage):
     event: CumulusMessage
@@ -115,4 +111,3 @@ class AllInput(TypedDict):
     schemas: NotRequired[CumulusSchemas]
     context: NotRequired[CumulusContext]
     message_config: NotRequired[Optional[CumulusMessageConfig]]
-

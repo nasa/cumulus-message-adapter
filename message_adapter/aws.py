@@ -2,7 +2,7 @@
 import os
 from boto3 import resource
 from mypy_boto3_s3 import S3ServiceResource
-from typing import Dict
+
 
 def localhost_s3_url() -> str:
     """ Returns configured LOCALSTACK_HOST url or default for localstack s3 """
@@ -26,8 +26,6 @@ def s3() -> S3ServiceResource:
             verify=False
         )
     return resource('s3')
-
-# TODO deleteme?
 
 
 def _get_sfn_execution_arn_by_name(state_machine_arn: str, execution_name: str) -> str:

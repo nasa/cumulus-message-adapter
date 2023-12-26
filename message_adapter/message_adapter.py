@@ -11,10 +11,11 @@ from .cumulus_message import (resolve_config_templates, resolve_input,
                               store_remote_response)
 
 from .types import (
-    CumulusMessage, CumulusMessage, CumulusContext, TaskMeta,
+    CumulusMessage, CumulusContext, TaskMeta,
     CumulusMessageConfig, GenericCumulusObject, CumulusConfig,
     CumulusSchemas
 )
+
 
 class MessageAdapter:
     """
@@ -28,7 +29,7 @@ class MessageAdapter:
         "ReplaceConfig"
     ]] = ['ReplaceConfig', 'task_config']
 
-    def __init__(self, schemas: Optional[CumulusSchemas]=None) -> None:
+    def __init__(self, schemas: Optional[CumulusSchemas] = None) -> None:
         self.schemas = schemas
 
     ##################################
@@ -42,7 +43,8 @@ class MessageAdapter:
         if "cma" not in event:
             return event
         # messages with non-event cma contents are not tested
-        updated_event = {k: v for (k, v) in event['cma'].items() if k != 'event'}
+        updated_event = {
+            k: v for (k, v) in event['cma'].items() if k != 'event'}
         parsed_event = event['cma']['event']
         parsed_event.update(updated_event)  # type: ignore
         return parsed_event
@@ -66,7 +68,8 @@ class MessageAdapter:
         if unloaded_event.get('cma'):
             cma_event = deepcopy(unloaded_event)
             cma_event['cma']['event'].update(
-                load_remote_event(unloaded_event['cma'].get('event'))  # type: ignore
+                load_remote_event(unloaded_event['cma'].get(
+                    'event'))  # type: ignore
             )
             event = self.__parse_parameter_configuration(cma_event)
         else:
@@ -78,8 +81,8 @@ class MessageAdapter:
                 'name': context.get('function_name', context.get('functionName', '')),
                 'version': context.get('function_version', context.get('functionVersion', '0')),
                 'arn': context.get('invoked_function_arn',
-                                           context.get('invokedFunctionArn',
-                                                       context.get('activityArn', '')))
+                                   context.get('invokedFunctionArn',
+                                               context.get('activityArn', '')))
             }
             if not 'workflow_tasks' in event['meta']:
                 event['meta']['workflow_tasks'] = {}
@@ -97,7 +100,11 @@ class MessageAdapter:
         filepath = os.path.join(root_dir, rel_filepath)
         return filepath if os.path.exists(filepath) else None
 
-    def __validate_json(self, document: Union[GenericCumulusObject, CumulusMessage], schema_type: Literal["input", "output", "config"]) -> None:
+    def __validate_json(
+        self,
+        document: Union[GenericCumulusObject, CumulusMessage],
+        schema_type: Literal["input", "output", "config"]
+    ) -> None:
         """
         check that json is valid based on a schema
         """
@@ -110,7 +117,8 @@ class MessageAdapter:
                 except Exception as exception:
                     # is this meant to overwrite a message? or package the message for cumulus only use
                     # exception.message = f'{schema_type} schema: {str(exception)}'
-                    raise type(exception)(f'{schema_type} schema: {str(exception)}')
+                    raise type(exception)(
+                        f'{schema_type} schema: {str(exception)}')
 
     def load_nested_event(self, event: CumulusMessage) -> CumulusMessage:
         """
@@ -122,7 +130,7 @@ class MessageAdapter:
         config = load_config(event)
         final_config = resolve_config_templates(event, config)
         final_payload = resolve_input(event, config)
-        
+
         response: CumulusMessage = {'input': final_payload}
         self.__validate_json(final_payload, 'input')
         if final_config:
@@ -138,7 +146,8 @@ class MessageAdapter:
             cumulus_config: CumulusConfig = {}
             # response['cumulus_config'] = {}
             # add both attributes or none of them
-            attributes: List[Literal['state_machine', 'execution_name']] = ['state_machine', 'execution_name']
+            attributes: List[Literal['state_machine', 'execution_name']] = [
+                'state_machine', 'execution_name']
             if all(attribute in event['cumulus_meta'] for attribute in attributes):
                 for attribute in attributes:
                     cumulus_config[attribute] = event['cumulus_meta'][attribute]
@@ -198,7 +207,8 @@ class MessageAdapter:
         """
         self.__validate_json(handler_response, 'output')
         validated_handler_response = cast(CumulusMessage, handler_response)
-        result = self.__assign_outputs(validated_handler_response, event, message_config)
+        result = self.__assign_outputs(
+            validated_handler_response, event, message_config)
         if not result.get('exception'):
             result['exception'] = 'None'
         if 'replace' in result:
