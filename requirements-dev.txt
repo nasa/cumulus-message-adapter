@@ -8,6 +8,7 @@ jsonschema==4.17.3
 pyinstaller==5.10.1
 
 # typing dependencies
+mypy
 types-jsonschema
 types-mock
 types-setuptools
