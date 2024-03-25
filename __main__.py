@@ -5,7 +5,7 @@ import sys
 import signal
 from typing import cast
 from message_adapter.message_adapter import MessageAdapter
-from message_adapter.types import CumulusMessage, AllInput
+from message_adapter.CMATypes import CumulusMessage, AllInput
 
 
 def callMessageAdapterFunction(functionName: str, allInput: AllInput) -> CumulusMessage:
