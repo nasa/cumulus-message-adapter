@@ -1,7 +1,6 @@
 """ Determines the correct AWS endpoint for AWS services """
 
 import os
-from typing import cast
 from boto3 import resource
 from mypy_boto3_s3 import S3ServiceResource
 
@@ -19,21 +18,15 @@ def s3() -> S3ServiceResource:
     """Determines the endpoint for the S3 service"""
 
     if ("CUMULUS_ENV" in os.environ) and (os.environ["CUMULUS_ENV"] == "testing"):
-        return cast(
-            S3ServiceResource,
-            resource(
-                service_name="s3",
-                endpoint_url=localhost_s3_url(),
-                aws_access_key_id="my-id",
-                aws_secret_access_key="my-secret",
-                region_name="us-east-1",
-                verify=False,
-            ),
+        return resource(
+            service_name="s3",
+            endpoint_url=localhost_s3_url(),
+            aws_access_key_id="my-id",
+            aws_secret_access_key="my-secret",
+            region_name="us-east-1",
+            verify=False,
         )
-    return cast(
-        S3ServiceResource,
-        resource("s3"),
-    )
+    return resource("s3")
 
 
 def _get_sfn_execution_arn_by_name(state_machine_arn: str, execution_name: str) -> str:

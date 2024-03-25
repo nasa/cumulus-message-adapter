@@ -2,12 +2,14 @@ from __future__ import annotations
 from typing import Dict, Any, Optional, List, Union
 from typing_extensions import TypedDict, NotRequired
 
-GenericCumulusSubObject = Optional[Union[
-    int,
-    str,
-    List['GenericCumulusSubObject'],
-    Dict[str, 'GenericCumulusSubObject'],
-]]
+GenericCumulusSubObject = Optional[
+    Union[
+        int,
+        str,
+        List["GenericCumulusSubObject"],
+        Dict[str, "GenericCumulusSubObject"],
+    ]
+]
 
 GenericCumulusObject = Dict[str, GenericCumulusSubObject]
 
@@ -71,10 +73,6 @@ class CumulusEventWrapper(CumulusMessage):
     event: CumulusMessage
 
 
-# class UnMassagedCumulusMessage(CumulusMessage):
-#     cma: NotRequired[CumulusEventWrapper]
-
-
 class CumulusContext(TypedDict):
     function_name: NotRequired[str]
     functionName: NotRequired[str]
@@ -83,10 +81,6 @@ class CumulusContext(TypedDict):
     invoked_function_arn: NotRequired[str]
     invokedFunctionArn: NotRequired[str]
     activityArn: NotRequired[str]
-
-
-class CumulusHandlerResponse(TypedDict):
-    pass
 
 
 class SDConfig(TypedDict):
