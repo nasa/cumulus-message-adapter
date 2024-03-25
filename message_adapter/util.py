@@ -1,6 +1,6 @@
 from copy import deepcopy
 import pydash as py_
-from .types import CumulusMessage, GenericCumulusSubObject
+from .CMATypes import CumulusMessage, GenericCumulusSubObject
 
 
 

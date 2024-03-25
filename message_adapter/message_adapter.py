@@ -10,7 +10,7 @@ from .cumulus_message import (resolve_config_templates, resolve_input,
                               resolve_path_str, load_config, load_remote_event,
                               store_remote_response)
 
-from .types import (
+from .CMATypes import (
     CumulusMessage, CumulusContext, TaskMeta,
     CumulusMessageConfig, GenericCumulusObject, CumulusConfig,
     CumulusSchemas

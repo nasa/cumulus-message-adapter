@@ -11,7 +11,7 @@ from message_adapter import aws
 
 from mypy_boto3_s3.type_defs import DeleteTypeDef
 
-from message_adapter.types import CumulusMessage, AllInput, CumulusSchemas, CumulusContext
+from message_adapter.CMATypes import CumulusMessage, AllInput, CumulusSchemas, CumulusContext
 
 
 class TransformParams(TypedDict):

@@ -9,7 +9,7 @@ from jsonpath_ng import parse
 from jsonpath_ng import JSONPath
 from .aws import s3
 from .error import write_error
-from .types import (
+from .CMATypes import (
     CumulusMessage, CumulusTaskConfig, ReplacementConfig,
     GenericCumulusObject, GenericCumulusSubObject
 )

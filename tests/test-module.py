@@ -8,7 +8,7 @@ from mock import patch
 from jsonschema.exceptions import ValidationError
 from message_adapter import aws, message_adapter
 from typing import Any, cast
-from message_adapter.types import (
+from message_adapter.CMATypes import (
     GenericCumulusObject,
     CumulusMessage,
     CumulusMessage,
