@@ -4,3 +4,4 @@
 .vscode
 cumulus-message-adapter.zip
 /dist/
+build/
