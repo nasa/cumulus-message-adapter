@@ -1,9 +1,9 @@
 """ Determines the correct AWS endpoint for AWS services """
 
 import os
+from typing import cast
 from boto3 import resource
 from mypy_boto3_s3 import S3ServiceResource
-from typing import cast
 
 
 def localhost_s3_url() -> str:
