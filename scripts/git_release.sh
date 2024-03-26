@@ -20,6 +20,7 @@ if [ "$VERSION_TAG" != "$LATEST_TAG" ]; then
 
 fi
 
+
 export RELEASE_URL=$(curl -H \
   "Authorization: token $GITHUB_TOKEN" \
   https://api.github.com/repos/nasa/cumulus-message-adapter/releases/tags/$VERSION_TAG | jq --raw-output '.url // ""')
