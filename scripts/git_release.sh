@@ -1,8 +1,8 @@
 
 set -ex
-
+GIT_API_URL=https://api.github.com/repos
 VERSION_TAG=`awk -F\' '{print $2}' ./message_adapter/version.py`
-
+GIT_PATH=nasa/cumulus-message-adapter
 git config --global user.email "cumulus.bot@gmail.com"
 git config --global user.name "cumulus-bot"
 
@@ -34,4 +34,20 @@ if [ -z "$RELEASE_URL" ]; then
     -H "Content-Type: application/json"\
     -X POST \
     https://api.github.com/repos/nasa/cumulus-message-adapter/releases
+fi
+ZIPFILENAME=cumulus-message-adapter.zip
+pip install .
+make clean
+make $ZIPFILENAME
+if [ -f $ZIPFILENAME ]; then
+  UPLOAD_URL_TEMPLATE=$(curl $GIT_API_URL/$GIT_PATH/releases/tags/$VERSION_TAG | jq '.upload_url' --raw-output)
+  UPLOAD_URL=${UPLOAD_URL_TEMPLATE//{?name,label\}/?name=$ZIPFILENAME}
+  echo "Uploading release to ${UPLOAD_URL}"
+  curl -X POST -u etcart:$GITHUB_TOKEN \
+    -H "Content-Type: application/zip" \
+    $UPLOAD_URL \
+    --data-binary @./$ZIPFILENAME | jq .
+else
+    echo "$ZIPFILENAME does not exist."
+    exit 1
 fi
