@@ -1,6 +1,6 @@
 
 set -ex
-yum update -y && yum install -y zip openssh-clients git curl make jq binutils
+apt update -y && apt install -y zip openssh-clients git curl make jq binutils
 GIT_API_URL=https://api.github.com/repos
 VERSION_TAG=`awk -F\' '{print $2}' ./message_adapter/version.py`
 GIT_PATH=nasa/cumulus-message-adapter
