@@ -3,12 +3,13 @@ See:
 https://packaging.python.org/en/latest/distributing.html
 https://github.com/pypa/sampleproject
 """
-# pylint: disable=W0402
-import imp
 
 from os import path
 # Always prefer setuptools over distutils
 from setuptools import setup, find_packages
+
+# Imports the version number from the version module
+from message_adapter.version import __version__
 
 here = path.abspath(path.dirname(__file__))
 
@@ -23,10 +24,6 @@ print(dependency_links)
 # Get the long description from the README file
 with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
-
-# Arguments marked as "Required" below must be included for upload to PyPI.
-# Fields marked as "Optional" may be commented out.
-__version__ = imp.load_source('version', 'message_adapter/version.py').__version__
 
 setup(
     name='cumulus-message-adapter',  # Required
