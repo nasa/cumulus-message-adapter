@@ -6,12 +6,21 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## Fixed
+
+- **CUMULUS-3827**
+  - removed patch specification for jsonpath-ng and boto3 dependencies
+
 ## [v2.0.3] 2023-06-29
 
 ### Updated
 
-- **CUMULUS-3270**
+- **CUMULUS-3827**
+  - removed dependency on imp in setup.py
 
+- **CUMULUS-3270**
   - Upgraded to Python 3.10, updated build jobs. Removed Python 3.8 and 3.6(EOL) build jobs.
   - Updated SDK boto3 version to support new Python runtime versions.
   - Updated pyinstaller and jsonschema versions.
