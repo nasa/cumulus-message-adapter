@@ -1,10 +1,11 @@
 import os
 import json
+import re
 
 from copy import deepcopy
 from jsonschema import validate
 
-from .util import assign_json_path_value
+from .util import assign_json_path_value, assign_json_path_values
 from .cumulus_message import (resolve_config_templates, resolve_input,
                               resolve_path_str, load_config, load_remote_event,
                               store_remote_response)
@@ -143,10 +144,18 @@ class MessageAdapter:
             result['payload'] = {}
             for output in outputs:
                 source_path = output['source']
+                source_json_path = source_path.lstrip('{').rstrip('}')
                 dest_path = output['destination']
                 dest_json_path = dest_path.lstrip('{').rstrip('}')
                 value = resolve_path_str(handler_response, source_path)
-                result = assign_json_path_value(result, dest_json_path, value)
+                if re.match(r'^\[.*\]$', dest_json_path):
+                    source_json_path = source_json_path.lstrip('[').rstrip(']')
+                    dest_json_path = dest_json_path.lstrip('[').rstrip(']')
+                    result = assign_json_path_values(
+                        handler_response, source_json_path, result, dest_json_path, value
+                    )
+                else:
+                    result = assign_json_path_value(result, dest_json_path, value)
         else:
             result['payload'] = handler_response
 
