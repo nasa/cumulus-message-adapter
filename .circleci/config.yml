@@ -123,13 +123,7 @@ workflows:
       - build_python310
       - publish_github:
           requires:
-            - build_python310
-          filters:
-            branches:
-              only: master
+            - build_python
       - publish_pypi:
           requires:
             - publish_github
-          filters:
-            branches:
-              only: master
