@@ -6,7 +6,7 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## **Unreleased**
+## [v2.0.5] 2025-09-12
 
 - **CUMULUS-4155**
   - Updated circleCI configuration to use `cimg/python:3.12.11`, and `amazon/aws-lambda-python:3.12`
@@ -35,8 +35,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   - Updated SDK boto3 version to support new Python runtime versions.
   - Updated pyinstaller and jsonschema versions.
   - Fixed pylint errors from Too Broad Exceptions.
-
-## [Unreleased]
 
 ## Updated
 
