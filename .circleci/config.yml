@@ -4,7 +4,7 @@
 #
 version: 2.1
 references:
-  container_python310: &container_python312
+  container_python312: &container_python312
     docker:
       - image: cimg/python:3.12.11
       - name: localstack
@@ -19,15 +19,15 @@ references:
   restore_cache_python312: &restore_cache_python312
     restore_cache:
       keys:
-        - v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
+        - v2-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
         # fallback to using the latest cache if no exact match is found
-        - v1-dependencies-
+        - v2-dependencies-
 
   save_cache_python312: &save_cache_python312
     save_cache:
       paths:
         - ~/venv312
-      key: v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
+      key: v2-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
 
 jobs:
   build_python312:
