@@ -50,7 +50,7 @@ jobs:
             LOCALSTACK_HOST: localstack
           command: |
             . ~/venv312/bin/activate
-            pylint_runner
+            python -m pylint --rcfile=.pylintrc -j 0 __main__.py ./message_adapter/
             CUMULUS_ENV=testing nose2 -v
 
   publish_github:
