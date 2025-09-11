@@ -67,7 +67,6 @@ jobs:
           command: |
             dnf update -y && dnf install -y zip openssh-clients git make jq binutils findutils libxcrypt-compat
             dnf swap -y coreutils-single-8.32-30.amzn2023.0.3.x86_64 coreutils
-            dnf swap -y 
             mkdir -p ~/.ssh
             ssh-keyscan github.com >> ~/.ssh/known_hosts
             VERSION=`awk -F\' '{print $2,$4}' message_adapter/version.py`
