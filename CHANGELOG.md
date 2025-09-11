@@ -6,6 +6,16 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## **Unreleased**
+
+- **CUMULUS-4155**
+  - Updated circleCI configuration to use `cimg/python:3.12.11`, and `amazon/aws-lambda-python:3.12`
+  - Updated circleCI 310 references to 312 (this is mostly cosmetic)
+  - Updated pyinstaller to 6.15
+  - Updated package requirement to Python 3.12
+  - Updated pylint to 3.2 and addressed additional rules
+  - Removed pylint_runner in favor of direct lint invocation
+
 ## [v2.0.4]
 
 ## Fixed
