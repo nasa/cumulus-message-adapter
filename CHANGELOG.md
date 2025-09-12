@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   - Updated package requirement to Python 3.12
   - Updated pylint to 3.2 and addressed additional rules
   - Removed pylint_runner in favor of direct lint invocation
+  - Update boto3 to 1.40.29
 
 ## [v2.0.4]
 
