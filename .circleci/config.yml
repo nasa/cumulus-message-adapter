@@ -113,7 +113,7 @@ jobs:
             pip install --user virtualenv
             ~/.local/bin/virtualenv ~/venv312
             . ~/venv312/bin/activate
-            pip install twine
+            pip install twine setuptools
             python setup.py sdist
             twine upload --skip-existing --username "${PYPI_USER}" --password "${PYPI_PASS}" dist/*
 
