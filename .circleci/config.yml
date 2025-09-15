@@ -2,59 +2,59 @@
 #
 # Check https://circleci.com/docs/2.0/language-python/ for more details
 #
-version: 2
+version: 2.1
 references:
-  container_python310: &container_python310
+  container_python312: &container_python312
     docker:
-      - image: cimg/python:3.10.11
+      - image: cimg/python:3.12.11
       - name: localstack
         image: localstack/localstack:2.0.2
     working_directory: ~/repo
 
-  container_lambda_python310: &container_lambda_python310
+  container_lambda_python312: &container_lambda_python312
     docker:
-      - image: amazon/aws-lambda-python:3.10
+      - image: amazon/aws-lambda-python:3.12
     working_directory: ~/repo
 
-  restore_cache_python310: &restore_cache_python310
+  restore_cache_python312: &restore_cache_python312
     restore_cache:
       keys:
-        - v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
+        - v2-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
         # fallback to using the latest cache if no exact match is found
-        - v1-dependencies-
+        - v2-dependencies-
 
-  save_cache_python310: &save_cache_python310
+  save_cache_python312: &save_cache_python312
     save_cache:
       paths:
-        - ~/venv310
-      key: v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
+        - ~/venv312
+      key: v2-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
 
 jobs:
-  build_python310:
-    <<: *container_python310
+  build_python312:
+    <<: *container_python312
     steps:
       - checkout
-      - *restore_cache_python310
+      - *restore_cache_python312
       - run:
           name: install dependencies
           command: |
-            virtualenv ~/venv310
-            . ~/venv310/bin/activate
+            virtualenv ~/venv312
+            . ~/venv312/bin/activate
             pip install -r requirements.txt
             pip install -r requirements-dev.txt
             pip install .
-      - *save_cache_python310
+      - *save_cache_python312
       - run:
           name: run tests
           environment:
             LOCALSTACK_HOST: localstack
           command: |
-            . ~/venv310/bin/activate
-            pylint_runner
+            . ~/venv312/bin/activate
+            python -m pylint --rcfile=.pylintrc -j 0 __main__.py ./message_adapter/
             CUMULUS_ENV=testing nose2 -v
 
   publish_github:
-    <<: *container_lambda_python310
+    <<: *container_lambda_python312
     steps:
       - checkout
       - add_ssh_keys
@@ -65,7 +65,8 @@ jobs:
             GIT_API_URL: https://api.github.com/repos
             ZIPFILENAME: cumulus-message-adapter.zip
           command: |
-            yum update -y && yum install -y zip openssh-clients git curl make jq binutils
+            dnf update -y && dnf install -y zip openssh-clients git make jq binutils findutils libxcrypt-compat
+            dnf swap -y coreutils-single-8.32-30.amzn2023.0.3.x86_64 coreutils
             mkdir -p ~/.ssh
             ssh-keyscan github.com >> ~/.ssh/known_hosts
             VERSION=`awk -F\' '{print $2,$4}' message_adapter/version.py`
@@ -82,8 +83,8 @@ jobs:
                   --data $CREATE_RELEASE_REQUEST_BODY | jq .
               echo "Building ${ZIPFILENAME}"
               pip install --user virtualenv
-              ~/.local/bin/virtualenv ~/venv310
-              . ~/venv310/bin/activate
+              ~/.local/bin/virtualenv ~/venv312
+              . ~/venv312/bin/activate
               pip install .
               make clean
               make $ZIPFILENAME
@@ -102,17 +103,17 @@ jobs:
             fi
 
   publish_pypi:
-    <<: *container_lambda_python310
+    <<: *container_lambda_python312
     steps:
       - checkout
-      - *restore_cache_python310
+      - *restore_cache_python312
       - run:
           name: Deploy to PyPi
           command: |
             pip install --user virtualenv
-            ~/.local/bin/virtualenv ~/venv310
-            . ~/venv310/bin/activate
-            pip install twine
+            ~/.local/bin/virtualenv ~/venv312
+            . ~/venv312/bin/activate
+            pip install twine setuptools
             python setup.py sdist
             twine upload --skip-existing --username "${PYPI_USER}" --password "${PYPI_PASS}" dist/*
 
@@ -120,10 +121,10 @@ workflows:
   version: 2
   build_test_publish:
     jobs:
-      - build_python310
+      - build_python312
       - publish_github:
           requires:
-            - build_python310
+            - build_python312
           filters:
             branches:
               only: master

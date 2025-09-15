@@ -20,7 +20,7 @@ requirements: dist requirements.txt
 packaged_runtime: requirements
 	pip install -r requirements-dev.txt
 	cp __main__.py ./dist/
-	pyinstaller --add-binary /usr/lib64/libcrypt.so.1:. --distpath dist_package --clean -n cma ./dist/__main__.py
+	pyinstaller --paths ./ --add-binary /usr/lib64/libcrypt.so.1:. --distpath dist_package --clean -n cma ./dist/__main__.py
 
 cumulus-message-adapter.zip: requirements packaged_runtime
 	cp __main__.py ./dist/

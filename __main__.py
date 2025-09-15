@@ -26,6 +26,7 @@ def callMessageAdapterFunction(functionName, allInput):
     transformer = MessageAdapter(schemas)
     event = allInput['event']
     context = allInput.get('context')
+    result = None
     if functionName == 'loadAndUpdateRemoteEvent':
         result = transformer.load_and_update_remote_event(event, context)
     elif functionName == 'loadNestedEvent':
@@ -37,6 +38,8 @@ def callMessageAdapterFunction(functionName, allInput):
         else:
             messageConfig = None
         result = transformer.create_next_event(handlerResponse, event, messageConfig)
+    else:
+        raise ValueError(f'Unknown function name {functionName}')
     return result
 
 def handle_exit():

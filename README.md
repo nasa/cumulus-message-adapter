@@ -83,12 +83,12 @@ Before any changes are finalized and released, they should be tested by packagin
 Packaging the zip file is probably best done in an environment that closely matches the lambda environment in which it will be run and contains the current Python version, so we are using an AWS Python Lambda image. Certain packages need to be installed, and using a virtual environment is important due to Python pathing.
 
 ```shell
-docker run -v ~/projects/cumulus-message-adapter/:/cma/ -v ~/tmp/:/tmp/ -v ~/amazon/:/home/amazon/ -it --entrypoint /bin/bash amazon/aws-lambda-python:3.10
+docker run -v ~/projects/cumulus-message-adapter/:/cma/ -v ~/tmp/:/tmp/ -v ~/amazon/:/home/amazon/ -it --entrypoint /bin/bash amazon/aws-lambda-python:3.12
 yum install -y make binutils zip
 cd /cma
 pip install --user virtualenv
-~/.local/bin/virtualenv ~/venv310
-. ~/venv310/bin/activate
+~/.local/bin/virtualenv ~/venv312
+. ~/venv312/bin/activate
 pip install .
 make clean
 make cumulus-message-adapter.zip
