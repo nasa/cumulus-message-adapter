@@ -86,7 +86,7 @@ def resolve_path_str(event, json_path_string):
         return match_data[0].value if match_data else None
 
     if re.search(array_regex, json_path_string):
-        parsed_json_path = json_path_string.lstrip('{').rstrip('}').lstrip('[').rstrip(']')
+        parsed_json_path = json_path_string[2:-2]
         match_data = parse(parsed_json_path).find(event)
         return [item.value for item in match_data] if match_data else []
 
